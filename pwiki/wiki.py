@@ -2,6 +2,7 @@
 import logging
 
 from pathlib import Path
+from time import sleep
 
 import requests
 
@@ -80,6 +81,8 @@ class Wiki:
 
         # TODO: Handle bad login
         self.username = response.json()["login"]["lgusername"]
+
+        log.info("%s: Successfully logged in as %s", self, self.username)
         self.csrf_token = self._get_tokens()['csrftoken']
 
         return True
@@ -94,7 +97,7 @@ class Wiki:
 
         return self.client.get(self.endpoint, params=self._make_params("query", {"meta": "tokens", "type": "csrf|login"})).json()['query']['tokens']
 
-    def upload(self, path: Path, title: str, desc: str, summary: str) -> bool:
+    def upload(self, path: Path, title: str, desc: str = "", summary: str = "", unstash=True, max_retries=5) -> bool:
         """Uploads a file to the target Wiki.
 
         Args:
@@ -106,16 +109,14 @@ class Wiki:
         Returns:
             bool: True if the upload was successful.
         """
-
-        # fsize = os.path.getsize(path)
+        # FIXME: update docs
         fsize = path.stat().st_size
         total_chunks = fsize // _CHUNKSIZE + 1
 
         log.info("%s: Uploading '%s' to '%s'", self, path, title)
 
-        data = {**_API_DEFAULTS, "filename": title, "offset": '0', "ignorewarnings": "1", "filesize": str(fsize), "token": self.csrf_token, "stash": "1"}
+        payload = {**_API_DEFAULTS, "filename": title, "offset": 0, "ignorewarnings": 1, "filesize": fsize, "token": self.csrf_token, "stash": 1}
 
-        # with open(path, 'rb') as f:
         with path.open('rb') as f:
             buffer = f.read(_CHUNKSIZE)
             chunk_count = 0
@@ -124,11 +125,11 @@ class Wiki:
             while True:
                 if err_count > 5:
                     log.error("%s: Encountered %d errors, aborting", self, err_count)
-                    return False
+                    return
 
                 log.info("%s: Uploading chunk %d of %d from '%s'", self, chunk_count+1, total_chunks, path)
 
-                response = self.client.post(self.endpoint, params={"action": "upload"}, data=data, files={'chunk': (path.name, buffer, "multipart/form-data")}, timeout=420)
+                response = self.client.post(self.endpoint, params={"action": "upload"}, data=payload, files={'chunk': (path.name, buffer, "multipart/form-data")}, timeout=420)
                 if not response:
                     log.warn("%s: Did not get response from server when uploading '%s', retrying...", self, path)
                     err_count += 1
@@ -140,43 +141,48 @@ class Wiki:
                     err_count += 1
                     continue
 
-                data['filekey'] = response["upload"]["filekey"]
+                payload['filekey'] = response["upload"]["filekey"]
                 chunk_count += 1
-                data['offset'] = str(_CHUNKSIZE * chunk_count)
+                payload['offset'] = _CHUNKSIZE * chunk_count
 
-                # buffer = f.read(_CHUNKSIZE)
                 if not (buffer := f.read(_CHUNKSIZE)):
                     break
 
-        if "filekey" not in data:
-            return False
+        if "filekey" not in payload:
+            log.error("%s: 'filekey' was not found in response body when uploading '%s': %s", self, path, payload)
+        elif unstash:
+            return self.unstash_upload(payload['filekey'], title, desc, summary, max_retries)
+        else:
+            return payload['filekey']
 
-        log.info("%s: Unstashing %s as %s", self, data['filekey'], title)
-        pl = {"filename": title, "text": desc, "comment": summary, "filekey": data['filekey'], "ignorewarnings": "1", "token": self.csrf_token}
-        pl.update(_API_DEFAULTS)
-        response = self.client.post(self.endpoint, params={"action": "upload"}, data=pl, timeout=420).json()
+    def unstash_upload(self, filekey: str, title: str, desc: str = "", summary: str = "", max_retries=5, retry_interval=5) -> bool:
+        """Attempt to unstash a file uploaded to the file stash.
 
-        if 'error' in response:
-            log.error("%s: got error from server: '%s'", self, response['error']['info'])
-            return False
+        Args:
+            filekey (str): The filekey of the file in your file stash to unstash (publish).
+            title (str): The title to publish the file in the stash to (excluding `File:` prefix).
+            desc (str, optional): The text to go on the file description page. Defaults to "".
+            summary (str, optional): The upload log summary to use. Defaults to "".
+            max_retries (int, optional): The maximum number of retry in the event of failure (assuming the server expereinced an error). Defaults to 5.
+            retry_interval (int, optional): The number of seconds to wait in between retries.  Set 0 to disable. Defaults to 5.
 
-        return response['upload']['result'] == "Success"
+        Returns:
+            bool: True if unstashing was successful
+        """
+        log.info("%s: Unstashing '%s' as '%s'", self, filekey, title)
 
-
-    def unstash_upload(self, filekey: str, title: str, desc: str, summary: str, max_retries=5):
-        log.info("%s: Unstashing %s as %s", self, filekey, title)
-
-        pl = {**_API_DEFAULTS, "filename": title, "text": desc, "comment": summary, "filekey": filekey, "ignorewarnings": "1", "token": self.csrf_token}
-        # pl.update(_API_DEFAULTS)
+        pl = {**_API_DEFAULTS, "filename": title, "text": desc, "comment": summary, "filekey": filekey, "ignorewarnings": 1, "token": self.csrf_token}
 
         tries = 0
         while tries < max_retries:
             response = self.client.post(self.endpoint, params={"action": "upload"}, data=pl, timeout=420).json()
+            if 'error' not in response and response['upload']['result'] == "Success":
+                return True
 
-            if 'error' in response:
-                log.error("%s: got error from server on unstash attempt %d of %d: '%s'", self, tries+1, max_retries, response['error']['info'])
-                tries += 1
-            else:
-                return response['upload']['result'] == "Success"
-        
+            log.error("%s: got error from server on unstash attempt %d of %d.  Sleeping %ds...", self, tries+1, max_retries, retry_interval)
+            log.debug(response)
+
+            sleep(retry_interval)
+            tries += 1
+
         return False
