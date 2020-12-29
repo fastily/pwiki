@@ -3,6 +3,7 @@ import logging
 
 from pathlib import Path
 from time import sleep
+from typing import Union
 
 import requests
 
@@ -97,19 +98,23 @@ class Wiki:
 
         return self.client.get(self.endpoint, params=self._make_params("query", {"meta": "tokens", "type": "csrf|login"})).json()['query']['tokens']
 
-    def upload(self, path: Path, title: str, desc: str = "", summary: str = "", unstash=True, max_retries=5) -> bool:
+    def upload(self, path: Path, title: str, desc: str = "", summary: str = "", unstash=True, max_retries=5) -> Union[bool, str]:
         """Uploads a file to the target Wiki.
 
         Args:
-            path (Path): the local path on your computer pointing to the file to upload.
+            path (Path): the local path on your computer pointing to the file to upload
             title (str): The title to upload the file to, excluding the "`File:`" namespace.
-            desc (str): The text that should go on the file's description page.
-            summary (str): The upload log summary to use.
+            desc (str, optional): The text to go on the file description page.  Does nothing if `unstash` is `False`. Defaults to "".
+            summary (str, optional): The upload log summary to use. Does nothing if `unstash` is `False`. Defaults to "".
+            unstash (bool, optional): Indicates if the file should be unstashed (published) after upload. Defaults to True.
+            max_retries (int, optional): The maximum number of retry attempts in the event of an error. Defaults to 5.
 
         Returns:
-            bool: True if the upload was successful.
+            Union[bool, str]: 
+                * `unstash=True`: returns a bool indicating if the unstash operation succeeded.
+                * `unstash=False`: returns a str with the filekey
+                * `None`: Error, something went wrong
         """
-        # FIXME: update docs
         fsize = path.stat().st_size
         total_chunks = fsize // _CHUNKSIZE + 1
 

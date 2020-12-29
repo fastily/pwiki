@@ -18,3 +18,5 @@ dist
 
 # virtualenv
 venv_pwiki
+
+scratch.py
