@@ -8,7 +8,7 @@ setuptools.setup(
     version="0.0.1",
     author="Fastily",
     author_email="fastily@users.noreply.github.com",
-    description="Python MediaWiki client",
+    description="A Python library for effortlessly interacting with Wikipedia/MediaWiki",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/fastily/pwiki",

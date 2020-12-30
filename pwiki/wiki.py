@@ -1,5 +1,6 @@
 """Classes for use by a client to interact with a MediaWiki instance's API"""
 import logging
+import pickle
 
 from pathlib import Path
 from time import sleep
@@ -11,28 +12,35 @@ _API_DEFAULTS = {"format": "json", "formatversion": "2"}
 
 _CHUNKSIZE = 1024 * 1024 * 4
 
+_DEFAULT_COOKIE_JAR = Path("./pwiki.pickle")
+
 log = logging.getLogger(__name__)
 
 
 class Wiki:
     """General wiki-interfacing functionality and config data"""
 
-    def __init__(self, domain: str = "en.wikipedia.org", username: str = None, password: str = None):
+    def __init__(self, domain: str = "en.wikipedia.org", username: str = None, password: str = None, cookie_jar: Path = _DEFAULT_COOKIE_JAR):
         """Initializer, creates a new Wiki object.
 
         Args:
             domain (str): The shorthand domain of the Wiki to target (e.g. "en.wikipedia.org")
-            username (str, optional): The username to login as. Does nothing if password is not set.  Defaults to None.
-            password (str, optional): The password to use when logging in. Does nothing if username is not set.  Defaults to None.
+            username (str, optional): The username to login as. Does nothing if `password` is not set.  Defaults to None.
+            password (str, optional): The password to use when logging in. Does nothing if `username` is not set.  Defaults to None.
         """
         self.endpoint = f"https://{domain}/w/api.php"
         self.domain = domain
         self.client = requests.Session()
-        self.username = username
+        self.csrf_token = "+\\"
 
-        self.csrf_token = None
+        if cookie_jar and cookie_jar.is_file():
+            with cookie_jar.open('rb') as f:
+                self.client.cookies = pickle.load(f)
 
-        if username and password:
+            self.csrf_token = self._fetch_token()
+            # TODO: Get username from API
+
+        if username and password and self.csrf_token == "+\\":
             self.login(username, password)
 
     def __repr__(self) -> str:
@@ -54,6 +62,15 @@ class Wiki:
             dict: A new dict with the parameters
         """
         return {**_API_DEFAULTS, **(pl or {}), "action": action}
+
+    def save_cookies(self, output_path: Path = _DEFAULT_COOKIE_JAR):
+        """Write the cookies of the Wiki object to disk, so they can be used in the future.
+
+        Args:
+            output_path (Path, optional): The local path to save the cookies at.  Defaults to _DEFAULT_COOKIE_JAR (`./pwiki.pickle`).
+        """
+        with output_path.open('wb') as f:
+            pickle.dump(self.client.cookies, f)
 
     def uploadable_filetypes(self) -> set:
         """Queries the Wiki for all acceptable file types which may be uploaded to this Wiki.  PRECONDITION: the target Wiki permits file uploads.
@@ -78,15 +95,33 @@ class Wiki:
         """
         log.info("%s: Attempting login for %s", self, username)
 
-        response = self.client.post(self.endpoint, params=self._make_params("login"), data={"lgname": username, "lgpassword": password, "lgtoken": self._get_tokens()["logintoken"]})
+        response = self.client.post(self.endpoint, params=self._make_params("login"), data={"lgname": username, "lgpassword": password, "lgtoken": self._fetch_token(login_token=True)})
 
         # TODO: Handle bad login
         self.username = response.json()["login"]["lgusername"]
 
         log.info("%s: Successfully logged in as %s", self, self.username)
-        self.csrf_token = self._get_tokens()['csrftoken']
+        self.csrf_token = self._fetch_token()
 
         return True
+
+    def _fetch_token(self, login_token: bool = False) -> str:
+        """Fetch a csrf or login token from the server.  By default, this method will retrieve a csrf token.
+
+        Args:
+            login_token (bool, optional): Set `True` to get a login token instead of a csrf token. Defaults to False.
+
+        Raises:
+            Exception: if there was a server error or the token couldn't be retrieved.
+
+        Returns:
+            str: The token as a str.
+        """
+        try:
+            return self.client.get(self.endpoint, params=self._make_params("query", {"meta": "tokens", "type": "login" if login_token else "csrf"})).json()['query']['tokens']["logintoken" if login_token else "csrftoken"]
+        except Exception as e:
+            log.critical("Couldn't get tokens", exc_info=True)
+            raise e
 
     def _get_tokens(self) -> dict:
         """Retrieves CSRF and login tokens. 
