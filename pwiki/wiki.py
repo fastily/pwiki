@@ -117,21 +117,15 @@ class Wiki:
         Returns:
             str: The token as a str.
         """
+        pl = {"meta": "tokens"}
+        if login_token:
+            pl["type"] = "login"
+
         try:
-            return self.client.get(self.endpoint, params=self._make_params("query", {"meta": "tokens", "type": "login" if login_token else "csrf"})).json()['query']['tokens']["logintoken" if login_token else "csrftoken"]
+            return self.client.get(self.endpoint, params=self._make_params("query", pl)).json()['query']['tokens']["logintoken" if login_token else "csrftoken"]
         except Exception as e:
             log.critical("Couldn't get tokens", exc_info=True)
             raise e
-
-    def _get_tokens(self) -> dict:
-        """Retrieves CSRF and login tokens. 
-
-        Returns:
-            dict: a dict with two keys 'csrftoken' (for CSRF token) and 'logintoken' (for login tokens)
-        """
-        log.info("%s: Fetching tokens...", self)
-
-        return self.client.get(self.endpoint, params=self._make_params("query", {"meta": "tokens", "type": "csrf|login"})).json()['query']['tokens']
 
     def upload(self, path: Path, title: str, desc: str = "", summary: str = "", unstash=True, max_retries=5) -> Union[bool, str]:
         """Uploads a file to the target Wiki.
