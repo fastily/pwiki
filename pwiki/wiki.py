@@ -32,6 +32,7 @@ class Wiki:
         self.domain = domain
         self.client = requests.Session()
         self.csrf_token = "+\\"
+        self.username = None
 
         if cookie_jar and cookie_jar.is_file():
             with cookie_jar.open('rb') as f:
@@ -40,8 +41,10 @@ class Wiki:
             self.csrf_token = self._fetch_token()
             # TODO: Get username from API
 
-        if username and password and self.csrf_token == "+\\":
-            self.login(username, password)
+        self.is_logged_in = self.csrf_token != "+\\" or username and password and self.login(username, password)
+
+        # if username and password and self.csrf_token == "+\\":
+        #     self.login(username, password)
 
     def __repr__(self) -> str:
         """Generate a str representation of this Wiki object.  Useful for logging.
