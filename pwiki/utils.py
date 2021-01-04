@@ -1,6 +1,7 @@
-
+"""Shared utilities and constants"""
 
 API_DEFAULTS = {"format": "json", "formatversion": "2"}
+
 
 def make_params(action: str, pl: dict = None) -> dict:
     """Convienence method to generate payload parameters.  Fills in useful details that should be submitted with every request.
