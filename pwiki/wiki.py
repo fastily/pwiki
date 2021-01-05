@@ -4,9 +4,11 @@ import pickle
 
 from pathlib import Path
 
+from .waction import WAction
+from .utils import make_params
+
 import requests
 
-_API_DEFAULTS = {"format": "json", "formatversion": "2"}
 
 _DEFAULT_COOKIE_JAR = Path("./pwiki.pickle")
 
@@ -48,18 +50,6 @@ class Wiki:
         """
         return f"[{self.username or '<Anonymous>'} @ {self.domain}]"
 
-    def _make_params(self, action: str, pl: dict = None) -> dict:
-        """Convienence method to generate payload parameters.  Fills in useful details that should be submitted with every request.
-
-        Args:
-            action (str): The action value (e.g. "query", "edit", "purge")
-            pl (dict, optional): Additional parameters besides the defaults in _API_DEFAULTS and the action parameter. Defaults to None.
-
-        Returns:
-            dict: A new dict with the parameters
-        """
-        return {**_API_DEFAULTS, **(pl or {}), "action": action}
-
     def save_cookies(self, output_path: Path = _DEFAULT_COOKIE_JAR):
         """Write the cookies of the Wiki object to disk, so they can be used in the future.
 
@@ -77,7 +67,7 @@ class Wiki:
         """
         log.info("%s: Fetching a list of acceptable file upload extensions", self)
 
-        response = self.client.get(self.endpoint, params=self._make_params("query", {"meta": "siteinfo", "siprop": "fileextensions"}))
+        response = self.client.get(self.endpoint, params=make_params("query", {"meta": "siteinfo", "siprop": "fileextensions"}))
         return {jo["ext"] for jo in response.json()["query"]['fileextensions']}
 
     def login(self, username: str, password: str) -> bool:
@@ -90,17 +80,7 @@ class Wiki:
         Returns:
             bool: True if successful
         """
-        log.info("%s: Attempting login for %s", self, username)
-
-        response = self.client.post(self.endpoint, params=self._make_params("login"), data={"lgname": username, "lgpassword": password, "lgtoken": self._fetch_token(login_token=True)})
-
-        # TODO: Handle bad login
-        self.username = response.json()["login"]["lgusername"]
-
-        log.info("%s: Successfully logged in as %s", self, self.username)
-        self.csrf_token = self._fetch_token()
-
-        return True
+        return WAction.login(self, username, password)
 
     def _fetch_token(self, login_token: bool = False) -> str:
         """Fetch a csrf or login token from the server.  By default, this method will retrieve a csrf token.
@@ -119,7 +99,7 @@ class Wiki:
             pl["type"] = "login"
 
         try:
-            return self.client.get(self.endpoint, params=self._make_params("query", pl)).json()['query']['tokens']["logintoken" if login_token else "csrftoken"]
+            return self.client.get(self.endpoint, params=make_params("query", pl)).json()['query']['tokens']["logintoken" if login_token else "csrftoken"]
         except Exception as e:
             log.critical("Couldn't get tokens", exc_info=True)
             raise e

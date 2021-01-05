@@ -32,7 +32,7 @@ class WAction:
             apply_token (bool, optional): Set `True` to also send the Wiki's csrf token in the POST. Defaults to True.
 
         Returns:
-            dict: The response from the server.  Empty dict if there was error.
+            dict: The response from the server.  Empty dict if there was an error.
         """
         pl = make_params(action, form)
         if apply_token:
@@ -109,7 +109,7 @@ class WAction:
         if not any((text, prepend, append)):
             raise ValueError("Invalid arguments - text, prepend, or append was not specified!")
 
-        pl = {"title": title, "text": text, "summary": summary}
+        pl = {"title": title, "summary": summary}
 
         if text:
             pl["text"] = text
@@ -132,10 +132,12 @@ class WAction:
         log.error("%s: Could not edit '%s', server said: %s", wiki, title, WAction.read_error("edit", response))
         return False
 
+    @staticmethod
     def upload(wiki: Wiki, path: Path, title: str, desc: str = "", summary: str = "", unstash=True, max_retries=5) -> Union[bool, str]:
         """Uploads a file to the target Wiki.
 
         Args:
+            wiki (Wiki): The Wiki object to use
             path (Path): the local path on your computer pointing to the file to upload
             title (str): The title to upload the file to, excluding the "`File:`" namespace.
             desc (str, optional): The text to go on the file description page.  Does nothing if `unstash` is `False`. Defaults to "".
@@ -194,10 +196,12 @@ class WAction:
         else:
             return payload['filekey']
 
+    @staticmethod
     def unstash_upload(wiki: Wiki, filekey: str, title: str, desc: str = "", summary: str = "", max_retries=5, retry_interval=5) -> bool:
         """Attempt to unstash a file uploaded to the file stash.
 
         Args:
+            wiki (Wiki): The Wiki object to use
             filekey (str): The filekey of the file in your file stash to unstash (publish).
             title (str): The title to publish the file in the stash to (excluding `File:` prefix).
             desc (str, optional): The text to go on the file description page. Defaults to "".
@@ -226,3 +230,27 @@ class WAction:
             tries += 1
 
         return False
+
+    @staticmethod
+    def login(wiki: Wiki, username: str, password: str) -> bool:
+        """Attempts to login this Wiki object.  If successful, all future calls will be automatically include authentication.
+
+        Args:
+            wiki (Wiki): The Wiki object to use
+            username (str): The username to login with
+            password (str): The password to login with
+
+        Returns:
+            bool: True if successful
+        """
+        log.info("%s: Attempting login for %s", wiki, username)
+
+        response = WAction.post_action(wiki, "login", {"lgname": username, "lgpassword": password, "lgtoken": wiki._fetch_token(login_token=True)}, False)
+
+        # TODO: Handle bad login
+        wiki.username = response["login"]["lgusername"]
+
+        log.info("%s: Successfully logged in as %s", wiki, wiki.username)
+        wiki.csrf_token = wiki._fetch_token()
+
+        return True
