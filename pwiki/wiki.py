@@ -4,6 +4,7 @@ import pickle
 
 from pathlib import Path
 
+from .oquery import OQuery
 from .waction import WAction
 from .utils import make_params
 
@@ -37,7 +38,7 @@ class Wiki:
             with cookie_jar.open('rb') as f:
                 self.client.cookies = pickle.load(f)
 
-            self.csrf_token = self._fetch_token()
+            self.csrf_token = OQuery.fetch_token(self)
             # TODO: Get username from API
 
         self.is_logged_in = self.csrf_token != "+\\" or username and password and self.login(username, password)
@@ -81,25 +82,3 @@ class Wiki:
             bool: True if successful
         """
         return WAction.login(self, username, password)
-
-    def _fetch_token(self, login_token: bool = False) -> str:
-        """Fetch a csrf or login token from the server.  By default, this method will retrieve a csrf token.
-
-        Args:
-            login_token (bool, optional): Set `True` to get a login token instead of a csrf token. Defaults to False.
-
-        Raises:
-            Exception: if there was a server error or the token couldn't be retrieved.
-
-        Returns:
-            str: The token as a str.
-        """
-        pl = {"meta": "tokens"}
-        if login_token:
-            pl["type"] = "login"
-
-        try:
-            return self.client.get(self.endpoint, params=make_params("query", pl)).json()['query']['tokens']["logintoken" if login_token else "csrftoken"]
-        except Exception as e:
-            log.critical("Couldn't get tokens", exc_info=True)
-            raise e

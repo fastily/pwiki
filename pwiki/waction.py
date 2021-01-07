@@ -8,7 +8,8 @@ from pathlib import Path
 from time import sleep
 from typing import TYPE_CHECKING, Union
 
-from .utils import make_params
+from .oquery import OQuery
+from .utils import has_error, make_params, read_error
 
 if TYPE_CHECKING:
     from .wiki import Wiki
@@ -41,12 +42,12 @@ class WAction:
         try:
             return wiki.client.post(wiki.endpoint, data=pl, timeout=timeout).json()
         except Exception:
-            log.error("Could not reach server or read response while performing %s with params %s", action, pl, exc_info=True)
+            log.error("%s: Could not reach server or read response while performing %s with params %s", wiki, action, pl, exc_info=True)
 
         return {}
 
     @staticmethod
-    def is_success(action: str, response: dict) -> bool:
+    def is_success(action: str, response: dict, success_vals: tuple[str, ...] = ("Success",)) -> bool:
         """Checks if the server responded with a `Success` message for the specified `response`.
 
         Args:
@@ -57,34 +58,12 @@ class WAction:
             bool: True if the server responded with a `Success` message.
         """
         with suppress(Exception):
-            return response[action]["result"] == "Success"
+            return response[action]["result"] in success_vals
 
         return False
 
     @staticmethod
-    def read_error(action: str, response: dict) -> tuple[str, str]:
-        """Reads the error or result from an action response.  Useful for logging.
-
-        Args:
-            action (str): The type of action that was just performed.
-            response (dict): The json response from the server
-
-        Returns:
-            tuple[str, str]: A tuple such that the first element is the status code and the second element is the error description.
-        """
-        with suppress(Exception):
-            if action in response:
-                return response[action]["result"], response[action]["reason"]
-            elif "error" in response:
-                return response["error"]["code"], response["error"]["info"]
-
-        log.warning("Unable to parse error which occurred while perfoming a '%s' action", action)
-        log.debug(response)
-
-        return None, None
-
-    @staticmethod
-    def edit(wiki: Wiki, title: str, text: str = None, summary: str = "", minor: bool = False, prepend: str = None, append: str = None) -> bool:
+    def edit(wiki: Wiki, title: str, text: str = None, summary: str = "", prepend: str = None, append: str = None, minor: bool = False) -> bool:
         """Attempts to edit a page on the Wiki.  Can replace text or append/prepend text.
 
         Args:
@@ -92,9 +71,9 @@ class WAction:
             title (str): The title to edit.
             text (str, optional): Text to replace the current page's contents with. Mutually exclusive with `prepend`/`append`. Defaults to None.
             summary (str, optional): The edit summary to use. Defaults to "".
-            minor (bool, optional): Set `True` to mark this edit as minor. Defaults to False.
             prepend (str, optional): Text to prepend to the page. Mutually exclusive with `text`. Defaults to None.
             append (str, optional): Text to append to the page.  Mutually exclusive with `text`. Defaults to None.
+            minor (bool, optional): Set `True` to mark this edit as minor. Defaults to False.
 
         Raises:
             ValueError: If `text`, `prepend`, `append` are all None OR if `text` and `prepend`/`append` were both specified.
@@ -129,7 +108,7 @@ class WAction:
         if WAction.is_success("edit", response):
             return True
 
-        log.error("%s: Could not edit '%s', server said: %s", wiki, title, WAction.read_error("edit", response))
+        log.error("%s: Could not edit '%s', server said: %s", wiki, title, read_error("edit", response))
         return False
 
     @staticmethod
@@ -177,24 +156,25 @@ class WAction:
                     continue
 
                 response = response.json()
-                if "error" in response:
-                    log.error("%s: server responded with this error: '%s'", wiki, response['error']['info'])
+                if not WAction.is_success("upload", response, ("Continue", "Success")):
+                    log.error("%s: uploading chunk failed, server said %s", wiki, read_error("upload", response))
                     err_count += 1
                     continue
 
-                payload['filekey'] = response["upload"]["filekey"]
+                if "filekey" not in response["upload"]:
+                    log.error("%s: filekey was not found in response body when uploading '%s'", wiki, path)
+                    log.debug(response)
+                    err_count += 1
+                    continue
+
+                payload["filekey"] = response["upload"]["filekey"]
                 chunk_count += 1
-                payload['offset'] = _CHUNKSIZE * chunk_count
+                payload["offset"] = _CHUNKSIZE * chunk_count
 
                 if not (buffer := f.read(_CHUNKSIZE)):
                     break
 
-        if "filekey" not in payload:
-            log.error("%s: 'filekey' was not found in response body when uploading '%s': %s", wiki, path, payload)
-        elif unstash:
-            return WAction.unstash_upload(wiki, payload['filekey'], title, desc, summary, max_retries)
-        else:
-            return payload['filekey']
+        return WAction.unstash_upload(wiki, payload["filekey"], title, desc, summary, max_retries) if unstash else payload["filekey"]
 
     @staticmethod
     def unstash_upload(wiki: Wiki, filekey: str, title: str, desc: str = "", summary: str = "", max_retries=5, retry_interval=5) -> bool:
@@ -223,7 +203,7 @@ class WAction:
             if WAction.is_success("upload", response):
                 return True
 
-            log.error("%s: Could not unstash, server said %s.  Attempt %d of %d. Sleeping %ds...", wiki, WAction.read_error("upload", response), tries+1, max_retries, retry_interval)
+            log.error("%s: Could not unstash, server said %s.  Attempt %d of %d. Sleeping %ds...", wiki, read_error("upload", response), tries+1, max_retries, retry_interval)
             log.debug(response)
 
             sleep(retry_interval)
@@ -245,12 +225,14 @@ class WAction:
         """
         log.info("%s: Attempting login for %s", wiki, username)
 
-        response = WAction.post_action(wiki, "login", {"lgname": username, "lgpassword": password, "lgtoken": wiki._fetch_token(login_token=True)}, False)
+        response = WAction.post_action(wiki, "login", {"lgname": username, "lgpassword": password, "lgtoken": OQuery.fetch_token(wiki, True)}, False)
+        if has_error(response):
+            log.error("%s: failed to fetch tokens, server said: %s", wiki, read_error("login", response))
+            return False
 
-        # TODO: Handle bad login
         wiki.username = response["login"]["lgusername"]
 
         log.info("%s: Successfully logged in as %s", wiki, wiki.username)
-        wiki.csrf_token = wiki._fetch_token()
+        wiki.csrf_token = OQuery.fetch_token(wiki)
 
         return True
