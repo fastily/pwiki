@@ -1,4 +1,4 @@
-"""Classes and functions backing the actions API.  Not a stable API, should not be used outside of pwiki."""
+"""Classes and functions backing the actions API.  Not a stable API, intended for internal use within pwiki only."""
 from __future__ import annotations
 
 import logging
@@ -102,13 +102,73 @@ class WAction:
         if wiki.is_bot:
             pl["bot"] = 1
 
-        # TODO: Error cases
         response = WAction.post_action(wiki, "edit", pl)
 
         if WAction.is_success("edit", response):
             return True
 
         log.error("%s: Could not edit '%s', server said: %s", wiki, title, read_error("edit", response))
+        return False
+
+    @staticmethod
+    def login(wiki: Wiki, username: str, password: str) -> bool:
+        """Attempts to login this Wiki object.  If successful, all future calls will be automatically include authentication.
+
+        Args:
+            wiki (Wiki): The Wiki object to use
+            username (str): The username to login with
+            password (str): The password to login with
+
+        Returns:
+            bool: True if successful
+        """
+        log.info("%s: Attempting login for %s", wiki, username)
+
+        response = WAction.post_action(wiki, "login", {"lgname": username, "lgpassword": password, "lgtoken": OQuery.fetch_token(wiki, True)}, False)
+        if has_error(response):
+            log.error("%s: failed to fetch tokens, server said: %s", wiki, read_error("login", response))
+            return False
+
+        wiki.username = response["login"]["lgusername"]
+
+        log.info("%s: Successfully logged in as %s", wiki, wiki.username)
+        wiki.csrf_token = OQuery.fetch_token(wiki)
+
+        return True
+
+    @staticmethod
+    def unstash_upload(wiki: Wiki, filekey: str, title: str, desc: str = "", summary: str = "", max_retries=5, retry_interval=5) -> bool:
+        """Attempt to unstash a file uploaded to the file stash.
+
+        Args:
+            wiki (Wiki): The Wiki object to use
+            filekey (str): The filekey of the file in your file stash to unstash (publish).
+            title (str): The title to publish the file in the stash to (excluding `File:` prefix).
+            desc (str, optional): The text to go on the file description page. Defaults to "".
+            summary (str, optional): The upload log summary to use. Defaults to "".
+            max_retries (int, optional): The maximum number of retry in the event of failure (assuming the server expereinced an error). Defaults to 5.
+            retry_interval (int, optional): The number of seconds to wait in between retries.  Set 0 to disable. Defaults to 5.
+
+        Returns:
+            bool: True if unstashing was successful
+        """
+        log.info("%s: Unstashing '%s' as '%s'", wiki, filekey, title)
+
+        pl = make_params("upload", {"filename": title, "text": desc, "comment": summary, "filekey": filekey, "ignorewarnings": 1})
+
+        tries = 0
+        while tries < max_retries:
+            response = WAction.post_action(wiki, "upload", pl, timeout=360)
+
+            if WAction.is_success("upload", response):
+                return True
+
+            log.error("%s: Could not unstash, server said %s.  Attempt %d of %d. Sleeping %ds...", wiki, read_error("upload", response), tries+1, max_retries, retry_interval)
+            log.debug(response)
+
+            sleep(retry_interval)
+            tries += 1
+
         return False
 
     @staticmethod
@@ -175,64 +235,3 @@ class WAction:
                     break
 
         return WAction.unstash_upload(wiki, payload["filekey"], title, desc, summary, max_retries) if unstash else payload["filekey"]
-
-    @staticmethod
-    def unstash_upload(wiki: Wiki, filekey: str, title: str, desc: str = "", summary: str = "", max_retries=5, retry_interval=5) -> bool:
-        """Attempt to unstash a file uploaded to the file stash.
-
-        Args:
-            wiki (Wiki): The Wiki object to use
-            filekey (str): The filekey of the file in your file stash to unstash (publish).
-            title (str): The title to publish the file in the stash to (excluding `File:` prefix).
-            desc (str, optional): The text to go on the file description page. Defaults to "".
-            summary (str, optional): The upload log summary to use. Defaults to "".
-            max_retries (int, optional): The maximum number of retry in the event of failure (assuming the server expereinced an error). Defaults to 5.
-            retry_interval (int, optional): The number of seconds to wait in between retries.  Set 0 to disable. Defaults to 5.
-
-        Returns:
-            bool: True if unstashing was successful
-        """
-        log.info("%s: Unstashing '%s' as '%s'", wiki, filekey, title)
-
-        pl = make_params("upload", {"filename": title, "text": desc, "comment": summary, "filekey": filekey, "ignorewarnings": 1})
-
-        tries = 0
-        while tries < max_retries:
-            response = WAction.post_action(wiki, "upload", pl, timeout=360)
-
-            if WAction.is_success("upload", response):
-                return True
-
-            log.error("%s: Could not unstash, server said %s.  Attempt %d of %d. Sleeping %ds...", wiki, read_error("upload", response), tries+1, max_retries, retry_interval)
-            log.debug(response)
-
-            sleep(retry_interval)
-            tries += 1
-
-        return False
-
-    @staticmethod
-    def login(wiki: Wiki, username: str, password: str) -> bool:
-        """Attempts to login this Wiki object.  If successful, all future calls will be automatically include authentication.
-
-        Args:
-            wiki (Wiki): The Wiki object to use
-            username (str): The username to login with
-            password (str): The password to login with
-
-        Returns:
-            bool: True if successful
-        """
-        log.info("%s: Attempting login for %s", wiki, username)
-
-        response = WAction.post_action(wiki, "login", {"lgname": username, "lgpassword": password, "lgtoken": OQuery.fetch_token(wiki, True)}, False)
-        if has_error(response):
-            log.error("%s: failed to fetch tokens, server said: %s", wiki, read_error("login", response))
-            return False
-
-        wiki.username = response["login"]["lgusername"]
-
-        log.info("%s: Successfully logged in as %s", wiki, wiki.username)
-        wiki.csrf_token = OQuery.fetch_token(wiki)
-
-        return True
