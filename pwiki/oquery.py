@@ -4,7 +4,7 @@ import logging
 
 from typing import TYPE_CHECKING
 
-from .query_utils import QueryUtils
+from .query_utils import basic_query, extract_body
 from .utils import has_error
 
 if TYPE_CHECKING:
@@ -35,8 +35,8 @@ class OQuery:
         if login_token:
             pl["type"] = "login"
 
-        if not has_error(response := QueryUtils.basic_query(wiki, pl)):
-            return QueryUtils.extract_body("tokens", response)["logintoken" if login_token else "csrftoken"]
+        if not has_error(response := basic_query(wiki, pl)):
+            return extract_body("tokens", response)["logintoken" if login_token else "csrftoken"]
 
         log.debug(response)
         raise OSError(f"{wiki}: Could not retrieve tokens, network error?")
@@ -50,8 +50,8 @@ class OQuery:
         """
         log.info("%s: Fetching a list of acceptable file upload extensions", wiki)
 
-        if not has_error(response := QueryUtils.basic_query(wiki, {"meta": "siteinfo", "siprop": "fileextensions"})):
-            return {jo["ext"] for jo in QueryUtils.extract_body("fileextensions", response)}
+        if not has_error(response := basic_query(wiki, {"meta": "siteinfo", "siprop": "fileextensions"})):
+            return {jo["ext"] for jo in extract_body("fileextensions", response)}
 
         log.debug(response)
         log.error("%s: Could not fetch acceptable file upload extensions", wiki)
@@ -68,8 +68,8 @@ class OQuery:
         """
         log.info("%s: Asking the server who we are logged in as...", wiki)
 
-        if not has_error(response := QueryUtils.basic_query(wiki, {"meta": "userinfo"})):
-            return QueryUtils.extract_body("userinfo", response)["name"]
+        if not has_error(response := basic_query(wiki, {"meta": "userinfo"})):
+            return extract_body("userinfo", response)["name"]
 
         log.debug(response)
         log.error("%s: Could get this Wiki's username from the server", wiki)

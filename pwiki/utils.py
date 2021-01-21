@@ -2,6 +2,7 @@
 import logging
 
 from contextlib import suppress
+from typing import Any
 
 API_DEFAULTS = {"format": "json", "formatversion": "2"}
 
@@ -53,3 +54,10 @@ def read_error(action: str, response: dict) -> tuple[str, str]:
     log.debug(response)
 
     return None, None
+
+
+def mine_for(target: dict, *args: str) -> Any:
+    for arg in args:
+        target = target.get(arg, {})
+
+    return target or None

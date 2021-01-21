@@ -31,7 +31,7 @@ class Wiki:
         self.client = requests.Session()
         self.csrf_token = "+\\"
         self.username = None
-        self.is_bot = False
+        self.is_bot = False #TODO: set bot status on login
 
         if cookie_jar and cookie_jar.is_file():
             log.info("%s: Loading cookies from '%s'", self, cookie_jar)
