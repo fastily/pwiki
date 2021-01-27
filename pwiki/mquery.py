@@ -1,4 +1,4 @@
-"""Mass/Bulk query methods and classes"""
+"""Mass/Bulk query methods and classes designed to fetch as many results as possible in the fewest round trips"""
 
 from __future__ import annotations
 
@@ -6,7 +6,8 @@ import logging
 
 from typing import Any, Callable, TYPE_CHECKING
 
-from .query_utils import basic_query, chunker
+from .query_constants import ContProp, NoContProp, QConstant
+from .query_utils import basic_query, chunker, get_continue_params
 from .utils import has_error, mine_for, read_error
 
 if TYPE_CHECKING:
@@ -18,12 +19,13 @@ log = logging.getLogger(__name__)
 class MQuery:
 
     @staticmethod
-    def prop_no_cont(wiki: Wiki, prop: str, pl: dict, titles: list[str], retrieve_value: Callable[[dict], Any]) -> dict:
+    def prop_no_cont(wiki: Wiki, titles: list[str], template: QConstant) -> dict:
 
         out = dict.fromkeys(titles)
 
         for chunk in chunker(titles, 50):
-            if not (response := basic_query(wiki, {**pl, "prop": prop, "titles": "|".join(chunk)})):
+            if not (response := basic_query(wiki, {**template.pl, "prop": template.name, "titles": "|".join(chunk)})):
+                log.error("%s: No response from server while performing a prop_no_cont query with prop '%s' and titles %s", wiki, template.name, chunk)
                 continue
 
             if has_error(response):
@@ -33,16 +35,75 @@ class MQuery:
 
             for p in mine_for(response, "query", "pages"):
                 try:
-                    out[p["title"]] = retrieve_value(p)
+                    out[p["title"]] = template.retrieve_results(p)
                 except Exception:
                     log.debug("%s: Unable able to parse prop value from: %s", wiki, p, exc_info=True)
 
         return out
 
-    def prop_cont(wiki: Wiki, prop: str, pl: dict, titles: list[str], retrieve_value: Callable[[dict], Any]):
-        pass
+
+    @staticmethod
+    def prop_cont(wiki: Wiki, titles: list[str], template: QConstant) -> dict:
+
+        out = {t: [] for t in titles}
+
+        for chunk in chunker(titles, 50):
+            params = {**template.pl_with_limit(), "prop": template.name, "titles": "|".join(chunk)}
+
+            while True:
+                if not (response := basic_query(wiki, params)):
+                    log.error("%s: No response from server while performing a prop_cont query with prop '%s' and titles %s", wiki, template.name, chunk)
+                    break
+
+                if has_error(response):
+                    log.error("%s: encountered error while performing prop_no_cont, server said: %s", wiki, read_error("query", response))
+                    log.debug(response)
+                    break
+
+                for p in mine_for(response, "query", "pages"):
+                    if template.name in p:
+                        try:
+                            out[p["title"]] += template.retrieve_results(p[template.name])
+                        except Exception:
+                            log.debug("%s: Unable able to parse prop value from: %s", wiki, p, exc_info=True)
+
+                if not (cont := get_continue_params(response)):
+                    break
+
+                params.update(cont)
+
+        return out
 
     @staticmethod
     def page_text(wiki: Wiki, titles: list[str]) -> dict:
-        log.info("%s: fetching page text for %s", wiki, titles)
-        return MQuery.prop_no_cont(wiki, "revisions", {"rvprop": "content", "rvslots": "main"}, titles, lambda r: mine_for(r["revisions"][0], "slots", "main", "content"))
+        """Queries the Wiki for the text of a title.
+
+        Args:
+            wiki (Wiki): The Wiki object to use.
+            titles (list[str]): The titles to query.
+
+        Returns:
+            dict: A `dict` where each key is the title and each value is a `str` with the wikitext of the title.  If a title does not exist, the str will be replaced with `None`.
+        """
+        log.debug("%s: fetching page text for %s", wiki, titles)
+        return MQuery.prop_no_cont(wiki, titles, NoContProp.PAGE_TEXT)
+
+    @staticmethod
+    def exists(wiki: Wiki, titles: list[str]) -> dict:
+        """Queries the Wiki to determine if the specified list of titles exists.
+
+        Args:
+            wiki (Wiki): The Wiki object to use.
+            titles (list[str]): The titles to query.
+
+        Returns:
+            dict: A `dict` where each key is a title and each value is a bool indiciating if the title exists (`True`) or not (`False`).
+        """
+        log.debug("%s: determining if pages exist...", wiki)
+        return MQuery.prop_no_cont(wiki, titles, NoContProp.EXISTS)
+
+    @staticmethod
+    def file_usage(wiki: Wiki, titles: list[str]) -> dict:
+        log.debug("%s: determining file usage...", wiki)
+        return MQuery.prop_cont(wiki, titles, ContProp.FILEUSAGE)
+    

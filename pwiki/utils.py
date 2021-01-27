@@ -56,8 +56,18 @@ def read_error(action: str, response: dict) -> tuple[str, str]:
     return None, None
 
 
-def mine_for(target: dict, *args: str) -> Any:
-    for arg in args:
-        target = target.get(arg, {})
+def mine_for(target: dict, *keys: str) -> Any:
+    """Digs through nested json objects, following the keys named by `keys`.  PRECONDITION: `target` only contains json objects.
 
-    return target or None
+    Args:
+        target (dict): The json object to dig through.
+        keys (str): The keys to follow.
+
+    Returns:
+        Any: Whatever value is found at the end of following the specified keys.  None if nothing was not found.
+    """
+    with suppress(Exception):
+        for k in keys:
+            target = target.get(k, {})
+
+        return target or None

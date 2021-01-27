@@ -6,7 +6,7 @@ from .utils import mine_for
 
 
 class DataEntry:
-    def __init__(self, user: str, title: str, summary: str, timestamp: str) -> None:
+    def __init__(self, user: str, title: str, summary: str, timestamp: str):
         self.user = user
         self.title = title
         self.summary = summary
@@ -17,7 +17,7 @@ class DataEntry:
 
 
 class Revision(DataEntry):
-    def __init__(self, title, rev: dict) -> None:
+    def __init__(self, title, rev: dict):
         super().__init__(rev.get("user"), title, rev.get("comment"), rev.get("timestamp"))
 
         self.text = mine_for(rev, "slots", "main", "content")

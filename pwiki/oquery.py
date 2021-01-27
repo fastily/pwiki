@@ -72,4 +72,4 @@ class OQuery:
             return extract_body("userinfo", response)["name"]
 
         log.debug(response)
-        log.error("%s: Could get this Wiki's username from the server", wiki)
+        log.error("%s: Could not get this Wiki's username from the server", wiki)
