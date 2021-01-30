@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import logging
 
-from typing import Any, Callable, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
-from .query_constants import ContProp, NoContProp, QConstant
+from .query_constants import PropCont, PropNoCont, QConstant
 from .query_utils import basic_query, chunker, get_continue_params
 from .utils import has_error, mine_for, read_error
 
@@ -17,6 +17,29 @@ log = logging.getLogger(__name__)
 
 
 class MQuery:
+
+    # @staticmethod
+    # def list_no_cont(wiki: Wiki, titles: list[str], template: ListQConstant) -> dict:
+
+    #     out = dict.fromkeys(titles)
+
+    #     for chunk in chunker(titles, 50):
+    #         if not (response := basic_query(wiki, {**template.pl, "list": template.name, template.titles_key: "|".join(chunk)})):
+    #             log.error("%s: No response from server while performing a list_no_cont query with prop '%s' and titles %s", wiki, template.name, chunk)
+    #             continue
+
+    #         if has_error(response):
+    #             log.error("%s: encountered error while performing list_no_cont, server said: %s", wiki, read_error("query", response))
+    #             log.debug(response)
+    #             continue
+
+    #         for p in mine_for(response, "query", template.name):
+    #             try:
+    #                 out[p["title"]] = template.retrieve_results(p)
+    #             except Exception:
+    #                 log.debug("%s: Unable able to parse list value from: %s", wiki, p, exc_info=True)
+
+    #     return out
 
     @staticmethod
     def prop_no_cont(wiki: Wiki, titles: list[str], template: QConstant) -> dict:
@@ -41,7 +64,6 @@ class MQuery:
 
         return out
 
-
     @staticmethod
     def prop_cont(wiki: Wiki, titles: list[str], template: QConstant) -> dict:
 
@@ -56,7 +78,7 @@ class MQuery:
                     break
 
                 if has_error(response):
-                    log.error("%s: encountered error while performing prop_no_cont, server said: %s", wiki, read_error("query", response))
+                    log.error("%s: encountered error while performing prop_cont, server said: %s", wiki, read_error("query", response))
                     log.debug(response)
                     break
 
@@ -74,6 +96,8 @@ class MQuery:
 
         return out
 
+    # PROP NO CONT
+
     @staticmethod
     def page_text(wiki: Wiki, titles: list[str]) -> dict:
         """Queries the Wiki for the text of a title.
@@ -86,7 +110,7 @@ class MQuery:
             dict: A `dict` where each key is the title and each value is a `str` with the wikitext of the title.  If a title does not exist, the str will be replaced with `None`.
         """
         log.debug("%s: fetching page text for %s", wiki, titles)
-        return MQuery.prop_no_cont(wiki, titles, NoContProp.PAGE_TEXT)
+        return MQuery.prop_no_cont(wiki, titles, PropNoCont.PAGE_TEXT)
 
     @staticmethod
     def exists(wiki: Wiki, titles: list[str]) -> dict:
@@ -99,11 +123,22 @@ class MQuery:
         Returns:
             dict: A `dict` where each key is a title and each value is a bool indiciating if the title exists (`True`) or not (`False`).
         """
-        log.debug("%s: determining if pages exist...", wiki)
-        return MQuery.prop_no_cont(wiki, titles, NoContProp.EXISTS)
+        log.debug("%s: determining if pages exist: %s", wiki, titles)
+        return MQuery.prop_no_cont(wiki, titles, PropNoCont.EXISTS)
+
+    @staticmethod
+    def category_size(wiki: Wiki, titles: list[str]) -> dict:
+        log.debug("%s: fetching category sizes for: %s", wiki, titles)
+        return MQuery.prop_no_cont(wiki, titles, PropNoCont.CATEGORY_SIZE)
+
+    # PROP CONT
 
     @staticmethod
     def file_usage(wiki: Wiki, titles: list[str]) -> dict:
-        log.debug("%s: determining file usage...", wiki)
-        return MQuery.prop_cont(wiki, titles, ContProp.FILEUSAGE)
-    
+        log.debug("%s: fetching file usage: %s", wiki, titles)
+        return MQuery.prop_cont(wiki, titles, PropCont.FILEUSAGE)
+
+    @staticmethod
+    def categories_on_page(wiki: Wiki, titles: list[str]) -> dict:
+        log.debug("%s: fetching categories on pages: %s", wiki, titles)
+        return MQuery.prop_cont(wiki, titles, PropCont.CATEGORIES)

@@ -9,7 +9,7 @@ from time import sleep
 from typing import TYPE_CHECKING, Union
 
 from .oquery import OQuery
-from .utils import has_error, make_params, read_error
+from .utils import has_error, make_params, mine_for, read_error
 
 if TYPE_CHECKING:
     from .wiki import Wiki
@@ -129,10 +129,12 @@ class WAction:
             log.error("%s: failed to fetch tokens, server said: %s", wiki, read_error("login", response))
             return False
 
-        wiki.username = response["login"]["lgusername"]
-
+        wiki.username = mine_for(response, "login", "lgusername")
         log.info("%s: Successfully logged in as %s", wiki, wiki.username)
+
         wiki.csrf_token = OQuery.fetch_token(wiki)
+        wiki._refresh_rights()
+        wiki.is_logged_in = True
 
         return True
 

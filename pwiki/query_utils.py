@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import logging
 
-from contextlib import suppress
 from typing import TYPE_CHECKING, Union
 
 from .utils import make_params, mine_for
@@ -25,8 +24,6 @@ def extract_body(id: str, response: dict) -> Union[dict, list]:
         Union[dict, list]: the contents under `"query"` -> `id`.
     """
     return mine_for(response, "query", id)
-    # with suppress(Exception):
-    #     return response["query"][id]
 
 
 def basic_query(wiki: Wiki, pl: dict) -> dict:

@@ -5,10 +5,11 @@ import pickle
 from pathlib import Path
 from typing import Union
 
+import requests
+
+from .ns import NS
 from .oquery import OQuery
 from .waction import WAction
-
-import requests
 
 _DEFAULT_COOKIE_JAR = Path("./pwiki.pickle")
 
@@ -29,19 +30,17 @@ class Wiki:
         self.endpoint = f"https://{domain}/w/api.php"
         self.domain = domain
         self.client = requests.Session()
-        self.csrf_token = "+\\"
+
         self.username = None
-        self.is_bot = False #TODO: set bot status on login
+        self.is_logged_in = False
+        self.csrf_token = "+\\"
 
-        if cookie_jar and cookie_jar.is_file():
-            log.info("%s: Loading cookies from '%s'", self, cookie_jar)
-            with cookie_jar.open('rb') as f:
-                self.client.cookies = pickle.load(f)
+        self._refresh_rights()
 
-            self.csrf_token = OQuery.fetch_token(self)
-            self.username = self.whoami()
+        if not self.load_cookies(cookie_jar) and username and password:
+            self.login(username, password)
 
-        self.is_logged_in = self.csrf_token != "+\\" or username and password and self.login(username, password)
+        self.ns_manager = OQuery.fetch_namespaces(self)
 
     def __repr__(self) -> str:
         """Generate a str representation of this Wiki object.  Useful for logging.
@@ -50,6 +49,42 @@ class Wiki:
             str: A str representation of this Wiki object.
         """
         return f"[{self.username or '<Anonymous>'} @ {self.domain}]"
+
+    def _refresh_rights(self):
+        """Refreshes the cached user rights fields.  If not logged in, then set the user rights to the defaults (i.e. no rights)."""
+        if not self.username:
+            self.rights = []
+            self.is_bot = False
+        else:
+            self.rights = self.list_user_rights()
+            self.is_bot = "bot" in self.rights
+
+    def load_cookies(self, cookie_jar: Path = _DEFAULT_COOKIE_JAR) -> bool:
+        """Load saved cookies from a file into this pwiki instance.
+
+        Args:
+            cookie_jar (Path, optional): The path to the cookies. Defaults to `_DEFAULT_COOKIE_JAR` (`./pwiki.pickle`).
+
+        Returns:
+            bool: True if successful (confirmed with server that cookies are valid).
+        """
+        if not cookie_jar or not cookie_jar.is_file():
+            return False
+
+        with cookie_jar.open('rb') as f:
+            self.client.cookies = pickle.load(f)
+
+        self.csrf_token = OQuery.fetch_token(self)
+        if self.csrf_token == "+\\":
+            log.warning("Cookies loaded from '%s' are invalid! Abort.", cookie_jar)
+            self.client.cookies.clear()
+            return False
+
+        self.username = self.whoami()
+        self._refresh_rights()
+        self.is_logged_in = True
+
+        return True
 
     def clear_cookies(self, cookie_jar: Path = _DEFAULT_COOKIE_JAR):
         """Deletes any saved cookies from disk.
@@ -71,6 +106,31 @@ class Wiki:
 
         with output_path.open('wb') as f:
             pickle.dump(self.client.cookies, f)
+
+    def which_ns(self, title: str) -> str:
+        return result[0][:-1] if (result := self.ns_manager.ns_regex.match(title)) else "Main"
+
+    def nss(self, title: str) -> str:
+        return self.ns_manager.ns_regex.sub("", title, 1)
+
+    def convert_ns(self, title: str, ns: Union[str, NS]) -> str:
+        return f"{self.ns_manager.stringify(ns)}:{self.nss(title)}"
+
+    def filter_by_ns(self, titles: list[str], *nsl: Union[str, NS]) -> list[str]:
+        nsl = {self.ns_manager.stringify(ns) for ns in nsl}
+        return [s for s in titles if self.which_ns(s) in nsl]
+
+    def talk_page_of(self, title: str) -> str:
+        if (ns_id := self.ns_manager.m.get(self.which_ns(title))) % 2 == 0:
+            return f"{self.ns_manager.m.get(ns_id + 1)}:{self.nss(title)}"
+
+        log.warning("%s: could not get talk page of '%s' because it is already a talk page with an id of %d", self, title, ns_id)
+
+    def page_of(self, title: str) -> str:
+        if (ns_id := self.ns_manager.m.get(self.which_ns(title))) % 2:  # == 1
+            return f"{self.ns_manager.m.get(ns_id - 1)}:{self.nss(title)}"
+
+        log.warning("%s: could not get page of '%s' because it is not a talk page and has an id of %d", self, title, ns_id)
 
     ##################################################################################################
     ######################################## A C T I O N S ###########################################
@@ -127,12 +187,25 @@ class Wiki:
     ######################################## Q U E R I E S ###########################################
     ##################################################################################################
 
+    def list_user_rights(self, username: str = None) -> list[str]:
+        """Lists user rights for the specified user.
+
+        Args:
+            username (str, optional): The user to get rights for.  Usernames must be well formed (e.g. no wacky capitalization), and must not contain the `User:` prefix.  If set to `None`, then Wiki's username will be used.  Defaults to None.
+
+        Returns:
+            list[str]: The rights for the specified user.  `None` if something went wrong.
+        """
+        log.info("%s: Fetching user rights for '%s'", self, u := username or self.username)
+        return OQuery.list_user_rights(self, [u]).get(u) if u else []
+
     def uploadable_filetypes(self) -> set:
         """Queries the Wiki for all acceptable file types which may be uploaded to this Wiki.  PRECONDITION: the target Wiki permits file uploads.
 
         Returns:
             set: A set containing all acceptable file types as their extensions ("." prefix is included) 
         """
+        log.info("%s: Fetching a list of acceptable file upload extensions.", self)
         return OQuery.uploadable_filetypes(self)
 
     def whoami(self) -> str:
@@ -141,4 +214,5 @@ class Wiki:
         Returns:
             str: If logged in, this Wiki's username.  Otherwise, the external IP address of your device.
         """
+        log.info("%s: Asking the server who I am logged in as...", self)
         return OQuery.whoami(self)
