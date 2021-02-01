@@ -29,25 +29,13 @@ class QConstant:
 
         return pl
 
-# class PropConstant(QConstant):
-#     def __init__(self, name: str, pl: dict = None, limit_key: str = None, retrieve_results: Callable[[Union[dict, list]], Any] = None):
-#         super().__init__(name, pl=pl, limit_key=limit_key, retrieve_results=retrieve_results or (lambda l: [e["title"] for e in l]))
-
-# class ListQConstant(QConstant):
-#     def __init__(self, name: str, titles_key:str, pl: dict = None, limit_key: str = None, retrieve_results: Callable[[Union[dict, list]], Any] = None):
-#         super().__init__(name, pl=pl, limit_key=limit_key, retrieve_results=retrieve_results)
-
-#         self.titles_key = titles_key
-
 
 class PropNoCont:
     EXISTS = QConstant("pageprops", {"ppprop": "missing"}, retrieve_results=lambda r: "missing" not in r)
     CATEGORY_SIZE = QConstant("categoryinfo", retrieve_results=lambda r: mine_for(r, "categoryinfo", "size"))
     PAGE_TEXT = QConstant("revisions", {"rvprop": "content", "rvslots": "main"}, retrieve_results=lambda r: mine_for(r["revisions"][0], "slots", "main", "content"))
 
+
 class PropCont:
     CATEGORIES = QConstant("categories", limit_key="cllimit")
     FILEUSAGE = QConstant("fileusage", limit_key="fulimit")
-
-# class ListNoCont:
-#     pass

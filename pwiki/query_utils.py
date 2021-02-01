@@ -5,12 +5,45 @@ import logging
 
 from typing import TYPE_CHECKING, Union
 
-from .utils import make_params, mine_for
+from .utils import has_error, make_params, mine_for, read_error
 
 if TYPE_CHECKING:
     from .wiki import Wiki
 
 log = logging.getLogger(__name__)
+
+
+def basic_query(wiki: Wiki, pl: dict, big_query: bool = False) -> dict:
+    """Performs a query action and returns the response from the server as json.
+
+    Args:
+        wiki (Wiki): The Wiki object to use
+        pl (dict): The parameter list to send.  Do not include `{"action": "query"}`, this pair will be automatically included.
+        big_query (bool, optional): Indicates if the query could be large, in which case a `POST` will be performed instead.  Defaults to False.
+
+    Returns:
+         dict: The response from the server.  Empty dict if something went wrong
+    """
+    p = make_params("query", pl)
+    try:
+        return (wiki.client.post(wiki.endpoint, data=p) if big_query else wiki.client.get(wiki.endpoint, params=p)).json()
+    except Exception:
+        log.error("%s: Could not reach server or read response while performing query with params: %s", wiki, p, exc_info=True)
+
+    return {}
+
+
+def chunker(l: list, size: int) -> tuple:
+    """Divides the input list, `l`, into equal sub-lists of size, `size`.  Any remainder will be in the last element.
+
+    Args:
+        l (list): The input list
+        size (int): The maximum size of the sub-lists
+
+    Returns:
+        tuple: The output tuple containing all the sub-lists derived from `l`.
+    """
+    return (l[pos:pos + size] for pos in range(0, len(l), size))
 
 
 def extract_body(id: str, response: dict) -> Union[dict, list]:
@@ -26,24 +59,6 @@ def extract_body(id: str, response: dict) -> Union[dict, list]:
     return mine_for(response, "query", id)
 
 
-def basic_query(wiki: Wiki, pl: dict) -> dict:
-    """Performs a query action and returns the response from the server as json.
-
-    Args:
-        wiki (Wiki): The Wiki object to use
-        pl (dict): The parameter list to send.  Do not include `{"action": "query"}`, this pair will be automatically included.
-
-    Returns:
-        dict: The response from the server.  Empty dict if something went wrong
-    """
-    try:
-        return wiki.client.get(wiki.endpoint, params=make_params("query", pl)).json()
-    except Exception:
-        log.error("%s: Could not reach server or read response while performing query with params: %s", wiki, pl, exc_info=True)
-
-    return {}
-
-
 def get_continue_params(response: dict) -> dict:
     """Gets the query continuation parameters from the response
 
@@ -56,14 +71,25 @@ def get_continue_params(response: dict) -> dict:
     return response.get("continue", {})
 
 
-def chunker(l: list, size: int) -> tuple:
-    """Divides the input list, `l`, into equal sub-lists of size, `size`.  Any remainder will be in the last element.
+def query_and_validate(wiki: Wiki, pl: dict, big_query: bool = False, desc: str = "perform query") -> dict:
+    """Performs a `basic_query()` and checks the results for errors.  If there is an error, it will be logged accordingly.
 
     Args:
-        l (list): The input list
-        size (int): The maximum size of the sub-lists
+        wiki (Wiki): The Wiki object to use
+        pl (dict): The parameter list to send.  Do not include `{"action": "query"}`, this pair will be automatically included.
+        big_query (bool, optional): Indicates if the query could be large, in which case a `POST` will be performed instead.  Defaults to False.
+        desc (str, optional): A few words describing what this query was trying to accomplish.  This will be displayed in the logs if there was an error. Defaults to "perform query".
 
     Returns:
-        tuple: The output tuple containing all the sub-lists derived from `l`.
+        dict: The response from the server.  `None` if something went wrong.
     """
-    return (l[pos:pos + size] for pos in range(0, len(l), size))
+    if not (response := basic_query(wiki, pl, big_query)):
+        log.error("%s: No response from server while trying to %s", wiki, desc)
+        log.debug("Sent parameters: %s", pl)
+        return
+
+    if not has_error(response):
+        return response
+
+    log.error("%s: encountered error while trying to %s, server said: %s", wiki, desc, read_error("query", response))
+    log.debug(response)

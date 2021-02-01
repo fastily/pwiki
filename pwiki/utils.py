@@ -66,8 +66,10 @@ def mine_for(target: dict, *keys: str) -> Any:
     Returns:
         Any: Whatever value is found at the end of following the specified keys.  None if nothing was not found.
     """
-    with suppress(Exception):
+    try:
         for k in keys:
             target = target.get(k, {})
 
         return target or None
+    except Exception:
+        log.debug("Crash in mine_for(), something must have gone *terribly* wrong", exc_info=True)

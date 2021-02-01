@@ -18,29 +18,6 @@ log = logging.getLogger(__name__)
 
 class MQuery:
 
-    # @staticmethod
-    # def list_no_cont(wiki: Wiki, titles: list[str], template: ListQConstant) -> dict:
-
-    #     out = dict.fromkeys(titles)
-
-    #     for chunk in chunker(titles, 50):
-    #         if not (response := basic_query(wiki, {**template.pl, "list": template.name, template.titles_key: "|".join(chunk)})):
-    #             log.error("%s: No response from server while performing a list_no_cont query with prop '%s' and titles %s", wiki, template.name, chunk)
-    #             continue
-
-    #         if has_error(response):
-    #             log.error("%s: encountered error while performing list_no_cont, server said: %s", wiki, read_error("query", response))
-    #             log.debug(response)
-    #             continue
-
-    #         for p in mine_for(response, "query", template.name):
-    #             try:
-    #                 out[p["title"]] = template.retrieve_results(p)
-    #             except Exception:
-    #                 log.debug("%s: Unable able to parse list value from: %s", wiki, p, exc_info=True)
-
-    #     return out
-
     @staticmethod
     def prop_no_cont(wiki: Wiki, titles: list[str], template: QConstant) -> dict:
 

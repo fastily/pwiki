@@ -56,11 +56,9 @@ class WAction:
 
         Returns:
             bool: True if the server responded with a `Success` message.
-        """
-        with suppress(Exception):
-            return response[action]["result"] in success_vals
+        """    
+        return mine_for(response, action, "result") in success_vals
 
-        return False
 
     @staticmethod
     def edit(wiki: Wiki, title: str, text: str = None, summary: str = "", prepend: str = None, append: str = None, minor: bool = False) -> bool:

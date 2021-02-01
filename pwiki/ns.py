@@ -32,7 +32,7 @@ class NSManager():
         self.m = {}
 
         l = []
-        for _, v in r["namespaces"].items():
+        for v in r["namespaces"].values():
             id = v["id"]
             name = v["name"] or "Main"
 

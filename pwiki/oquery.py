@@ -1,4 +1,4 @@
-"""Classes and constants for making miscellaneous and one-off queries"""
+"""Classes and constants for making miscellaneous and other one-off queries"""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ import logging
 from typing import TYPE_CHECKING
 
 from .ns import NSManager
-from .query_utils import basic_query, chunker, extract_body, mine_for
+from .query_utils import basic_query, chunker, extract_body, mine_for, query_and_validate
 from .utils import has_error, read_error
 
 if TYPE_CHECKING:
@@ -79,20 +79,70 @@ class OQuery:
         out = {}
 
         for chunk in chunker(users, 50):
-            if not (response := basic_query(wiki, {"list": "users", "usprop": "groups", "ususers": "|".join(chunk)})):
-                log.error("%s: No response from server while trying to list user rights query with users %s", wiki, chunk)
+            # if not (response := basic_query(wiki, {"list": "users", "usprop": "groups", "ususers": "|".join(chunk)})):
+            #     log.error("%s: No response from server while trying to list user rights query with users %s", wiki, chunk)
+            #     continue
+
+            # if has_error(response):
+            #     log.error("%s: encountered error while trying to list user rights, server said: %s", wiki, read_error("query", response))
+            #     log.debug(response)
+            #     continue
+
+            if response := query_and_validate(wiki, {"list": "users", "usprop": "groups", "ususers": "|".join(chunk)}, wiki.is_bot, desc="determine user rights"):
+                for p in mine_for(response, "query", "users"):
+                    try:
+                        out[p["name"]] = None if p.keys() & {"invalid", "missing"} else p["groups"]
+                    except Exception:
+                        log.debug("%s: Unable able to parse list value from: %s", wiki, p, exc_info=True)
+
+        return out
+
+    @staticmethod
+    def normalize_titles(wiki: Wiki, titles: list[str]) -> dict:
+        out = {s: s for s in titles}
+
+        for chunk in chunker(titles, 50):
+            if not (response := basic_query(wiki, {"titles": "|".join(chunk)})):
+                log.error("%s: No response from server while trying to normalize titles %s", wiki, chunk)
                 continue
 
             if has_error(response):
-                log.error("%s: encountered error while trying to list user rights, server said: %s", wiki, read_error("query", response))
+                log.error("%s: encountered error while trying to normalize titles, server said: %s", wiki, read_error("query", response))
                 log.debug(response)
                 continue
 
-            for p in mine_for(response, "query", "users"):
-                try:
-                    out[p["name"]] = None if p.keys() & {"invalid", "missing"} else p["groups"]
-                except Exception:
-                    log.debug("%s: Unable able to parse list value from: %s", wiki, p, exc_info=True)
+            if response := extract_body("normalized", response):
+                for e in response:
+                    out[e["from"]] = e["to"]
+
+        return out
+
+    @staticmethod
+    def resolve_redirects(wiki: Wiki, titles: list[str]) -> dict:
+        """Fetch the targets of redirect pages.
+
+        Args:
+            wiki (Wiki): The Wiki object to use
+            titles (list[str]): The list of titles to query
+
+        Returns:
+            dict: A dict where each key is the title and the value is the redirect target.  If the key was not a redirect, then the value will be identical to the key.
+        """
+        out = {s: s for s in titles}
+
+        for chunk in chunker(titles, 50):
+            if not (response := basic_query(wiki, {"redirects": 1, "titles": "|".join(chunk)})):
+                log.error("%s: No response from server while trying to resolve title redirects %s", wiki, chunk)
+                continue
+
+            if has_error(response):
+                log.error("%s: encountered error while trying to resolve title redirects, server said: %s", wiki, read_error("query", response))
+                log.debug(response)
+                continue
+
+            if response := extract_body("redirects", response):
+                for e in response:
+                    out[e["from"]] = e["to"]
 
         return out
 
