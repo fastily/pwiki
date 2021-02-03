@@ -23,7 +23,7 @@ class MQuery:
 
         out = dict.fromkeys(titles)
 
-        for chunk in chunker(titles, 50):
+        for chunk in chunker(titles, wiki.prop_title_max):
             if not (response := basic_query(wiki, {**template.pl, "prop": template.name, "titles": "|".join(chunk)})):
                 log.error("%s: No response from server while performing a prop_no_cont query with prop '%s' and titles %s", wiki, template.name, chunk)
                 continue
@@ -46,7 +46,7 @@ class MQuery:
 
         out = {t: [] for t in titles}
 
-        for chunk in chunker(titles, 50):
+        for chunk in chunker(titles, wiki.prop_title_max):
             params = {**template.pl_with_limit(), "prop": template.name, "titles": "|".join(chunk)}
 
             while True:

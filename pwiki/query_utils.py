@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import logging
 
-from typing import TYPE_CHECKING, Union
+from typing import Any, TYPE_CHECKING, Union
 
 from .utils import has_error, make_params, mine_for, read_error
 
@@ -44,6 +44,29 @@ def chunker(l: list, size: int) -> tuple:
         tuple: The output tuple containing all the sub-lists derived from `l`.
     """
     return (l[pos:pos + size] for pos in range(0, len(l), size))
+
+
+def denormalize_result(d: dict, normalized: list, target_class: type[Any]):
+    """Reads the normalized json array returned by queries and denormalizes, merges, and updates `d` accordingly.
+
+    Args:
+        d (dict): The results dict which will eventually be returned to the caller
+        normalized (list): The normalized array returned by a query.  If `None`, then this method does nothing.
+        target_class (type[Any]): The type of the values in `d`.  This indicates the merge stratedgy to be used.
+    """
+    if normalized:
+        for e in normalized:
+            new = d.pop(e["to"])
+            existing = d[e["from"]] if e["from"] in d else target_class()
+
+            if target_class == list:
+                existing += new
+            elif target_class == dict:
+                existing |= new
+            else:
+                existing = new
+
+            d[e["from"]] = existing
 
 
 def extract_body(id: str, response: dict) -> Union[dict, list]:

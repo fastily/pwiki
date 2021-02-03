@@ -78,17 +78,8 @@ class OQuery:
         """
         out = {}
 
-        for chunk in chunker(users, 50):
-            # if not (response := basic_query(wiki, {"list": "users", "usprop": "groups", "ususers": "|".join(chunk)})):
-            #     log.error("%s: No response from server while trying to list user rights query with users %s", wiki, chunk)
-            #     continue
-
-            # if has_error(response):
-            #     log.error("%s: encountered error while trying to list user rights, server said: %s", wiki, read_error("query", response))
-            #     log.debug(response)
-            #     continue
-
-            if response := query_and_validate(wiki, {"list": "users", "usprop": "groups", "ususers": "|".join(chunk)}, wiki.is_bot, desc="determine user rights"):
+        for chunk in chunker(users, wiki.prop_title_max):
+            if response := query_and_validate(wiki, {"list": "users", "usprop": "groups", "ususers": "|".join(chunk)}, wiki.is_bot, "determine user rights"):
                 for p in mine_for(response, "query", "users"):
                     try:
                         out[p["name"]] = None if p.keys() & {"invalid", "missing"} else p["groups"]
@@ -99,19 +90,19 @@ class OQuery:
 
     @staticmethod
     def normalize_titles(wiki: Wiki, titles: list[str]) -> dict:
+        """Normalizes titles to match their canonical versions.  Usually this means fixing capitalization or replacing underscores with spaces.
+
+        Args:
+            wiki (Wiki): The Wiki object to use.
+            titles (list[str]): The titles to normalize.
+
+        Returns:
+            dict: A `dict` where the original title is the key and the value is its normalized version.
+        """
         out = {s: s for s in titles}
 
-        for chunk in chunker(titles, 50):
-            if not (response := basic_query(wiki, {"titles": "|".join(chunk)})):
-                log.error("%s: No response from server while trying to normalize titles %s", wiki, chunk)
-                continue
-
-            if has_error(response):
-                log.error("%s: encountered error while trying to normalize titles, server said: %s", wiki, read_error("query", response))
-                log.debug(response)
-                continue
-
-            if response := extract_body("normalized", response):
+        for chunk in chunker(titles, wiki.prop_title_max):
+            if response := extract_body("normalized", query_and_validate(wiki, {"titles": "|".join(chunk)}, wiki.is_bot, "normalize titles")):
                 for e in response:
                     out[e["from"]] = e["to"]
 
@@ -130,17 +121,8 @@ class OQuery:
         """
         out = {s: s for s in titles}
 
-        for chunk in chunker(titles, 50):
-            if not (response := basic_query(wiki, {"redirects": 1, "titles": "|".join(chunk)})):
-                log.error("%s: No response from server while trying to resolve title redirects %s", wiki, chunk)
-                continue
-
-            if has_error(response):
-                log.error("%s: encountered error while trying to resolve title redirects, server said: %s", wiki, read_error("query", response))
-                log.debug(response)
-                continue
-
-            if response := extract_body("redirects", response):
+        for chunk in chunker(titles, wiki.prop_title_max):
+            if response := extract_body("redirects", query_and_validate(wiki, {"redirects": 1, "titles": "|".join(chunk)}, wiki.is_bot, "resolve title redirects")):
                 for e in response:
                     out[e["from"]] = e["to"]
 

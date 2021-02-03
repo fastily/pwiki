@@ -5,9 +5,9 @@ import pickle
 from pathlib import Path
 from typing import Union
 
-import requests
+from requests import Session
 
-from .ns import NS
+from .ns import NS, NSManager
 from .oquery import OQuery
 from .waction import WAction
 
@@ -26,21 +26,22 @@ class Wiki:
             domain (str): The shorthand domain of the Wiki to target (e.g. "en.wikipedia.org")
             username (str, optional): The username to login as. Does nothing if `password` is not set.  Defaults to None.
             password (str, optional): The password to use when logging in. Does nothing if `username` is not set.  Defaults to None.
+            cookie_jar (Path, optional): The path to the saved cookies file.  Does nothing if set to `None` or if the specified path does not exist.  Defaults to `_DEFAULT_COOKIE_JAR` (`./pwiki.pickle`).
         """
-        self.endpoint = f"https://{domain}/w/api.php"
-        self.domain = domain
-        self.client = requests.Session()
+        self.endpoint: str = f"https://{domain}/w/api.php"
+        self.domain: str = domain
+        self.client: Session = Session()
 
-        self.username = None
-        self.is_logged_in = False
-        self.csrf_token = "+\\"
+        self.username: str = None
+        self.is_logged_in: bool = False
+        self.csrf_token: str = "+\\"
 
         self._refresh_rights()
 
         if not self.load_cookies(cookie_jar) and username and password:
             self.login(username, password)
 
-        self.ns_manager = OQuery.fetch_namespaces(self)
+        self.ns_manager: NSManager = OQuery.fetch_namespaces(self)
 
     def __repr__(self) -> str:
         """Generate a str representation of this Wiki object.  Useful for logging.
@@ -53,11 +54,13 @@ class Wiki:
     def _refresh_rights(self):
         """Refreshes the cached user rights fields.  If not logged in, then set the user rights to the defaults (i.e. no rights)."""
         if not self.username:
-            self.rights = []
-            self.is_bot = False
+            self.rights: list = []
+            self.is_bot: bool = False
+            self.prop_title_max: int = 50
         else:
-            self.rights = self.list_user_rights()
-            self.is_bot = "bot" in self.rights
+            self.rights: list = self.list_user_rights()
+            self.is_bot: bool = "bot" in self.rights
+            self.prop_title_max: int = 500 if self.is_bot else 50
 
     def load_cookies(self, cookie_jar: Path = _DEFAULT_COOKIE_JAR) -> bool:
         """Load saved cookies from a file into this pwiki instance.
@@ -114,7 +117,12 @@ class Wiki:
         return self.ns_manager.ns_regex.sub("", title, 1)
 
     def convert_ns(self, title: str, ns: Union[str, NS]) -> str:
-        return f"{self.ns_manager.stringify(ns)}:{self.nss(title)}"
+        if (prefix := self.ns_manager.stringify(ns)) == "Main":
+            prefix = ""
+        else:
+            prefix += ":"
+
+        return prefix + self.nss(title)
 
     def filter_by_ns(self, titles: list[str], *nsl: Union[str, NS]) -> list[str]:
         nsl = {self.ns_manager.stringify(ns) for ns in nsl}
@@ -124,13 +132,13 @@ class Wiki:
         if (ns_id := self.ns_manager.m.get(self.which_ns(title))) % 2 == 0:
             return f"{self.ns_manager.m.get(ns_id + 1)}:{self.nss(title)}"
 
-        log.warning("%s: could not get talk page of '%s' because it is already a talk page with an id of %d", self, title, ns_id)
+        log.debug("%s: could not get talk page of '%s' because it is already a talk page with an id of %d", self, title, ns_id)
 
     def page_of(self, title: str) -> str:
         if (ns_id := self.ns_manager.m.get(self.which_ns(title))) % 2:  # == 1
             return f"{self.ns_manager.m.get(ns_id - 1)}:{self.nss(title)}"
 
-        log.warning("%s: could not get page of '%s' because it is not a talk page and has an id of %d", self, title, ns_id)
+        log.debug("%s: could not get page of '%s' because it is not a talk page and has an id of %d", self, title, ns_id)
 
     ##################################################################################################
     ######################################## A C T I O N S ###########################################
