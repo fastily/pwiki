@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 
 from .ns import NSManager
 from .query_utils import basic_query, chunker, extract_body, mine_for, query_and_validate
-from .utils import has_error, read_error
+from .utils import has_error
 
 if TYPE_CHECKING:
     from .wiki import Wiki
@@ -18,6 +18,29 @@ log = logging.getLogger(__name__)
 
 class OQuery:
     """Collection of miscellaneous and one-off query action methods"""
+
+    @staticmethod
+    def _pair_titles_query(wiki: Wiki, id: str, pl: dict, titles: list[str], desc: str) -> dict:
+        """Performs a simple query (not `list` or `prop`) that returns a `query` json object containing a key with a list of to-from json objects.  Also parses and returns results.
+
+        Args:
+            wiki (Wiki): The Wiki object to use
+            id (str): The key under `"query"` in `response` to fetch.
+            pl (dict): Additional parameters, excluding `"titles"`.
+            titles (list[str]): The titles to process.
+            desc (str): A few words describing what this query was trying to accomplish.  This will be displayed in the logs if there was an error.
+
+        Returns:
+            dict: [description]
+        """
+        out = {s: s for s in titles}
+
+        for chunk in chunker(titles, wiki.prop_title_max):
+            if response := extract_body(id, query_and_validate(wiki, {**pl, "titles": "|".join(chunk)}, wiki.is_bot, desc)):
+                for e in response:
+                    out[e["from"]] = e["to"]
+
+        return out
 
     @staticmethod
     def fetch_token(wiki: Wiki, login_token: bool = False) -> str:
@@ -99,14 +122,7 @@ class OQuery:
         Returns:
             dict: A `dict` where the original title is the key and the value is its normalized version.
         """
-        out = {s: s for s in titles}
-
-        for chunk in chunker(titles, wiki.prop_title_max):
-            if response := extract_body("normalized", query_and_validate(wiki, {"titles": "|".join(chunk)}, wiki.is_bot, "normalize titles")):
-                for e in response:
-                    out[e["from"]] = e["to"]
-
-        return out
+        return OQuery._pair_titles_query(wiki, "normalized", {}, titles, "normalize titles")
 
     @staticmethod
     def resolve_redirects(wiki: Wiki, titles: list[str]) -> dict:
@@ -119,14 +135,7 @@ class OQuery:
         Returns:
             dict: A dict where each key is the title and the value is the redirect target.  If the key was not a redirect, then the value will be identical to the key.
         """
-        out = {s: s for s in titles}
-
-        for chunk in chunker(titles, wiki.prop_title_max):
-            if response := extract_body("redirects", query_and_validate(wiki, {"redirects": 1, "titles": "|".join(chunk)}, wiki.is_bot, "resolve title redirects")):
-                for e in response:
-                    out[e["from"]] = e["to"]
-
-        return out
+        return OQuery._pair_titles_query(wiki, "redirects", {"redirects": 1}, titles, "resolve title redirects")
 
     @staticmethod
     def uploadable_filetypes(wiki: Wiki) -> set:

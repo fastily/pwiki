@@ -46,23 +46,30 @@ def chunker(l: list, size: int) -> tuple:
     return (l[pos:pos + size] for pos in range(0, len(l), size))
 
 
-def denormalize_result(d: dict, normalized: list, target_class: type[Any]):
+def denormalize_result(d: dict, response: dict, target_class: Union[type[list], type[dict], None] = None):
     """Reads the normalized json array returned by queries and denormalizes, merges, and updates `d` accordingly.
 
     Args:
         d (dict): The results dict which will eventually be returned to the caller
-        normalized (list): The normalized array returned by a query.  If `None`, then this method does nothing.
-        target_class (type[Any]): The type of the values in `d`.  This indicates the merge stratedgy to be used.
+        response (dict): The response from the server.
+        target_class (Union[type[list], type[dict], None], optional):  The type of the values in `d`.  This indicates the merge strategy to be used.  Set to `None` if not processing a `list`/`dict`. Defaults to None.
+
+    Raises:
+        TypeError: If `target_class` was set to something other than `list` or `dict`.
     """
-    if normalized:
+    if normalized := mine_for(response, "query", "normalized"):
         for e in normalized:
             new = d.pop(e["to"])
-            existing = d[e["from"]] if e["from"] in d else target_class()
 
-            if target_class == list:
-                existing += new
-            elif target_class == dict:
-                existing |= new
+            if target_class:
+                existing = d[e["from"]] if e["from"] in d else target_class()
+
+                if target_class == list:
+                    existing += new
+                elif target_class == dict:
+                    existing |= new
+                else:
+                    raise TypeError("%s is not a supported data structure for denormalization", target_class)
             else:
                 existing = new
 

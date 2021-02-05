@@ -7,7 +7,7 @@ from typing import Union
 
 from requests import Session
 
-from .ns import NS, NSManager
+from .ns import MAIN_NAME, NS, NSManager
 from .oquery import OQuery
 from .waction import WAction
 
@@ -111,32 +111,76 @@ class Wiki:
             pickle.dump(self.client.cookies, f)
 
     def which_ns(self, title: str) -> str:
-        return result[0][:-1] if (result := self.ns_manager.ns_regex.match(title)) else "Main"
+        """Determines which namespace a title belongs to.
+
+        Args:
+            title (str): The title to get the namespace of
+
+        Returns:
+            str: The namespace, without it's `:` suffix.  If main namespace, then `"Main"` will be returned
+        """
+        return result[0][:-1] if (result := self.ns_manager.ns_regex.match(title)) else MAIN_NAME
 
     def nss(self, title: str) -> str:
+        """Strips the namespace prefix from a title.
+
+        Args:
+            title (str): The title to remove the namespace from.
+
+        Returns:
+            str: `title`, without a namespace.
+        """
         return self.ns_manager.ns_regex.sub("", title, 1)
 
     def convert_ns(self, title: str, ns: Union[str, NS]) -> str:
-        if (prefix := self.ns_manager.stringify(ns)) == "Main":
-            prefix = ""
-        else:
-            prefix += ":"
+        """Converts the namespace of the specified title to another namespace.  PRECONDITION: `title` is well-formed.
 
-        return prefix + self.nss(title)
+        Args:
+            title (str): The title to convert
+            ns (Union[str, NS]): The namespace to convert `title` to.
+
+        Returns:
+            str: `title`, converted to namespace `ns`
+        """
+        return self.ns_manager.canonical_prefix(self.ns_manager.stringify(ns)) + self.nss(title)
 
     def filter_by_ns(self, titles: list[str], *nsl: Union[str, NS]) -> list[str]:
+        """Creates a copy of `titles` and strips out any title that isn't in the namespaces specified in `nsl`.
+
+        Args:
+            titles (list[str]): The list of titles to process.
+
+        Returns:
+            list[str]: A copy of `titles` with any titles in `nsl` excluded.
+        """
         nsl = {self.ns_manager.stringify(ns) for ns in nsl}
         return [s for s in titles if self.which_ns(s) in nsl]
 
     def talk_page_of(self, title: str) -> str:
+        """Gets the talk page of `title`.  If `title` is a talk page, then `None` will be returned.
+
+        Args:
+            title (str): The talk page associated with `title`.
+
+        Returns:
+            str: The talk page of `title`, or `None` if `title` is already a talk page.
+        """
         if (ns_id := self.ns_manager.m.get(self.which_ns(title))) % 2 == 0:
             return f"{self.ns_manager.m.get(ns_id + 1)}:{self.nss(title)}"
 
         log.debug("%s: could not get talk page of '%s' because it is already a talk page with an id of %d", self, title, ns_id)
 
     def page_of(self, title: str) -> str:
+        """Gets the content page associated with `title`.   If `title` is a content page, then `None` will be returned.
+
+        Args:
+            title (str): The content page associated with `title`.
+
+        Returns:
+            str: The content page associated with `title`, or `None` if `title` is already a content page.
+        """
         if (ns_id := self.ns_manager.m.get(self.which_ns(title))) % 2:  # == 1
-            return f"{self.ns_manager.m.get(ns_id - 1)}:{self.nss(title)}"
+            return self.ns_manager.canonical_prefix(self.ns_manager.m.get(ns_id - 1)) + self.nss(title)
 
         log.debug("%s: could not get page of '%s' because it is not a talk page and has an id of %d", self, title, ns_id)
 

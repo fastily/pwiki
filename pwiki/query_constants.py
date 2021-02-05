@@ -32,8 +32,8 @@ class QConstant:
 
 class PropNoCont:
     EXISTS = QConstant("pageprops", {"ppprop": "missing"}, retrieve_results=lambda r: "missing" not in r)
-    CATEGORY_SIZE = QConstant("categoryinfo", retrieve_results=lambda r: mine_for(r, "categoryinfo", "size"))
-    PAGE_TEXT = QConstant("revisions", {"rvprop": "content", "rvslots": "main"}, retrieve_results=lambda r: mine_for(r["revisions"][0], "slots", "main", "content"))
+    CATEGORY_SIZE = QConstant("categoryinfo", retrieve_results=lambda r: mine_for(r, "categoryinfo", "size") or 0)
+    PAGE_TEXT = QConstant("revisions", {"rvprop": "content", "rvslots": "main"}, retrieve_results=lambda r: mine_for(r["revisions"][0], "slots", "main", "content") if "revisions" in r else "")
 
 
 class PropCont:

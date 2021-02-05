@@ -4,10 +4,11 @@ from __future__ import annotations
 
 import logging
 
+from collections import defaultdict
 from typing import TYPE_CHECKING
 
 from .query_constants import PropCont, PropNoCont, QConstant
-from .query_utils import basic_query, chunker, get_continue_params
+from .query_utils import basic_query, chunker, denormalize_result, get_continue_params
 from .utils import has_error, mine_for, read_error
 
 if TYPE_CHECKING:
@@ -39,12 +40,13 @@ class MQuery:
                 except Exception:
                     log.debug("%s: Unable able to parse prop value from: %s", wiki, p, exc_info=True)
 
+            denormalize_result(out, response)
+
         return out
 
     @staticmethod
     def prop_cont(wiki: Wiki, titles: list[str], template: QConstant) -> dict:
-
-        out = {t: [] for t in titles}
+        out = defaultdict(list)
 
         for chunk in chunker(titles, wiki.prop_title_max):
             params = {**template.pl_with_limit(), "prop": template.name, "titles": "|".join(chunk)}
@@ -60,17 +62,20 @@ class MQuery:
                     break
 
                 for p in mine_for(response, "query", "pages"):
-                    if template.name in p:
-                        try:
-                            out[p["title"]] += template.retrieve_results(p[template.name])
-                        except Exception:
-                            log.debug("%s: Unable able to parse prop value from: %s", wiki, p, exc_info=True)
+                    try:
+                        out[p["title"]] += template.retrieve_results(p[template.name]) if template.name in p else []
+                    except Exception:
+                        log.debug("%s: Unable able to parse prop value from: %s", wiki, p, exc_info=True)
+
+                denormalize_result(out, response, list)
 
                 if not (cont := get_continue_params(response)):
                     break
 
                 params.update(cont)
 
+        out = dict(out)
+        out |= {t: None for t in titles if t not in out}
         return out
 
     # PROP NO CONT

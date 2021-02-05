@@ -8,6 +8,8 @@ from typing import Union
 
 log = logging.getLogger(__name__)
 
+MAIN_NAME = "Main"
+
 
 class NS(IntEnum):
     """Default namespace IDs, for convenience"""
@@ -43,7 +45,7 @@ class NSManager:
         l = []
         for v in r["namespaces"].values():
             id = v["id"]
-            name = v["name"] or "Main"
+            name = v["name"] or MAIN_NAME
 
             self.m[id] = name
             self.m[name] = id
@@ -82,3 +84,14 @@ class NSManager:
             str: The name of `ns` as a `str`.
         """
         return self.m.get(ns) if isinstance(ns, NS) else ns
+
+    def canonical_prefix(self, ns: str) -> str:
+        """Gets the canonical prefix for the specified namespace.  This adds a `:` suffix to `ns`, or returns the empty string if `ns` is the Main namespace.
+
+        Args:
+            ns (str): The namespace to get the canonical prefix for.
+
+        Returns:
+            str: The canonical prefix for the specified namepsace.
+        """
+        return "" if ns == MAIN_NAME else ns + ":"

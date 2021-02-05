@@ -5,6 +5,7 @@ from pwiki.wiki import Wiki
 
 
 class TestNamespaces(unittest.TestCase):
+    """Tests pwiki's namespace handling"""
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -32,16 +33,17 @@ class TestNamespaces(unittest.TestCase):
         self.assertEqual("File talk:Example.jpg", self.wiki.convert_ns("Image:Example.jpg", NS.FILE_TALK))
 
     def test_filter_by_ns(self):
-        self.assertEqual({"Foo"}, set(self.wiki.filter_by_ns(["User:Example", "Foo", "Talk:Hello"], NS.MAIN)))
-        self.assertEqual({"Copper", "Talk:Silver", "Gold"}, set(self.wiki.filter_by_ns(["Copper", "Talk:Silver", "Gold", "User talk:Iridium"], "Main", NS.TALK)))
-        self.assertEqual(set(), set(self.wiki.filter_by_ns(["Chicken", "Talk:Cow", "Pig"], NS.PROJECT)))
-        self.assertEqual(set(), set(self.wiki.filter_by_ns(["Category:Sun", "Talk:Moon", "Template:Stars"])))
+        self.assertSetEqual({"Foo"}, set(self.wiki.filter_by_ns(["User:Example", "Foo", "Talk:Hello"], NS.MAIN)))
+        self.assertSetEqual({"Copper", "Talk:Silver", "Gold"}, set(self.wiki.filter_by_ns(["Copper", "Talk:Silver", "Gold", "User talk:Iridium"], "Main", NS.TALK)))
+        self.assertSetEqual(set(), set(self.wiki.filter_by_ns(["Chicken", "Talk:Cow", "Pig"], NS.PROJECT)))
+        self.assertSetEqual(set(), set(self.wiki.filter_by_ns(["Category:Sun", "Talk:Moon", "Template:Stars"])))
 
     def test_talk_page_of(self):
         self.assertEqual("User talk:Me", self.wiki.talk_page_of("User:Me"))
         self.assertEqual("Talk:Hello", self.wiki.talk_page_of("Hello"))
         self.assertIsNone(self.wiki.talk_page_of("File talk:Derp.mp3"))
 
-
-if __name__ == '__main__':
-    unittest.main()
+    def test_page_of(self):
+        self.assertEqual("User:Me", self.wiki.page_of("User talk:Me"))
+        self.assertEqual("Hello", self.wiki.page_of("Talk:Hello"))
+        self.assertIsNone(self.wiki.page_of("File:Derp.mp3"))
