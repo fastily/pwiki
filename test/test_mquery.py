@@ -5,7 +5,7 @@ from pwiki.wiki import Wiki
 
 
 class TestMQuery(unittest.TestCase):
-    """Tests pwiki's OQuery methods"""
+    """Tests pwiki's MQuery methods"""
 
     @classmethod
     def setUpClass(cls) -> None:

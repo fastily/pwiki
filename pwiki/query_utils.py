@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import logging
 
-from typing import Any, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Union
 
 from .utils import has_error, make_params, mine_for, read_error
 

@@ -8,8 +8,8 @@ from collections import defaultdict
 from typing import TYPE_CHECKING
 
 from .query_constants import PropCont, PropNoCont, QConstant
-from .query_utils import basic_query, chunker, denormalize_result, get_continue_params
-from .utils import has_error, mine_for, read_error
+from .query_utils import chunker, denormalize_result, get_continue_params, query_and_validate
+from .utils import mine_for
 
 if TYPE_CHECKING:
     from .wiki import Wiki
@@ -18,6 +18,7 @@ log = logging.getLogger(__name__)
 
 
 class MQuery:
+    """Collection of queries optimized for performing mass/bulk data retrieval from the API"""
 
     @staticmethod
     def prop_no_cont(wiki: Wiki, titles: list[str], template: QConstant) -> dict:
@@ -25,22 +26,14 @@ class MQuery:
         out = dict.fromkeys(titles)
 
         for chunk in chunker(titles, wiki.prop_title_max):
-            if not (response := basic_query(wiki, {**template.pl, "prop": template.name, "titles": "|".join(chunk)})):
-                log.error("%s: No response from server while performing a prop_no_cont query with prop '%s' and titles %s", wiki, template.name, chunk)
-                continue
+            if response := query_and_validate(wiki, {**template.pl, "prop": template.name, "titles": "|".join(chunk)}, desc=f"peform a prop_no_cont query with '{template.name}'"):
+                for p in mine_for(response, "query", "pages"):
+                    try:
+                        out[p["title"]] = template.retrieve_results(p)
+                    except Exception:
+                        log.debug("%s: Unable able to parse prop value from: %s", wiki, p, exc_info=True)
 
-            if has_error(response):
-                log.error("%s: encountered error while performing prop_no_cont, server said: %s", wiki, read_error("query", response))
-                log.debug(response)
-                continue
-
-            for p in mine_for(response, "query", "pages"):
-                try:
-                    out[p["title"]] = template.retrieve_results(p)
-                except Exception:
-                    log.debug("%s: Unable able to parse prop value from: %s", wiki, p, exc_info=True)
-
-            denormalize_result(out, response)
+                denormalize_result(out, response)
 
         return out
 
@@ -52,13 +45,7 @@ class MQuery:
             params = {**template.pl_with_limit(), "prop": template.name, "titles": "|".join(chunk)}
 
             while True:
-                if not (response := basic_query(wiki, params)):
-                    log.error("%s: No response from server while performing a prop_cont query with prop '%s' and titles %s", wiki, template.name, chunk)
-                    break
-
-                if has_error(response):
-                    log.error("%s: encountered error while performing prop_cont, server said: %s", wiki, read_error("query", response))
-                    log.debug(response)
+                if not (response := query_and_validate(wiki, params, desc=f"peform a prop_cont query with '{template.name}'")):
                     break
 
                 for p in mine_for(response, "query", "pages"):
@@ -74,11 +61,12 @@ class MQuery:
 
                 params.update(cont)
 
-        out = dict(out)
         out |= {t: None for t in titles if t not in out}
-        return out
+        return dict(out)
 
-    # PROP NO CONT
+    ##################################################################################################
+    ######################################### P R O P  N O  C O N T ##################################
+    ##################################################################################################
 
     @staticmethod
     def page_text(wiki: Wiki, titles: list[str]) -> dict:
@@ -113,7 +101,9 @@ class MQuery:
         log.debug("%s: fetching category sizes for: %s", wiki, titles)
         return MQuery.prop_no_cont(wiki, titles, PropNoCont.CATEGORY_SIZE)
 
-    # PROP CONT
+    ##################################################################################################
+    ########################################## P R O P  C O N T ######################################
+    ##################################################################################################
 
     @staticmethod
     def file_usage(wiki: Wiki, titles: list[str]) -> dict:
