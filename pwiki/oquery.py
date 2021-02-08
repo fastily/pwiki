@@ -7,7 +7,8 @@ import logging
 from typing import TYPE_CHECKING
 
 from .ns import NSManager
-from .query_utils import basic_query, chunker, extract_body, mine_for, query_and_validate
+from .query_constants import QConstant
+from .query_utils import basic_query, chunker, extract_body, get_continue_params, mine_for, query_and_validate
 from .utils import has_error
 
 if TYPE_CHECKING:
@@ -41,6 +42,31 @@ class OQuery:
                     out[e["from"]] = e["to"]
 
         return out
+
+    @staticmethod
+    def _prop_cont_single(wiki: Wiki, title: str, template: QConstant, extra_pl: dict = None) -> list:
+        out = []
+
+        params = {**template.pl_with_limit(), "prop": template.name, "titles": title}
+        if extra_pl:
+            params |= extra_pl
+
+        while True:
+            if not (response := query_and_validate(wiki, params, desc=f"peform a prop_cont_single query with '{template.name}'")):
+                raise OSError(f"Critical failure performing a _prop_cont_single query with {template.name}, cannot proceed")
+
+            if not ((l := mine_for(response, "query", "pages")) and template.name in (p := l[0])):
+                break
+
+            out += template.retrieve_results(p[template.name])
+
+            if not (cont := get_continue_params(response)):
+                break
+
+            params.update(cont)
+
+        return out
+
 
     @staticmethod
     def fetch_token(wiki: Wiki, login_token: bool = False) -> str:

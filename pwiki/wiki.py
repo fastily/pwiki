@@ -2,11 +2,14 @@
 import logging
 import pickle
 
+from itertools import chain
 from pathlib import Path
 from typing import Union
 
 from requests import Session
 
+from .dwrap import Revision
+from .gquery import GQuery
 from .ns import MAIN_NAME, NS, NSManager
 from .oquery import OQuery
 from .waction import WAction
@@ -239,6 +242,17 @@ class Wiki:
     ######################################## Q U E R I E S ###########################################
     ##################################################################################################
 
+    def first_editor_of(self, title: str) -> str:
+        """Gets the user who created `title`.
+
+        Args:
+            title (str): The title of the page to query
+
+        Returns:
+            str: The username of the user who created `title`.  Does not include `User:` prefix.  Returns `None` if the page does not exist.
+        """
+        return l[0].user if (l := next(GQuery.revisions(self, title, older_first=True), None)) else None
+
     def list_user_rights(self, username: str = None) -> list[str]:
         """Lists user rights for the specified user.
 
@@ -250,6 +264,31 @@ class Wiki:
         """
         log.info("%s: Fetching user rights for '%s'", self, u := username or self.username)
         return OQuery.list_user_rights(self, [u]).get(u) if u else []
+
+    def last_editor_of(self, title: str) -> str:
+        """Gets the user who most recently edited `title`.
+
+        Args:
+            title (str): The title of the page to query
+
+        Returns:
+            str: The username of the user who most recently edited `title`.  Does not include `User:` prefix.  Returns `None` if the page does not exist.
+        """
+        return l[0].user if (l := next(GQuery.revisions(self, title), None)) else None
+
+    def revisions(self, title: str, older_first: bool = False, include_text: bool = True) -> list[Revision]:
+        """Fetches all the revisions of `title`.  Plan accordingly when querying pages that have many revisions!
+
+        Args:
+            title (str): The title to get revisions for.
+            older_first (bool, optional): Set `True` to get older revisions first. Defaults to False.
+            include_text (bool, optional): Set `True` to populate the `text` field of each `Revision` in the returned list. Defaults to True.
+
+        Returns:
+            list[Revision]: A list with the revisions of `title` as specified.
+        """
+        log.info("%s: Fetching revisions of '%s'", self, title)
+        return list(chain.from_iterable(GQuery.revisions(self, title, older_first=older_first, include_text=include_text)))
 
     def uploadable_filetypes(self) -> set:
         """Queries the Wiki for all acceptable file types which may be uploaded to this Wiki.  PRECONDITION: the target Wiki permits file uploads.

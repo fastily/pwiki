@@ -44,3 +44,6 @@ class Revision(DataEntry):
         super().__init__(rev.get("user"), title, rev.get("comment"), rev.get("timestamp"))
 
         self.text: str = mine_for(rev, "slots", "main", "content")
+
+    def __repr__(self) -> str:
+        return f"{super().__repr__()} | text: {self.text}"

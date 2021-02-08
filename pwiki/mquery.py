@@ -44,10 +44,7 @@ class MQuery:
         for chunk in chunker(titles, wiki.prop_title_max):
             params = {**template.pl_with_limit(), "prop": template.name, "titles": "|".join(chunk)}
 
-            while True:
-                if not (response := query_and_validate(wiki, params, desc=f"peform a prop_cont query with '{template.name}'")):
-                    break
-
+            while response := query_and_validate(wiki, params, desc=f"peform a prop_cont query with '{template.name}'"):
                 for p in mine_for(response, "query", "pages"):
                     try:
                         out[p["title"]] += template.retrieve_results(p[template.name]) if template.name in p else []
@@ -98,6 +95,15 @@ class MQuery:
 
     @staticmethod
     def category_size(wiki: Wiki, titles: list[str]) -> dict:
+        """Queries the Wiki and gets the number of elements categorized in each of the specified categories.
+
+        Args:
+            wiki (Wiki): The Wiki object to use.
+            titles (list[str]): The categories to get the size of.  Each list element must include the `Category:` prefix
+
+        Returns:
+            dict: A dict where each key is the category name and each value is an `int` representing the number of elements categorized in this category.
+        """
         log.debug("%s: fetching category sizes for: %s", wiki, titles)
         return MQuery.prop_no_cont(wiki, titles, PropNoCont.CATEGORY_SIZE)
 
@@ -107,10 +113,28 @@ class MQuery:
 
     @staticmethod
     def file_usage(wiki: Wiki, titles: list[str]) -> dict:
+        """Fetch the titles of all pages displaying the specified list of media files.
+
+        Args:
+            wiki (Wiki): The Wiki object to use
+            titles (list[str]): The files to get file usage of.  Each list element must include the `File:` prefix
+
+        Returns:
+            dict: A dict such that each key is the title and each value is the list of pages displaying the file.
+        """
         log.debug("%s: fetching file usage: %s", wiki, titles)
         return MQuery.prop_cont(wiki, titles, PropCont.FILEUSAGE)
 
     @staticmethod
     def categories_on_page(wiki: Wiki, titles: list[str]) -> dict:
+        """Fetch the categories used on a page.
+
+        Args:
+            wiki (Wiki): The Wiki object to use
+            titles (list[str]): The list of pages to get categories of.
+
+        Returns:
+            dict: A dict such that each key is the title and each value is the list of categories the page is categorized in.
+        """
         log.debug("%s: fetching categories on pages: %s", wiki, titles)
         return MQuery.prop_cont(wiki, titles, PropCont.CATEGORIES)

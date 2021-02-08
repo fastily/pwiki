@@ -50,3 +50,7 @@ class PropCont:
     """Collection of QConstant objects which fulfill the page prop with continuation strategy."""
     CATEGORIES = QConstant("categories", limit_key="cllimit")
     FILEUSAGE = QConstant("fileusage", limit_key="fulimit")
+
+
+class PropContSingle:
+    REVISIONS = QConstant("revisions", {"rvslots": "main"}, "rvlimit", lambda l: [Revision(e) for e in l])
