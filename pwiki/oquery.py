@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import logging
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
 
-from .ns import NSManager
-from .query_constants import QConstant
+from .ns import NS, NSManager
+from .query_constants import ListCont, QConstant
 from .query_utils import basic_query, chunker, extract_body, get_continue_params, mine_for, query_and_validate
 from .utils import has_error
 
@@ -47,9 +47,7 @@ class OQuery:
     def _prop_cont_single(wiki: Wiki, title: str, template: QConstant, extra_pl: dict = None) -> list:
         out = []
 
-        params = {**template.pl_with_limit(), "prop": template.name, "titles": title}
-        if extra_pl:
-            params |= extra_pl
+        params = {**template.pl_with_limit(), "prop": template.name, "titles": title} | (extra_pl or {})
 
         while True:
             if not (response := query_and_validate(wiki, params, desc=f"peform a prop_cont_single query with '{template.name}'")):
@@ -67,6 +65,27 @@ class OQuery:
 
         return out
 
+    @staticmethod
+    def _list_cont(wiki: Wiki, template: QConstant, extra_pl: dict = None) -> list:
+        out = []
+
+        params = {**template.pl_with_limit(), "list": template.name} | (extra_pl or {})
+        while True:
+            if not (response := query_and_validate(wiki, params, desc=f"peform a list_cont query with '{template.name}'")):
+                return
+
+            if template.name not in (q := mine_for(response, "query")):
+                log.error("'%s' was not found in query result while doing a list_cont, something is very wrong.", template.name)
+                return
+
+            out += template.retrieve_results(q[template.name])
+
+            if not (cont := get_continue_params(response)):
+                break
+
+            params.update(cont)
+
+        return out
 
     @staticmethod
     def fetch_token(wiki: Wiki, login_token: bool = False) -> str:
@@ -151,6 +170,20 @@ class OQuery:
         return OQuery._pair_titles_query(wiki, "normalized", {}, titles, "normalize titles")
 
     @staticmethod
+    def prefix_index(wiki: Wiki, ns: Union[NS, str], prefix: str) -> list[str]:
+        """Performs a prefix index query and returns all matching titles.
+
+        Args:
+            wiki (Wiki): The Wiki object to use
+            ns (Union[NS, str]): The namespace to search in.
+            prefix (str): Fetches all titles in the specified namespace that start with this str.  To return subpages only, append a `/` character to this param.
+
+        Returns:
+            list[str]: A list of titles that match the specified prefix index query.
+        """
+        return OQuery._list_cont(wiki, ListCont.PREFIX_INDEX, {"apnamespace": wiki.ns_manager.create_filter(ns), "apprefix": prefix})
+
+    @staticmethod
     def resolve_redirects(wiki: Wiki, titles: list[str]) -> dict:
         """Fetch the targets of redirect pages.
 
@@ -175,6 +208,19 @@ class OQuery:
 
         log.debug(response)
         log.error("%s: Could not fetch acceptable file upload extensions", wiki)
+
+    @staticmethod
+    def user_uploads(wiki: Wiki, user: str) -> list[str]:
+        """Gets the uploads of a user.
+
+        Args:
+            wiki (Wiki): The Wiki object to use
+            user (str): The username to query, without the `User:` prefix.
+
+        Returns:
+            list[str]: The files uploaded by `user`.
+        """
+        return OQuery._list_cont(wiki, ListCont.USER_UPLOADS, {"aiuser": user})
 
     @staticmethod
     def whoami(wiki: Wiki) -> str:

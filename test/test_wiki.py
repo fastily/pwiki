@@ -13,20 +13,20 @@ class TestWikiQuery(unittest.TestCase):
         cls.wiki = Wiki("test.wikipedia.org", cookie_jar=None)
 
     def test_first_editor_of(self):
-        self.assertEqual("FastilyClone", self.wiki.first_editor_of("User:FastilyClone/Page/1"))
+        self.assertEqual("Fastily", self.wiki.first_editor_of("User:Fastily/Sandbox/RevisionTest"))
 
     def test_last_editor_of(self):
-        self.assertEqual("FastilyClone", self.wiki.last_editor_of("User:FastilyClone/Page/1"))
+        self.assertEqual("FSock", self.wiki.last_editor_of("User:Fastily/Sandbox/RevisionTest"))
 
     def test_revisions(self):
         # newer first
-        result = self.wiki.revisions("User:FastilyClone/Page/1")
+        result = self.wiki.revisions("User:Fastily/Sandbox/RevisionTest")
         self.assertEqual(3, len(result))
-        self.assertEqual("1", result[1].text)
-        self.assertEqual("s0", result[2].summary)
-        self.assertEqual(datetime.fromisoformat("2015-10-23T05:58:54Z+00:00"), result[0].timestamp)
+        self.assertEqual("foo", result[1].text)
+        self.assertEqual("a", result[2].summary)
+        self.assertEqual(datetime.fromisoformat("2021-02-09T04:33:26Z+00:00"), result[0].timestamp)
 
         # older first
-        result = self.wiki.revisions("User:FastilyClone/Page/1", True, False)
-        self.assertEqual("s2", result[2].summary)
+        result = self.wiki.revisions("User:Fastily/Sandbox/RevisionTest", True, False)
+        self.assertEqual("c", result[2].summary)
         self.assertIsNone(result[0].text)

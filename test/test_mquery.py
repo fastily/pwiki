@@ -1,11 +1,12 @@
 import unittest
 
 from pwiki.mquery import MQuery
+from pwiki.ns import NS
 from pwiki.wiki import Wiki
 
 
-class TestMQuery(unittest.TestCase):
-    """Tests pwiki's MQuery methods"""
+class TestPropNoCont(unittest.TestCase):
+    """Tests MQuery's PropNoCont methods"""
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -16,6 +17,19 @@ class TestMQuery(unittest.TestCase):
 
         self.assertSetEqual({"User:Fastily/Sandbox/ImageLinks", "User:Fastily/Sandbox/Page"}, set(m["File:FastilyTest.svg"]))
         self.assertListEqual([], m["File:Fastily NonExistent File.png"])
+
+    def test_links_on_page(self):
+        m = MQuery.links_on_page(self.wiki, ["User:Fastily/Sandbox/Page"], NS.USER)
+
+        self.assertSetEqual({"User:Fastily/Sandbox/Page/1", "User:Fastily/Sandbox/Page/2", "User:Fastily/Sandbox/Page/3", "User:Fastily/Sandbox/Page/4"}, set(m["User:Fastily/Sandbox/Page"]))
+
+
+class TestPropCont(unittest.TestCase):
+    """Tests MQuery's PropCont methods"""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.wiki = Wiki("test.wikipedia.org", cookie_jar=None)
 
     def test_category_size(self):
         expected = {"Category:Fastily Test": 4, "Category:Fastily Test2": 2, "Category:Does0Not0Exist6": 0}

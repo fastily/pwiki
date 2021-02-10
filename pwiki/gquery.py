@@ -24,9 +24,7 @@ class GQuery:
 
     @staticmethod
     def prop_cont(wiki: Wiki, title: str, limit_value: Union[int, str], template: QConstant, extra_pl: dict = None) -> Iterator[Any]:
-        params = {**template.pl_with_limit(limit_value), "prop": template.name, "titles": title}
-        if extra_pl:
-            params |= extra_pl
+        params = {**template.pl_with_limit(limit_value), "prop": template.name, "titles": title} | (extra_pl or {})
 
         while True:
             if not (response := query_and_validate(wiki, params, desc=f"peform a prop_cont query with '{template.name}'")):
@@ -55,8 +53,8 @@ class GQuery:
             title (str): The title to get revisions of.
             limit (Union[int, str], optional): The maxmimum number of revisions to fetch each iteration. Defaults to 1.
             older_first (bool, optional): Set to `True` to fetch older revisions first. Defaults to False.
-            start (datetime, optional): Set to filter out revisions older than this date. Defaults to None.
-            end (datetime, optional): Set to filter out revisions newer than this date. Defaults to None.
+            start (datetime, optional): Set to filter out revisions older than this date.  If no timezone is specified in the datetime, then UTC is assumed. Defaults to None.
+            end (datetime, optional): Set to filter out revisions newer than this date. If no timezone is specified in the datetime, then UTC is assumed.  Defaults to None.
             include_text (bool, optional): If `True`, then also fetch the wikitext of each revision.  Will populate the Revision.text field.  Defaults to False.
 
         Returns:

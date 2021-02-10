@@ -50,7 +50,17 @@ class PropCont:
     """Collection of QConstant objects which fulfill the page prop with continuation strategy."""
     CATEGORIES = QConstant("categories", limit_key="cllimit")
     FILEUSAGE = QConstant("fileusage", limit_key="fulimit")
+    IMAGES = QConstant("images", limit_key="imlimit")
+    LINKS_HERE = QConstant("linkshere", limit_key="lhlimit")
+    TEMPLATES = QConstant("templates", limit_key="tllimit")
+    TRANSCLUDED_IN = QConstant("transcludedin", limit_key="tilimit")
+    WIKILINKS_ON_PAGE = QConstant("links", limit_key="pllimit")
 
 
 class PropContSingle:
     REVISIONS = QConstant("revisions", {"rvslots": "main"}, "rvlimit", lambda l: [Revision(e) for e in l])
+
+
+class ListCont:
+    PREFIX_INDEX = QConstant("allpages", limit_key="aplimit")
+    USER_UPLOADS = QConstant("allimages", {"aisort": "timestamp"}, "ailimit")
