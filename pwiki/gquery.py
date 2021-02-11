@@ -4,12 +4,13 @@ from __future__ import annotations
 
 import logging
 
-from collections.abc import Iterator
+from collections.abc import Generator
 from datetime import datetime
 from typing import Any, TYPE_CHECKING, Union
 
-from .dwrap import Revision
-from .query_constants import PropCont, PropContSingle, QConstant
+from .dwrap import Contrib, Revision
+from .ns import NS
+from .query_constants import ListCont, PropCont, PropContSingle, QConstant
 from .query_utils import get_continue_params, query_and_validate
 from .utils import mine_for
 
@@ -23,7 +24,24 @@ class GQuery:
     """Collection of queries which fetch and yield results via Generator."""
 
     @staticmethod
-    def prop_cont(wiki: Wiki, title: str, limit_value: Union[int, str], template: QConstant, extra_pl: dict = None) -> Iterator[Any]:
+    def _list_cont(wiki: Wiki, limit_value: Union[int, str], template: QConstant, extra_pl: dict = None):
+        params = {**template.pl_with_limit(limit_value), "list": template.name} | (extra_pl or {})
+        while True:
+            if not (response := query_and_validate(wiki, params, desc=f"peform a list_cont query with '{template.name}'")):
+                raise OSError(f"Critical failure performing a list_cont query with {template.name}, cannot proceed")
+
+            if template.name not in (q := mine_for(response, "query")):
+                break
+
+            yield template.retrieve_results(q[template.name])
+
+            if not (cont := get_continue_params(response)):
+                break
+
+            params.update(cont)
+
+    @staticmethod
+    def prop_cont(wiki: Wiki, title: str, limit_value: Union[int, str], template: QConstant, extra_pl: dict = None) -> Generator[Any, None, None]:
         params = {**template.pl_with_limit(limit_value), "prop": template.name, "titles": title} | (extra_pl or {})
 
         while True:
@@ -41,11 +59,21 @@ class GQuery:
             params.update(cont)
 
     @staticmethod
-    def categories_on_page(wiki: Wiki, title: str, limit: Union[int, str] = 1) -> Iterator[list[str]]:
+    def contribs(wiki: Wiki, user: str, older_first: bool = False, ns: list[Union[NS, str]] = [], limit: Union[int, str] = 1) -> Generator[list[Contrib], None, None]:
+        pl = {"ucuser": user}
+        if ns:
+            pl["ucnamespace"] = wiki.ns_manager.create_filter(*ns)
+        if older_first:
+            pl["ucdir"] = "newer"
+
+        return GQuery._list_cont(wiki, limit, ListCont.CONTRIBS, pl)
+
+    @staticmethod
+    def categories_on_page(wiki: Wiki, title: str, limit: Union[int, str] = 1) -> Generator[list[str], None, None]:
         return GQuery.prop_cont(wiki, title, limit, PropCont.CATEGORIES)
 
     @staticmethod
-    def revisions(wiki: Wiki, title: str, limit: Union[int, str] = 1, older_first: bool = False, start: datetime = None, end: datetime = None, include_text: bool = False) -> Iterator[list[Revision]]:
+    def revisions(wiki: Wiki, title: str, limit: Union[int, str] = 1, older_first: bool = False, start: datetime = None, end: datetime = None, include_text: bool = False) -> Generator[list[Revision], None, None]:
         """Gets the revisions of a page.  Fetches newer revisions first by default.  PRECONDITION: if `start` and `end` are both set, then `start` must occur before `end`.
 
         Args:

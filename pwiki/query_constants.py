@@ -2,7 +2,7 @@
 
 from typing import Any, Callable, Union
 
-from .dwrap import Revision
+from .dwrap import Contrib, ImageInfo, Revision
 from .utils import mine_for
 
 
@@ -49,7 +49,10 @@ class PropNoCont:
 class PropCont:
     """Collection of QConstant objects which fulfill the page prop with continuation strategy."""
     CATEGORIES = QConstant("categories", limit_key="cllimit")
+    DUPLICATE_FILES = QConstant("duplicatefiles", limit_key="dflimit")
+    GLOBAL_USAGE = QConstant("globalusage", limit_key="gulimit", retrieve_results=lambda l: [(e["title"], e["wiki"]) for e in l])
     FILEUSAGE = QConstant("fileusage", limit_key="fulimit")
+    IMAGE_INFO = QConstant("imageinfo", {"iiprop": "comment|sha1|size|timestamp|url|user"}, "iilimit", lambda l: [ImageInfo(e) for e in l])
     IMAGES = QConstant("images", limit_key="imlimit")
     LINKS_HERE = QConstant("linkshere", limit_key="lhlimit")
     TEMPLATES = QConstant("templates", limit_key="tllimit")
@@ -58,9 +61,13 @@ class PropCont:
 
 
 class PropContSingle:
+    """Collection of QConstant objects which fulfill the prop cont single strategy."""
     REVISIONS = QConstant("revisions", {"rvslots": "main"}, "rvlimit", lambda l: [Revision(e) for e in l])
 
 
 class ListCont:
+    """Collection of QConstant objects which fulfill the list cont strategy."""
+    CONTRIBS = QConstant("usercontribs", limit_key="uclimit", retrieve_results=lambda l: [Contrib(e) for e in l])
+    DUPLICATE_FILES = QConstant("querypage", {"qppage": "ListDuplicatedFiles"}, "qplimit", lambda q: [e["title"] for e in q["results"]])
     PREFIX_INDEX = QConstant("allpages", limit_key="aplimit")
     USER_UPLOADS = QConstant("allimages", {"aisort": "timestamp"}, "ailimit")

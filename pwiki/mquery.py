@@ -140,6 +140,21 @@ class MQuery:
         return MQuery._prop_cont(wiki, titles, PropCont.CATEGORIES)
 
     @staticmethod
+    def duplicate_files(wiki: Wiki, titles: list[str], local_only: bool = True) -> dict:
+        log.debug("%s: fetching duplicates of %s", wiki, titles)
+        return MQuery._prop_cont(wiki, titles, PropCont.DUPLICATE_FILES, {"dflocalonly": 1} if local_only else {})
+
+    @staticmethod
+    def global_usage(wiki: Wiki, titles: list[str]) -> dict:
+        log.debug("%s: fetching global usage of %s", wiki, titles)
+        return MQuery._prop_cont(wiki, titles, PropCont.GLOBAL_USAGE)
+
+    @staticmethod
+    def image_info(wiki: Wiki, titles: list[str]) -> dict:
+        log.debug("%s: fetching image info for %s", wiki, titles)
+        return MQuery._prop_cont(wiki, titles, PropCont.IMAGE_INFO)
+
+    @staticmethod
     def images_on_page(wiki: Wiki, titles: list[str]) -> dict:
         log.debug("%s: determining what files are embedded on %s", wiki, titles)
         return MQuery._prop_cont(wiki, titles, PropCont.IMAGES)
@@ -147,12 +162,7 @@ class MQuery:
     @staticmethod
     def links_on_page(wiki: Wiki, titles: list[str], *ns: Union[NS, str]) -> dict:
         log.debug("%s: fetching wikilinks on %s", wiki, titles)
-
-        pl = {}
-        if ns:
-            pl["plnamespace"] = wiki.ns_manager.create_filter(*ns)
-
-        return MQuery._prop_cont(wiki, titles, PropCont.WIKILINKS_ON_PAGE, pl)
+        return MQuery._prop_cont(wiki, titles, PropCont.WIKILINKS_ON_PAGE, {"plnamespace": wiki.ns_manager.create_filter(*ns)} if ns else {})
 
     @staticmethod
     def templates_on_page(wiki: Wiki, titles: list[str]) -> dict:
@@ -167,9 +177,4 @@ class MQuery:
     @staticmethod
     def what_transcludes_here(wiki: Wiki, titles: list[str], *ns: Union[NS, str]) -> dict:
         log.debug("%s: fetching transclusions of %s", wiki, titles)
-
-        pl = {}
-        if ns:
-            pl["tinamespace"] = wiki.ns_manager.create_filter(*ns)
-
-        return MQuery._prop_cont(wiki, titles, PropCont.TRANSCLUDED_IN, pl)
+        return MQuery._prop_cont(wiki, titles, PropCont.TRANSCLUDED_IN, {"tinamespace": wiki.ns_manager.create_filter(*ns)} if ns else {})

@@ -134,6 +134,10 @@ class OQuery:
         raise OSError(f"{wiki}: Could not retrieve namespace data, network error?")
 
     @staticmethod
+    def list_duplicate_files(wiki: Wiki) -> list:
+        return OQuery._list_cont(wiki, ListCont.DUPLICATE_FILES)
+
+    @staticmethod
     def list_user_rights(wiki: Wiki, users: list[str]) -> dict:
         """Lists user rights for the specified users.
 

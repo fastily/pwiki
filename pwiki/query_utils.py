@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import logging
 
+from collections.abc import Generator
+from itertools import chain
 from typing import TYPE_CHECKING, Union
 
 from .utils import has_error, make_params, mine_for, read_error
@@ -87,6 +89,18 @@ def extract_body(id: str, response: dict) -> Union[dict, list]:
         Union[dict, list]: the contents under `"query"` -> `id`.
     """
     return mine_for(response, "query", id)
+
+
+def flatten_generator(g: Generator[list, None, None]) -> list:
+    """Reads all elements from a generator that yields lists and flatten the list of lists.
+
+    Args:
+        g (Generator[list, None, None]): The generator to read from.
+
+    Returns:
+        list: The flattened list of lists yielded by the generator.
+    """
+    return list(chain.from_iterable(g))
 
 
 def get_continue_params(response: dict) -> dict:

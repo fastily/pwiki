@@ -2,7 +2,6 @@
 import logging
 import pickle
 
-from itertools import chain
 from pathlib import Path
 from typing import Union
 
@@ -12,7 +11,9 @@ from .dwrap import Revision
 from .gquery import GQuery
 from .ns import MAIN_NAME, NS, NSManager
 from .oquery import OQuery
+from .query_utils import flatten_generator
 from .waction import WAction
+
 
 _DEFAULT_COOKIE_JAR = Path("./pwiki.pickle")
 
@@ -288,7 +289,7 @@ class Wiki:
             list[Revision]: A list with the revisions of `title` as specified.
         """
         log.info("%s: Fetching revisions of '%s'", self, title)
-        return list(chain.from_iterable(GQuery.revisions(self, title, older_first=older_first, include_text=include_text)))
+        return flatten_generator(GQuery.revisions(self, title, older_first=older_first, include_text=include_text))
 
     def uploadable_filetypes(self) -> set:
         """Queries the Wiki for all acceptable file types which may be uploaded to this Wiki.  PRECONDITION: the target Wiki permits file uploads.
