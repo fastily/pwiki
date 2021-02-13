@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import logging
 
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 
-from .ns import NS, NSManager
-from .query_constants import ListCont, QConstant
+from .ns import NSManager
+from .query_constants import QConstant
 from .query_utils import basic_query, chunker, extract_body, get_continue_params, mine_for, query_and_validate
 from .utils import has_error
 
@@ -134,10 +134,6 @@ class OQuery:
         raise OSError(f"{wiki}: Could not retrieve namespace data, network error?")
 
     @staticmethod
-    def list_duplicate_files(wiki: Wiki) -> list:
-        return OQuery._list_cont(wiki, ListCont.DUPLICATE_FILES)
-
-    @staticmethod
     def list_user_rights(wiki: Wiki, users: list[str]) -> dict:
         """Lists user rights for the specified users.
 
@@ -174,20 +170,6 @@ class OQuery:
         return OQuery._pair_titles_query(wiki, "normalized", {}, titles, "normalize titles")
 
     @staticmethod
-    def prefix_index(wiki: Wiki, ns: Union[NS, str], prefix: str) -> list[str]:
-        """Performs a prefix index query and returns all matching titles.
-
-        Args:
-            wiki (Wiki): The Wiki object to use
-            ns (Union[NS, str]): The namespace to search in.
-            prefix (str): Fetches all titles in the specified namespace that start with this str.  To return subpages only, append a `/` character to this param.
-
-        Returns:
-            list[str]: A list of titles that match the specified prefix index query.
-        """
-        return OQuery._list_cont(wiki, ListCont.PREFIX_INDEX, {"apnamespace": wiki.ns_manager.create_filter(ns), "apprefix": prefix})
-
-    @staticmethod
     def resolve_redirects(wiki: Wiki, titles: list[str]) -> dict:
         """Fetch the targets of redirect pages.
 
@@ -212,19 +194,6 @@ class OQuery:
 
         log.debug(response)
         log.error("%s: Could not fetch acceptable file upload extensions", wiki)
-
-    @staticmethod
-    def user_uploads(wiki: Wiki, user: str) -> list[str]:
-        """Gets the uploads of a user.
-
-        Args:
-            wiki (Wiki): The Wiki object to use
-            user (str): The username to query, without the `User:` prefix.
-
-        Returns:
-            list[str]: The files uploaded by `user`.
-        """
-        return OQuery._list_cont(wiki, ListCont.USER_UPLOADS, {"aiuser": user})
 
     @staticmethod
     def whoami(wiki: Wiki) -> str:

@@ -8,7 +8,7 @@ from collections.abc import Generator
 from datetime import datetime
 from typing import Any, TYPE_CHECKING, Union
 
-from .dwrap import Contrib, Revision
+from .dwrap import Contrib, Log, Revision
 from .ns import NS
 from .query_constants import ListCont, PropCont, PropContSingle, QConstant
 from .query_utils import get_continue_params, query_and_validate
@@ -41,7 +41,7 @@ class GQuery:
             params.update(cont)
 
     @staticmethod
-    def prop_cont(wiki: Wiki, title: str, limit_value: Union[int, str], template: QConstant, extra_pl: dict = None) -> Generator[Any, None, None]:
+    def _prop_cont(wiki: Wiki, title: str, limit_value: Union[int, str], template: QConstant, extra_pl: dict = None) -> Generator[Any, None, None]:
         params = {**template.pl_with_limit(limit_value), "prop": template.name, "titles": title} | (extra_pl or {})
 
         while True:
@@ -70,7 +70,50 @@ class GQuery:
 
     @staticmethod
     def categories_on_page(wiki: Wiki, title: str, limit: Union[int, str] = 1) -> Generator[list[str], None, None]:
-        return GQuery.prop_cont(wiki, title, limit, PropCont.CATEGORIES)
+        return GQuery._prop_cont(wiki, title, limit, PropCont.CATEGORIES)
+
+    @staticmethod
+    def list_duplicate_files(wiki: Wiki, limit: Union[int, str] = 1) -> list:
+        return GQuery._list_cont(wiki, limit, ListCont.DUPLICATE_FILES)
+
+    @staticmethod
+    def logs(wiki: Wiki, title: str = None, log_type: str = None, log_action: str = None, user: str = None, ns: Union[NS, str] = None, tag: str = None, start: datetime = None, end: datetime = None, older_first: bool = False, limit: Union[int, str] = 1) -> Generator[list[Log], None, None]:
+        pl = {}
+        if title:
+            pl["letitle"] = title
+        if log_type:
+            pl["letype"] = log_type
+        if log_action:
+            pl["leaction"] = log_action
+        if user:
+            pl["leuser"] = user
+        if ns:
+            pl["lenamespace"] = wiki.ns_manager.create_filter(ns)
+        if tag:
+            pl["letag"] = tag
+        if start:
+            pl["lestart"] = start.isoformat()
+        if end:
+            pl["leend"] = end.isoformat()
+        if older_first:
+            pl["ledir"] = "newer"
+
+        return GQuery._list_cont(wiki, limit, ListCont.LOGS, pl)
+
+    @staticmethod
+    def prefix_index(wiki: Wiki, ns: Union[NS, str], prefix: str, limit: Union[int, str] = 1) -> list[str]:
+        """Performs a prefix index query and returns all matching titles.
+
+        Args:
+            wiki (Wiki): The Wiki object to use
+            ns (Union[NS, str]): The namespace to search in.
+            prefix (str): Fetches all titles in the specified namespace that start with this str.  To return subpages only, append a `/` character to this param.
+            limit (Union[int, str], optional): The maxmimum number of elements to fetch each iteration. Defaults to 1.
+
+        Returns:
+            list[str]: A list of titles that match the specified prefix index query.
+        """
+        return GQuery._list_cont(wiki, limit, ListCont.PREFIX_INDEX, {"apnamespace": wiki.ns_manager.create_filter(ns), "apprefix": prefix})
 
     @staticmethod
     def revisions(wiki: Wiki, title: str, limit: Union[int, str] = 1, older_first: bool = False, start: datetime = None, end: datetime = None, include_text: bool = False) -> Generator[list[Revision], None, None]:
@@ -98,4 +141,18 @@ class GQuery:
         if include_text:
             pl["rvprop"] += "|content"
 
-        return GQuery.prop_cont(wiki, title, limit, PropContSingle.REVISIONS, pl)
+        return GQuery._prop_cont(wiki, title, limit, PropContSingle.REVISIONS, pl)
+
+    @staticmethod
+    def user_uploads(wiki: Wiki, user: str, limit: Union[int, str] = 1) -> list[str]:
+        """Gets the uploads of a user.
+
+        Args:
+            wiki (Wiki): The Wiki object to use
+            user (str): The username to query, without the `User:` prefix.
+            limit (Union[int, str], optional): The maxmimum number of elements to fetch each iteration. Defaults to 1.
+
+        Returns:
+            list[str]: The files uploaded by `user`.
+        """
+        return GQuery._list_cont(wiki, limit, ListCont.USER_UPLOADS, {"aiuser": user})

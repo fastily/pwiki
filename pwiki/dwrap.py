@@ -52,6 +52,15 @@ class ImageInfo(DataEntry):
         self.sha1: str = e.get("sha1")
 
 
+class Log(DataEntry):
+    def __init__(self, e: dict):
+        super().__init__(e.get("user"), e.get("title"), e.get("comment"), e.get("timestamp"))
+
+        self.type: str = e.get("type")
+        self.action: str = e.get("action")
+        self.tags: list[str] = e.get("tags")
+
+
 class Revision(DataEntry):
     """Represents an edit to a page on a wiki"""
 

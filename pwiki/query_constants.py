@@ -2,7 +2,7 @@
 
 from typing import Any, Callable, Union
 
-from .dwrap import Contrib, ImageInfo, Revision
+from .dwrap import Contrib, ImageInfo, Log, Revision
 from .utils import mine_for
 
 
@@ -69,5 +69,6 @@ class ListCont:
     """Collection of QConstant objects which fulfill the list cont strategy."""
     CONTRIBS = QConstant("usercontribs", limit_key="uclimit", retrieve_results=lambda l: [Contrib(e) for e in l])
     DUPLICATE_FILES = QConstant("querypage", {"qppage": "ListDuplicatedFiles"}, "qplimit", lambda q: [e["title"] for e in q["results"]])
+    LOGS = QConstant("logevents", {"leprop": "title|type|user|timestamp|comment|tags"}, "lelimit", retrieve_results=lambda l: [Log(e) for e in l])
     PREFIX_INDEX = QConstant("allpages", limit_key="aplimit")
     USER_UPLOADS = QConstant("allimages", {"aisort": "timestamp"}, "ailimit")
