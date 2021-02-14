@@ -83,7 +83,7 @@ class Wiki:
 
         self.csrf_token = OQuery.fetch_token(self)
         if self.csrf_token == "+\\":
-            log.warning("Cookies loaded from '%s' are invalid! Abort.", cookie_jar)
+            log.warning("Cookies loaded from '%s' are invalid!  Skipping cookies...", cookie_jar)
             self.client.cookies.clear()
             return False
 

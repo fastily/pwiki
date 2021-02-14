@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import logging
 
-from contextlib import suppress
 from pathlib import Path
 from time import sleep
 from typing import TYPE_CHECKING, Union
@@ -23,7 +22,7 @@ class WAction:
     """Collection of functions which can perform write actions on a Wiki"""
 
     @staticmethod
-    def post_action(wiki: Wiki, action: str, form: dict = None, apply_token: bool = True, timeout: int = 5) -> dict:
+    def _post_action(wiki: Wiki, action: str, form: dict = None, apply_token: bool = True, timeout: int = 15) -> dict:
         """Convienence method, performs the actual POST of the action to the server.
 
         Args:
@@ -35,9 +34,7 @@ class WAction:
         Returns:
             dict: The response from the server.  Empty dict if there was an error.
         """
-        pl = make_params(action, form)
-        if apply_token:
-            pl["token"] = wiki.csrf_token
+        pl = make_params(action, form) | ({"token": wiki.csrf_token} if apply_token else {})
 
         try:
             return wiki.client.post(wiki.endpoint, data=pl, timeout=timeout).json()
@@ -47,7 +44,7 @@ class WAction:
         return {}
 
     @staticmethod
-    def is_success(action: str, response: dict, success_vals: tuple[str, ...] = ("Success",)) -> bool:
+    def is_success(action: str, response: dict, success_vals: tuple = ("Success",)) -> bool:
         """Checks if the server responded with a `Success` message for the specified `response`.
 
         Args:
@@ -56,9 +53,18 @@ class WAction:
 
         Returns:
             bool: True if the server responded with a `Success` message.
-        """    
+        """
         return mine_for(response, action, "result") in success_vals
 
+    @staticmethod
+    def delete(wiki: Wiki, title: str, reason: str) -> bool:
+        response = WAction._post_action(wiki, "delete", {"title": title, "reason": reason})
+
+        if WAction.is_success("delete", response):
+            return True
+
+        log.error("%s: Could not delete '%s', server said: %s", wiki, title, read_error("delete", response))
+        return False
 
     @staticmethod
     def edit(wiki: Wiki, title: str, text: str = None, summary: str = "", prepend: str = None, append: str = None, minor: bool = False) -> bool:
@@ -100,7 +106,7 @@ class WAction:
         if wiki.is_bot:
             pl["bot"] = 1
 
-        response = WAction.post_action(wiki, "edit", pl)
+        response = WAction._post_action(wiki, "edit", pl)
 
         if WAction.is_success("edit", response):
             return True
@@ -122,7 +128,7 @@ class WAction:
         """
         log.info("%s: Attempting login for %s", wiki, username)
 
-        response = WAction.post_action(wiki, "login", {"lgname": username, "lgpassword": password, "lgtoken": OQuery.fetch_token(wiki, True)}, False)
+        response = WAction._post_action(wiki, "login", {"lgname": username, "lgpassword": password, "lgtoken": OQuery.fetch_token(wiki, True)}, False)
         if has_error(response):
             log.error("%s: failed to fetch tokens, server said: %s", wiki, read_error("login", response))
             return False
@@ -158,7 +164,7 @@ class WAction:
 
         tries = 0
         while tries < max_retries:
-            response = WAction.post_action(wiki, "upload", pl, timeout=360)
+            response = WAction._post_action(wiki, "upload", pl, timeout=360)
 
             if WAction.is_success("upload", response):
                 return True
@@ -211,7 +217,7 @@ class WAction:
 
                 response = wiki.client.post(wiki.endpoint, data=payload, files={'chunk': (path.name, buffer, "multipart/form-data")}, timeout=420)
                 if not response:
-                    log.warn("%s: Did not get response from server when uploading '%s', retrying...", wiki, path)
+                    log.warning("%s: Did not get response from server when uploading '%s', retrying...", wiki, path)
                     err_count += 1
                     continue
 

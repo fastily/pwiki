@@ -8,8 +8,7 @@ from typing import TYPE_CHECKING
 
 from .ns import NSManager
 from .query_constants import QConstant
-from .query_utils import basic_query, chunker, extract_body, get_continue_params, mine_for, query_and_validate
-from .utils import has_error
+from .query_utils import chunker, extract_body, get_continue_params, mine_for, query_and_validate
 
 if TYPE_CHECKING:
     from .wiki import Wiki
@@ -65,27 +64,27 @@ class OQuery:
 
         return out
 
-    @staticmethod
-    def _list_cont(wiki: Wiki, template: QConstant, extra_pl: dict = None) -> list:
-        out = []
+    # @staticmethod
+    # def _list_cont(wiki: Wiki, template: QConstant, extra_pl: dict = None) -> list:
+    #     out = []
 
-        params = {**template.pl_with_limit(), "list": template.name} | (extra_pl or {})
-        while True:
-            if not (response := query_and_validate(wiki, params, desc=f"peform a list_cont query with '{template.name}'")):
-                return
+    #     params = {**template.pl_with_limit(), "list": template.name} | (extra_pl or {})
+    #     while True:
+    #         if not (response := query_and_validate(wiki, params, desc=f"peform a list_cont query with '{template.name}'")):
+    #             return
 
-            if template.name not in (q := mine_for(response, "query")):
-                log.error("'%s' was not found in query result while doing a list_cont, something is very wrong.", template.name)
-                return
+    #         if template.name not in (q := mine_for(response, "query")):
+    #             log.error("'%s' was not found in query result while doing a list_cont, something is very wrong.", template.name)
+    #             return
 
-            out += template.retrieve_results(q[template.name])
+    #         out += template.retrieve_results(q[template.name])
 
-            if not (cont := get_continue_params(response)):
-                break
+    #         if not (cont := get_continue_params(response)):
+    #             break
 
-            params.update(cont)
+    #         params.update(cont)
 
-        return out
+    #     return out
 
     @staticmethod
     def fetch_token(wiki: Wiki, login_token: bool = False) -> str:
@@ -100,17 +99,15 @@ class OQuery:
         Returns:
             str: The token as a str.
         """
-        log.debug("%s: Fetching %s token...", wiki, "login" if login_token else "csrf")
+        pl = {"meta": "tokens"} | ({"type": "login"} if login_token else {})
+        prefix = pl.get('type', 'csrf')
 
-        pl = {"meta": "tokens"}
-        if login_token:
-            pl["type"] = "login"
+        log.debug("%s: Fetching %s token...", wiki, prefix)
 
-        if not has_error(response := basic_query(wiki, pl)):
-            return extract_body("tokens", response)["logintoken" if login_token else "csrftoken"]
+        if response := query_and_validate(wiki, pl, desc=f"fetch {prefix} token"):
+            return extract_body("tokens", response)[prefix + "token"]
 
-        log.debug(response)
-        raise OSError(f"{wiki}: Could not retrieve tokens, network error?")
+        raise OSError(f"Could not retrieve {prefix} token, network error?")
 
     @staticmethod
     def fetch_namespaces(wiki: Wiki) -> NSManager:
@@ -127,10 +124,9 @@ class OQuery:
         """
         log.debug("%s: Fetching namespace data...", wiki)
 
-        if not has_error(response := basic_query(wiki, {"meta": "siteinfo", "siprop": "namespaces|namespacealiases"})):
+        if response := query_and_validate(wiki, {"meta": "siteinfo", "siprop": "namespaces|namespacealiases"}, desc="obtain namespace data"):
             return NSManager(response["query"])
 
-        log.debug(response)
         raise OSError(f"{wiki}: Could not retrieve namespace data, network error?")
 
     @staticmethod
@@ -150,7 +146,7 @@ class OQuery:
             if response := query_and_validate(wiki, {"list": "users", "usprop": "groups", "ususers": "|".join(chunk)}, wiki.is_bot, "determine user rights"):
                 for p in mine_for(response, "query", "users"):
                     try:
-                        out[p["name"]] = None if p.keys() & {"invalid", "missing"} else p["groups"]
+                        out[p["name"]] = None if p.keys() & {"invalid", "missing"} else p["groups"] #TODO: p.get("groups", None)?
                     except Exception:
                         log.debug("%s: Unable able to parse list value from: %s", wiki, p, exc_info=True)
 
@@ -183,17 +179,14 @@ class OQuery:
         return OQuery._pair_titles_query(wiki, "redirects", {"redirects": 1}, titles, "resolve title redirects")
 
     @staticmethod
-    def uploadable_filetypes(wiki: Wiki) -> set:
+    def uploadable_filetypes(wiki: Wiki) -> set[str]:
         """Queries the Wiki for all acceptable file types which may be uploaded to this Wiki.  PRECONDITION: the target Wiki permits file uploads.
 
         Returns:
-            set: A set containing all acceptable file types as their extensions ("." prefix is included) 
+            set: A set containing all acceptable file types as their extensions ("." prefix is included).  None if something went wrong.
         """
-        if not has_error(response := basic_query(wiki, {"meta": "siteinfo", "siprop": "fileextensions"})):
+        if response := query_and_validate(wiki, {"meta": "siteinfo", "siprop": "fileextensions"}, desc="fetch acceptable file upload extensions"):
             return {jo["ext"] for jo in extract_body("fileextensions", response)}
-
-        log.debug(response)
-        log.error("%s: Could not fetch acceptable file upload extensions", wiki)
 
     @staticmethod
     def whoami(wiki: Wiki) -> str:
@@ -203,10 +196,7 @@ class OQuery:
             wiki (Wiki): The Wiki object to use
 
         Returns:
-            str: If logged in, this Wiki's username.  Otherwise, the external IP address of your device.
+            str: If logged in, this Wiki's username, otherwise the external IP address of your device.  None if something went wrong.
         """
-        if not has_error(response := basic_query(wiki, {"meta": "userinfo"})):
+        if response := query_and_validate(wiki, {"meta": "userinfo"}, desc="get this Wiki's username from the server"):
             return extract_body("userinfo", response)["name"]
-
-        log.debug(response)
-        log.error("%s: Could not get this Wiki's username from the server", wiki)

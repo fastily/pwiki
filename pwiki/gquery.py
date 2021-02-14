@@ -58,6 +58,10 @@ class GQuery:
 
             params.update(cont)
 
+    ##################################################################################################
+    ########################################### L I S T  C O N T #####################################
+    ##################################################################################################
+
     @staticmethod
     def contribs(wiki: Wiki, user: str, older_first: bool = False, ns: list[Union[NS, str]] = [], limit: Union[int, str] = 1) -> Generator[list[Contrib], None, None]:
         pl = {"ucuser": user}
@@ -69,8 +73,8 @@ class GQuery:
         return GQuery._list_cont(wiki, limit, ListCont.CONTRIBS, pl)
 
     @staticmethod
-    def categories_on_page(wiki: Wiki, title: str, limit: Union[int, str] = 1) -> Generator[list[str], None, None]:
-        return GQuery._prop_cont(wiki, title, limit, PropCont.CATEGORIES)
+    def category_members(wiki: Wiki, title: str, ns: list[Union[NS, str]] = [], limit: Union[int, str] = 1) -> list:
+        return GQuery._list_cont(wiki, limit, ListCont.CATEGORY_MEMBERS, {"cmtitle": title} | ({"cmnamespace": wiki.ns_manager.create_filter(*ns)} if ns else {}))
 
     @staticmethod
     def list_duplicate_files(wiki: Wiki, limit: Union[int, str] = 1) -> list:
@@ -116,6 +120,36 @@ class GQuery:
         return GQuery._list_cont(wiki, limit, ListCont.PREFIX_INDEX, {"apnamespace": wiki.ns_manager.create_filter(ns), "apprefix": prefix})
 
     @staticmethod
+    def random(wiki: Wiki, ns: list[Union[NS, str]] = [], limit: Union[int, str] = 1) -> list:
+        return GQuery._list_cont(wiki, limit, ListCont.SEARCH, {"rnnamespace": wiki.ns_manager.create_filter(*ns)} if ns else {})
+
+    @staticmethod
+    def search(wiki: Wiki, phrase: str, ns: list[Union[NS, str]] = [], limit: Union[int, str] = 1) -> list:
+        return GQuery._list_cont(wiki, limit, ListCont.RANDOM, {"srsearch": phrase} | ({"srnamespace": wiki.ns_manager.create_filter(*ns)} if ns else {}))
+
+    @staticmethod
+    def user_uploads(wiki: Wiki, user: str, limit: Union[int, str] = 1) -> list[str]:
+        """Gets the uploads of a user.
+
+        Args:
+            wiki (Wiki): The Wiki object to use
+            user (str): The username to query, without the `User:` prefix.
+            limit (Union[int, str], optional): The maxmimum number of elements to fetch each iteration. Defaults to 1.
+
+        Returns:
+            list[str]: The files uploaded by `user`.
+        """
+        return GQuery._list_cont(wiki, limit, ListCont.USER_UPLOADS, {"aiuser": user})
+
+    ##################################################################################################
+    ########################################### P R O P  C O N T #####################################
+    ##################################################################################################
+
+    @staticmethod
+    def categories_on_page(wiki: Wiki, title: str, limit: Union[int, str] = 1) -> Generator[list[str], None, None]:
+        return GQuery._prop_cont(wiki, title, limit, PropCont.CATEGORIES)
+
+    @staticmethod
     def revisions(wiki: Wiki, title: str, limit: Union[int, str] = 1, older_first: bool = False, start: datetime = None, end: datetime = None, include_text: bool = False) -> Generator[list[Revision], None, None]:
         """Gets the revisions of a page.  Fetches newer revisions first by default.  PRECONDITION: if `start` and `end` are both set, then `start` must occur before `end`.
 
@@ -142,17 +176,3 @@ class GQuery:
             pl["rvprop"] += "|content"
 
         return GQuery._prop_cont(wiki, title, limit, PropContSingle.REVISIONS, pl)
-
-    @staticmethod
-    def user_uploads(wiki: Wiki, user: str, limit: Union[int, str] = 1) -> list[str]:
-        """Gets the uploads of a user.
-
-        Args:
-            wiki (Wiki): The Wiki object to use
-            user (str): The username to query, without the `User:` prefix.
-            limit (Union[int, str], optional): The maxmimum number of elements to fetch each iteration. Defaults to 1.
-
-        Returns:
-            list[str]: The files uploaded by `user`.
-        """
-        return GQuery._list_cont(wiki, limit, ListCont.USER_UPLOADS, {"aiuser": user})

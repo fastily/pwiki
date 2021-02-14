@@ -145,6 +145,11 @@ class MQuery:
         return MQuery._prop_cont(wiki, titles, PropCont.DUPLICATE_FILES, {"dflocalonly": 1} if local_only else {})
 
     @staticmethod
+    def external_links(wiki: Wiki, titles: list[str]) -> dict:
+        log.debug("%s: fetching external links on %s", wiki, titles)
+        return MQuery._prop_cont(wiki, titles, PropCont.EXTERNAL_LINKS)
+
+    @staticmethod
     def global_usage(wiki: Wiki, titles: list[str]) -> dict:
         log.debug("%s: fetching global usage of %s", wiki, titles)
         return MQuery._prop_cont(wiki, titles, PropCont.GLOBAL_USAGE)

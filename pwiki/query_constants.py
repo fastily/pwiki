@@ -51,6 +51,7 @@ class PropCont:
     CATEGORIES = QConstant("categories", limit_key="cllimit")
     DUPLICATE_FILES = QConstant("duplicatefiles", limit_key="dflimit")
     GLOBAL_USAGE = QConstant("globalusage", limit_key="gulimit", retrieve_results=lambda l: [(e["title"], e["wiki"]) for e in l])
+    EXTERNAL_LINKS = QConstant("extlinks", {"elexpandurl": 1}, "ellimit", lambda l: [e["url"] for e in l])
     FILEUSAGE = QConstant("fileusage", limit_key="fulimit")
     IMAGE_INFO = QConstant("imageinfo", {"iiprop": "comment|sha1|size|timestamp|url|user"}, "iilimit", lambda l: [ImageInfo(e) for e in l])
     IMAGES = QConstant("images", limit_key="imlimit")
@@ -67,8 +68,11 @@ class PropContSingle:
 
 class ListCont:
     """Collection of QConstant objects which fulfill the list cont strategy."""
+    CATEGORY_MEMBERS = QConstant("categorymembers", limit_key="cmlimit")
     CONTRIBS = QConstant("usercontribs", limit_key="uclimit", retrieve_results=lambda l: [Contrib(e) for e in l])
     DUPLICATE_FILES = QConstant("querypage", {"qppage": "ListDuplicatedFiles"}, "qplimit", lambda q: [e["title"] for e in q["results"]])
     LOGS = QConstant("logevents", {"leprop": "title|type|user|timestamp|comment|tags"}, "lelimit", retrieve_results=lambda l: [Log(e) for e in l])
     PREFIX_INDEX = QConstant("allpages", limit_key="aplimit")
+    RANDOM = QConstant("random", {"rnfilterredir": "nonredirects"}, "rnlimit")
+    SEARCH = QConstant("search", {"srprop": ""}, "srlimit")
     USER_UPLOADS = QConstant("allimages", {"aisort": "timestamp"}, "ailimit")
