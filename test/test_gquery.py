@@ -1,17 +1,12 @@
-import unittest
-
 from pwiki.gquery import GQuery
 from pwiki.ns import NS
 from pwiki.query_utils import flatten_generator
-from pwiki.wiki import Wiki
+
+from .base import QueryTestCase
 
 
-class TestPropNoCont(unittest.TestCase):
+class TestPropNoCont(QueryTestCase):
     """Tests pwiki's GQuery methods"""
-
-    @classmethod
-    def setUpClass(cls) -> None:
-        cls.wiki = Wiki("test.wikipedia.org", cookie_jar=None)
 
     def test_prefix_index(self):
         self.assertSetEqual({"User:Fastily/Sandbox/Page/1", "User:Fastily/Sandbox/Page/2", "User:Fastily/Sandbox/Page/3"}, set(flatten_generator(GQuery.prefix_index(self.wiki, NS.USER, "Fastily/Sandbox/Page/"))))

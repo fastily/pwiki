@@ -1,16 +1,10 @@
-import unittest
-
-from pwiki.ns import NS
 from pwiki.oquery import OQuery
-from pwiki.wiki import Wiki
+
+from .base import QueryTestCase
 
 
-class TestOQuery(unittest.TestCase):
+class TestOQuery(QueryTestCase):
     """Tests pwiki's OQuery methods"""
-
-    @classmethod
-    def setUpClass(cls) -> None:
-        cls.wiki = Wiki("test.wikipedia.org", cookie_jar=None)
 
     def test_normalize_titles(self):
         expected = {"lol": "Lol", "user talk:captain_america": "User talk:Captain america", "WP:AN": "Wikipedia:AN"}

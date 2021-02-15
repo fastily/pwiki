@@ -23,7 +23,16 @@ class MQuery:
 
     @staticmethod
     def _prop_no_cont(wiki: Wiki, titles: list[str], template: QConstant) -> dict:
+        """Performs a prop query and does not do any query continuation.  Use this for fetching page properties that are one-off in nature.
 
+        Args:
+            wiki (Wiki): The Wiki object to use.
+            titles (list[str]): The titles to work on.
+            template (QConstant): The QConstant to use.
+
+        Returns:
+            dict: A dict where each key is a title and the value is the corresponding value that was retrieved from the server.  A `None` value means something probably went wrong server side.
+        """
         out = dict.fromkeys(titles)
 
         for chunk in chunker(titles, wiki.prop_title_max):
@@ -40,7 +49,19 @@ class MQuery:
 
     @staticmethod
     def _prop_cont(wiki: Wiki, titles: list[str], template: QConstant, extra_pl: dict = None) -> dict:
-        out = defaultdict(list)
+        """Performs a prop query with query continuation.  Use this for fetching page properties that take the form of a list.  All available values will be fetched.
+
+        Args:
+            wiki (Wiki): The Wiki object to use.
+            titles (list[str]): The titles to work on.
+            template (QConstant): The QConstant to use.
+            extra_pl (dict, optional): Extra parameters to the passed along with the request.  Useful for queries that accept optional configuration. Defaults to None.
+
+        Returns:
+            dict: A dict where each key is a title and the value is the corresponding list of values for this title that were retrieved from the server.  A `None` value means something probably went wrong server side.
+        """
+        out = {t: [] for t in titles}
+        # out = defaultdict(list)
 
         for chunk in chunker(titles, wiki.prop_title_max):
             params = {**template.pl_with_limit(), "prop": template.name, "titles": "|".join(chunk)} | (extra_pl or {})
@@ -51,6 +72,7 @@ class MQuery:
                         out[p["title"]] += template.retrieve_results(p[template.name]) if template.name in p else []
                     except Exception:
                         log.debug("%s: Unable able to parse prop value from: %s", wiki, p, exc_info=True)
+                        return dict.fromkeys(titles)
 
                 denormalize_result(out, response, list)
 
@@ -112,6 +134,40 @@ class MQuery:
     ##################################################################################################
 
     @staticmethod
+    def categories_on_page(wiki: Wiki, titles: list[str]) -> dict:
+        """Fetch the categories used on a page.
+
+        Args:
+            wiki (Wiki): The Wiki object to use
+            titles (list[str]): The list of pages to get categories of.
+
+        Returns:
+            dict: A `dict` such that each key is the title and each value is the list of categories the page is categorized in.
+        """
+        log.debug("%s: fetching categories on pages: %s", wiki, titles)
+        return MQuery._prop_cont(wiki, titles, PropCont.CATEGORIES)
+
+    @staticmethod
+    def duplicate_files(wiki: Wiki, titles: list[str], local_only: bool = True) -> dict:
+        """Find dupliates of the specified files if possible.
+
+        Args:
+            wiki (Wiki): The Wiki object to use
+            titles (list[str]): The list of files to get duplicates of (must start with `File:` prefix).
+            local_only (bool, optional): Set `False` to also search the associated shared media repository wiki.  If that sounded like a foreign language to you, then ignore this parameter.  Defaults to True.
+
+        Returns:
+            dict:  A `dict` such that each key is the title and each value is the list of files that duplicate the specified file.
+        """
+        log.debug("%s: fetching duplicates of %s", wiki, titles)
+        return {k: ([wiki.convert_ns(s, NS.FILE) for s in v] if v is not None else None) for k, v in MQuery._prop_cont(wiki, titles, PropCont.DUPLICATE_FILES, {"dflocalonly": 1} if local_only else {}).items()}
+
+    @staticmethod
+    def external_links(wiki: Wiki, titles: list[str]) -> dict:
+        log.debug("%s: fetching external links on %s", wiki, titles)
+        return MQuery._prop_cont(wiki, titles, PropCont.EXTERNAL_LINKS)
+
+    @staticmethod
     def file_usage(wiki: Wiki, titles: list[str]) -> dict:
         """Fetch the titles of all pages displaying the specified list of media files.
 
@@ -124,30 +180,6 @@ class MQuery:
         """
         log.debug("%s: fetching file usage: %s", wiki, titles)
         return MQuery._prop_cont(wiki, titles, PropCont.FILEUSAGE)
-
-    @staticmethod
-    def categories_on_page(wiki: Wiki, titles: list[str]) -> dict:
-        """Fetch the categories used on a page.
-
-        Args:
-            wiki (Wiki): The Wiki object to use
-            titles (list[str]): The list of pages to get categories of.
-
-        Returns:
-            dict: A dict such that each key is the title and each value is the list of categories the page is categorized in.
-        """
-        log.debug("%s: fetching categories on pages: %s", wiki, titles)
-        return MQuery._prop_cont(wiki, titles, PropCont.CATEGORIES)
-
-    @staticmethod
-    def duplicate_files(wiki: Wiki, titles: list[str], local_only: bool = True) -> dict:
-        log.debug("%s: fetching duplicates of %s", wiki, titles)
-        return MQuery._prop_cont(wiki, titles, PropCont.DUPLICATE_FILES, {"dflocalonly": 1} if local_only else {})
-
-    @staticmethod
-    def external_links(wiki: Wiki, titles: list[str]) -> dict:
-        log.debug("%s: fetching external links on %s", wiki, titles)
-        return MQuery._prop_cont(wiki, titles, PropCont.EXTERNAL_LINKS)
 
     @staticmethod
     def global_usage(wiki: Wiki, titles: list[str]) -> dict:

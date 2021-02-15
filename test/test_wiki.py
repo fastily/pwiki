@@ -1,16 +1,10 @@
-import unittest
-
 from datetime import datetime
 
-from pwiki.wiki import Wiki
+from .base import QueryTestCase
 
 
-class TestWikiQuery(unittest.TestCase):
+class TestWikiQuery(QueryTestCase):
     """Tests pwiki's Wiki query methods"""
-
-    @classmethod
-    def setUpClass(cls) -> None:
-        cls.wiki = Wiki("test.wikipedia.org", cookie_jar=None)
 
     def test_first_editor_of(self):
         self.assertEqual("Fastily", self.wiki.first_editor_of("User:Fastily/Sandbox/RevisionTest"))

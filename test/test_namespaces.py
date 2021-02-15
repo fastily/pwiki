@@ -1,15 +1,10 @@
-import unittest
-
 from pwiki.ns import NS
-from pwiki.wiki import Wiki
+
+from .base import QueryTestCase
 
 
-class TestNamespaces(unittest.TestCase):
+class TestNamespaces(QueryTestCase):
     """Tests pwiki's namespace handling"""
-
-    @classmethod
-    def setUpClass(cls) -> None:
-        cls.wiki = Wiki("test.wikipedia.org", cookie_jar=None)
 
     def test_which_ns(self):
         self.assertEqual("User talk", self.wiki.which_ns("User talk:TestUser"))
