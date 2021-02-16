@@ -146,7 +146,7 @@ class Wiki:
         Returns:
             str: `title`, converted to namespace `ns`
         """
-        return self.ns_manager.canonical_prefix(self.ns_manager.stringify(ns)) + self.nss(title)
+        return self.ns_manager.canonical_prefix(ns) + self.nss(title)
 
     def filter_by_ns(self, titles: list[str], *nsl: Union[str, NS]) -> list[str]:
         """Creates a copy of `titles` and strips out any title that isn't in the namespaces specified in `nsl`.

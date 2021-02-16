@@ -60,8 +60,7 @@ class MQuery:
         Returns:
             dict: A dict where each key is a title and the value is the corresponding list of values for this title that were retrieved from the server.  A `None` value means something probably went wrong server side.
         """
-        out = {t: [] for t in titles}
-        # out = defaultdict(list)
+        out = defaultdict(list, {t: [] for t in titles})
 
         for chunk in chunker(titles, wiki.prop_title_max):
             params = {**template.pl_with_limit(), "prop": template.name, "titles": "|".join(chunk)} | (extra_pl or {})
@@ -79,9 +78,10 @@ class MQuery:
                 if not (cont := get_continue_params(response)):
                     break
 
-                params.update(cont)
+                # params.update(cont)
+                params |= cont
 
-        return dict(out) | {t: None for t in titles if t not in out}
+        return dict(out)  # | {t: None for t in titles if t not in out}
 
     ##################################################################################################
     ######################################### P R O P  N O  C O N T ##################################
@@ -139,7 +139,7 @@ class MQuery:
 
         Args:
             wiki (Wiki): The Wiki object to use
-            titles (list[str]): The list of pages to get categories of.
+            titles (list[str]): The titles to query.
 
         Returns:
             dict: A `dict` such that each key is the title and each value is the list of categories the page is categorized in.
@@ -160,10 +160,22 @@ class MQuery:
             dict:  A `dict` such that each key is the title and each value is the list of files that duplicate the specified file.
         """
         log.debug("%s: fetching duplicates of %s", wiki, titles)
-        return {k: ([wiki.convert_ns(s, NS.FILE) for s in v] if v is not None else None) for k, v in MQuery._prop_cont(wiki, titles, PropCont.DUPLICATE_FILES, {"dflocalonly": 1} if local_only else {}).items()}
+
+        file_prefix = wiki.ns_manager.canonical_prefix(NS.FILE)
+        result = MQuery._prop_cont(wiki, titles, PropCont.DUPLICATE_FILES, {"dflocalonly": 1} if local_only else {})
+        return result if None in result.values() else {k: [file_prefix + e for e in v] for k, v in result.items()}
 
     @staticmethod
     def external_links(wiki: Wiki, titles: list[str]) -> dict:
+        """Fetches external links on a page.
+
+        Args:
+            wiki (Wiki): The Wiki object to use
+            titles (list[str]): The titles to query
+
+        Returns:
+            dict: A `dict` such that each key is the title and each value is the list of external links contained in the text of the page.
+        """
         log.debug("%s: fetching external links on %s", wiki, titles)
         return MQuery._prop_cont(wiki, titles, PropCont.EXTERNAL_LINKS)
 
@@ -183,35 +195,99 @@ class MQuery:
 
     @staticmethod
     def global_usage(wiki: Wiki, titles: list[str]) -> dict:
+        """Fetch the global file usage of a media file.  Only works with wikis that utilize a shared media respository wiki.
+
+        Args:
+            wiki (Wiki): The Wiki object to use
+            titles (list[str]): The files to get global usage usage of.  Each list element must include the `File:` prefix
+
+        Returns:
+            dict: A dict such that each key is the title and each value is the list of tuples (page title, wiki domain) containing the global usages of the file.
+        """
         log.debug("%s: fetching global usage of %s", wiki, titles)
         return MQuery._prop_cont(wiki, titles, PropCont.GLOBAL_USAGE)
 
     @staticmethod
     def image_info(wiki: Wiki, titles: list[str]) -> dict:
+        """Fetch image (file) info for media files.  This is basically image metadata for each uploaded media file under the specified title. See `dwrap.ImageInfo` for details.
+
+        Args:
+            wiki (Wiki): The Wiki object to use
+            titles (list[str]): The files to get image info of.  Each list element must include the `File:` prefix
+
+        Returns:
+            dict: A dict such that each key is the title and each value is the list of ImageInfo objects associated with the title.
+        """
         log.debug("%s: fetching image info for %s", wiki, titles)
         return MQuery._prop_cont(wiki, titles, PropCont.IMAGE_INFO)
 
     @staticmethod
     def images_on_page(wiki: Wiki, titles: list[str]) -> dict:
+        """Fetch images/media files used on a page.
+
+        Args:
+            wiki (Wiki): The Wiki object to use
+            titles (list[str]): The titles to query
+
+        Returns:
+            dict: A dict such that each key is the title and each value is the list of images/files that are used on the page.
+        """
         log.debug("%s: determining what files are embedded on %s", wiki, titles)
         return MQuery._prop_cont(wiki, titles, PropCont.IMAGES)
 
     @staticmethod
     def links_on_page(wiki: Wiki, titles: list[str], *ns: Union[NS, str]) -> dict:
+        """Fetch wiki links on a page.
+
+        Args:
+            wiki (Wiki): The Wiki object to use
+            titles (list[str]): The titles to query
+
+        Returns:
+            dict: A `dict` such that each key is the title and each value is the list of wiki links contained in the text of the page.
+        """
         log.debug("%s: fetching wikilinks on %s", wiki, titles)
         return MQuery._prop_cont(wiki, titles, PropCont.WIKILINKS_ON_PAGE, {"plnamespace": wiki.ns_manager.create_filter(*ns)} if ns else {})
 
     @staticmethod
     def templates_on_page(wiki: Wiki, titles: list[str]) -> dict:
+        """Fetch templates transcluded on a page.
+
+        Args:
+            wiki (Wiki): The Wiki object to use
+            titles (list[str]): The titles to query
+
+        Returns:
+            dict: A `dict` such that each key is the title and each value is the list of tempalates transcluded on the page.
+        """
         log.debug("%s: determining what templates are transcluded on %s", wiki, titles)
         return MQuery._prop_cont(wiki, titles, PropCont.TEMPLATES)
 
     @staticmethod
-    def what_links_here(wiki: Wiki, titles: list[str]) -> dict:
+    def what_links_here(wiki: Wiki, titles: list[str], redirects_only: bool = False) -> dict:
+        """Fetch pages that wiki link (locally) to a page.
+
+        Args:
+            wiki (Wiki): The Wiki object to use
+            titles (list[str]): The titles to query
+            redirects_only (bool, optional): Set `True` to get the titles that redirect to this page. Defaults to False.
+
+        Returns:
+            dict: A `dict` such that each key is the title and each value is the list of pages that link to the specified page.
+        """
         log.debug("%s: determining what pages link to %s", wiki, titles)
-        return MQuery._prop_cont(wiki, titles, PropCont.LINKS_HERE)
+        return MQuery._prop_cont(wiki, titles, PropCont.LINKS_HERE, {"lhshow": ("" if redirects_only else "!") + "redirect"})
 
     @staticmethod
     def what_transcludes_here(wiki: Wiki, titles: list[str], *ns: Union[NS, str]) -> dict:
+        """Fetch pages that translcude a page.  If querying for templates, you must include the `Template:` prefix.
+
+        Args:
+            wiki (Wiki): The Wiki object to use
+            titles (list[str]): The titles to query
+
+        Returns:
+            dict: A `dict` such that each key is the title and each value is the list of pages that transclude the specified page.
+        """
         log.debug("%s: fetching transclusions of %s", wiki, titles)
         return MQuery._prop_cont(wiki, titles, PropCont.TRANSCLUDED_IN, {"tinamespace": wiki.ns_manager.create_filter(*ns)} if ns else {})

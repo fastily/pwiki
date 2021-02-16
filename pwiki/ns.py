@@ -85,13 +85,13 @@ class NSManager:
         """
         return self.m.get(ns) if isinstance(ns, NS) else ns
 
-    def canonical_prefix(self, ns: str) -> str:
+    def canonical_prefix(self, ns: Union[NS, str]) -> str:
         """Gets the canonical prefix for the specified namespace.  This adds a `:` suffix to `ns`, or returns the empty string if `ns` is the Main namespace.
 
         Args:
-            ns (str): The namespace to get the canonical prefix for.
+            ns (Union[NS, str]): The namespace to get the canonical prefix for.
 
         Returns:
             str: The canonical prefix for the specified namepsace.
         """
-        return "" if ns == MAIN_NAME else ns + ":"
+        return "" if (ns := self.stringify(ns)) == MAIN_NAME else ns + ":"
