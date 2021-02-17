@@ -66,6 +66,20 @@ class Wiki:
             self.is_bot: bool = "bot" in self.rights
             self.prop_title_max: int = 500 if self.is_bot else 50
 
+    ##################################################################################################
+    ######################################## C O O K I E S ###########################################
+    ##################################################################################################
+
+    def clear_cookies(self, cookie_jar: Path = _DEFAULT_COOKIE_JAR):
+        """Deletes any saved cookies from disk.
+
+        Args:
+            cookie_jar (Path, optional): The local Path to the cookie jar. Defaults to _DEFAULT_COOKIE_JAR.
+        """
+        log.info("%s: Removing cookie jar at '%s'", self, cookie_jar)
+
+        cookie_jar.unlink(True)
+
     def load_cookies(self, cookie_jar: Path = _DEFAULT_COOKIE_JAR) -> bool:
         """Load saved cookies from a file into this pwiki instance.
 
@@ -93,16 +107,6 @@ class Wiki:
 
         return True
 
-    def clear_cookies(self, cookie_jar: Path = _DEFAULT_COOKIE_JAR):
-        """Deletes any saved cookies from disk.
-
-        Args:
-            cookie_jar (Path, optional): The local Path to the cookie jar. Defaults to _DEFAULT_COOKIE_JAR.
-        """
-        log.info("%s: Removing cookie jar at '%s'", self, cookie_jar)
-
-        cookie_jar.unlink(True)
-
     def save_cookies(self, output_path: Path = _DEFAULT_COOKIE_JAR):
         """Write the cookies of the Wiki object to disk, so they can be used in the future.
 
@@ -114,27 +118,9 @@ class Wiki:
         with output_path.open('wb') as f:
             pickle.dump(self.client.cookies, f)
 
-    def which_ns(self, title: str) -> str:
-        """Determines which namespace a title belongs to.
-
-        Args:
-            title (str): The title to get the namespace of
-
-        Returns:
-            str: The namespace, without it's `:` suffix.  If main namespace, then `"Main"` will be returned
-        """
-        return result[0][:-1] if (result := self.ns_manager.ns_regex.match(title)) else MAIN_NAME
-
-    def nss(self, title: str) -> str:
-        """Strips the namespace prefix from a title.
-
-        Args:
-            title (str): The title to remove the namespace from.
-
-        Returns:
-            str: `title`, without a namespace.
-        """
-        return self.ns_manager.ns_regex.sub("", title, 1)
+    ##################################################################################################
+    ##################################### N A M E S P A C E S ########################################
+    ##################################################################################################
 
     def convert_ns(self, title: str, ns: Union[str, NS]) -> str:
         """Converts the namespace of the specified title to another namespace.  PRECONDITION: `title` is well-formed.
@@ -160,19 +146,16 @@ class Wiki:
         nsl = {self.ns_manager.stringify(ns) for ns in nsl}
         return [s for s in titles if self.which_ns(s) in nsl]
 
-    def talk_page_of(self, title: str) -> str:
-        """Gets the talk page of `title`.  If `title` is a talk page, then `None` will be returned.
+    def nss(self, title: str) -> str:
+        """Strips the namespace prefix from a title.
 
         Args:
-            title (str): The talk page associated with `title`.
+            title (str): The title to remove the namespace from.
 
         Returns:
-            str: The talk page of `title`, or `None` if `title` is already a talk page.
+            str: `title`, without a namespace.
         """
-        if (ns_id := self.ns_manager.m.get(self.which_ns(title))) % 2 == 0:
-            return f"{self.ns_manager.m.get(ns_id + 1)}:{self.nss(title)}"
-
-        log.debug("%s: could not get talk page of '%s' because it is already a talk page with an id of %d", self, title, ns_id)
+        return self.ns_manager.ns_regex.sub("", title, 1)
 
     def page_of(self, title: str) -> str:
         """Gets the content page associated with `title`.   If `title` is a content page, then `None` will be returned.
@@ -188,21 +171,34 @@ class Wiki:
 
         log.debug("%s: could not get page of '%s' because it is not a talk page and has an id of %d", self, title, ns_id)
 
+    def talk_page_of(self, title: str) -> str:
+        """Gets the talk page of `title`.  If `title` is a talk page, then `None` will be returned.
+
+        Args:
+            title (str): The talk page associated with `title`.
+
+        Returns:
+            str: The talk page of `title`, or `None` if `title` is already a talk page.
+        """
+        if (ns_id := self.ns_manager.m.get(self.which_ns(title))) % 2 == 0:
+            return f"{self.ns_manager.m.get(ns_id + 1)}:{self.nss(title)}"
+
+        log.debug("%s: could not get talk page of '%s' because it is already a talk page with an id of %d", self, title, ns_id)
+
+    def which_ns(self, title: str) -> str:
+        """Determines which namespace a title belongs to.
+
+        Args:
+            title (str): The title to get the namespace of
+
+        Returns:
+            str: The namespace, without it's `:` suffix.  If main namespace, then `"Main"` will be returned
+        """
+        return result[0][:-1] if (result := self.ns_manager.ns_regex.match(title)) else MAIN_NAME
+
     ##################################################################################################
     ######################################## A C T I O N S ###########################################
     ##################################################################################################
-
-    def login(self, username: str, password: str) -> bool:
-        """Attempts to login this Wiki object.  If successful, all future calls will be automatically include authentication.
-
-        Args:
-            username (str): The username to login with
-            password (str): The password to login with
-
-        Returns:
-            bool: True if successful
-        """
-        return WAction.login(self, username, password)
 
     def edit(self, title: str, text: str = None, summary: str = "", prepend: str = None, append: str = None, minor: bool = False) -> bool:
         """Attempts to edit a page on the Wiki.  Can replace text or append/prepend text.
@@ -219,6 +215,18 @@ class Wiki:
             bool: `True` if the edit was successful.
         """
         return WAction.edit(self, title, text, summary, prepend, append, minor)
+
+    def login(self, username: str, password: str) -> bool:
+        """Attempts to login this Wiki object.  If successful, all future calls will be automatically include authentication.
+
+        Args:
+            username (str): The username to login with
+            password (str): The password to login with
+
+        Returns:
+            bool: True if successful
+        """
+        return WAction.login(self, username, password)
 
     def upload(self, path: Path, title: str, desc: str = "", summary: str = "", unstash=True, max_retries=5) -> Union[bool, str]:
         """Uploads a file to the target Wiki.
@@ -254,18 +262,6 @@ class Wiki:
         """
         return l[0].user if (l := next(GQuery.revisions(self, title, older_first=True), None)) else None
 
-    def list_user_rights(self, username: str = None) -> list[str]:
-        """Lists user rights for the specified user.
-
-        Args:
-            username (str, optional): The user to get rights for.  Usernames must be well formed (e.g. no wacky capitalization), and must not contain the `User:` prefix.  If set to `None`, then Wiki's username will be used.  Defaults to None.
-
-        Returns:
-            list[str]: The rights for the specified user.  `None` if something went wrong.
-        """
-        log.info("%s: Fetching user rights for '%s'", self, u := username or self.username)
-        return OQuery.list_user_rights(self, [u]).get(u) if u else []
-
     def last_editor_of(self, title: str) -> str:
         """Gets the user who most recently edited `title`.
 
@@ -276,6 +272,44 @@ class Wiki:
             str: The username of the user who most recently edited `title`.  Does not include `User:` prefix.  Returns `None` if the page does not exist.
         """
         return l[0].user if (l := next(GQuery.revisions(self, title), None)) else None
+
+    def list_user_rights(self, username: str = None) -> list[str]:
+        """Lists user rights for the specified user.
+
+        Args:
+            username (str, optional): The user to get rights for.  Usernames must be well formed (e.g. no wacky capitalization), and must not contain the `User:` prefix.  If set to `None`, then Wiki's username will be used.  Defaults to None.
+
+        Returns:
+            list[str]: The rights for the specified user.  `None` if something went wrong.
+        """
+        if not username or not (username := self.username):  # no username specified and not logged in.
+            return []
+
+        log.info("%s: Fetching user rights for '%s'", self, username)
+        return OQuery.list_user_rights(self, [username]).get(username)
+
+    def normalize_title(self, title: str) -> str:
+        """Normalizes titles to match their canonical versions.  Usually this means fixing capitalization or replacing underscores with spaces.
+
+        Args:
+            title (str): The title to normalize.
+
+        Returns:
+            str: The normalized version of `title`.
+        """
+        log.info("%s: Normalizing '%s'", self, title)
+        return OQuery.normalize_titles(self, [title]).get(title)
+
+    def resolve_redirect(self, title:str) -> str:
+        """Fetch the target of a redirect page.
+
+        Args:
+            title (str): The title to query
+
+        Returns:
+            str: The redirect target.  If `title` was not a redirect, then `title` will be returned.
+        """
+        return OQuery.resolve_redirects(self, [title]).get(title)
 
     def revisions(self, title: str, older_first: bool = False, include_text: bool = True) -> list[Revision]:
         """Fetches all the revisions of `title`.  Plan accordingly when querying pages that have many revisions!

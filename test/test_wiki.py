@@ -12,6 +12,10 @@ class TestWikiQuery(QueryTestCase):
     def test_last_editor_of(self):
         self.assertEqual("FSock", self.wiki.last_editor_of("User:Fastily/Sandbox/RevisionTest"))
 
+    def test_list_user_rights(self):
+        self.assertFalse(self.wiki.list_user_rights())
+        self.assertIn("user", self.wiki.list_user_rights("FastilyClone"))
+
     def test_revisions(self):
         # newer first
         result = self.wiki.revisions("User:Fastily/Sandbox/RevisionTest")

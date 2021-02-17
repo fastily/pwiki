@@ -9,6 +9,18 @@ API_DEFAULTS = {"format": "json", "formatversion": "2"}
 log = logging.getLogger(__name__)
 
 
+def has_error(response: dict) -> bool:
+    """Checks if a response from the server contains an error.
+
+    Args:
+        response (dict): The json response from the server.
+
+    Returns:
+        bool: True if the response contained an error.
+    """
+    return "error" in response
+
+
 def make_params(action: str, pl: dict = None) -> dict:
     """Convienence method to generate payload parameters.  Fills in useful details that should be submitted with every request.
 
@@ -22,16 +34,23 @@ def make_params(action: str, pl: dict = None) -> dict:
     return {**API_DEFAULTS, **(pl or {}), "action": action}
 
 
-def has_error(response: dict) -> bool:
-    """Checks if a response from the server contains an error.
+def mine_for(target: dict, *keys: str) -> Any:
+    """Digs through nested json objects, following the keys named by `keys`.  PRECONDITION: `target` only contains json objects.
 
     Args:
-        response (dict): The json response from the server.
+        target (dict): The json object to dig through.
+        keys (str): The keys to follow.
 
     Returns:
-        bool: True if the response contained an error.
+        Any: Whatever value is found at the end of following the specified keys.  None if nothing was not found.
     """
-    return "error" in response
+    try:
+        for k in keys:
+            target = target.get(k, {})
+
+        return target or None
+    except Exception:
+        log.debug("Crash in mine_for(), something must have gone *terribly* wrong", exc_info=True)
 
 
 def read_error(action: str, response: dict) -> tuple[str, str]:
@@ -54,22 +73,3 @@ def read_error(action: str, response: dict) -> tuple[str, str]:
     log.debug(response)
 
     return None, None
-
-
-def mine_for(target: dict, *keys: str) -> Any:
-    """Digs through nested json objects, following the keys named by `keys`.  PRECONDITION: `target` only contains json objects.
-
-    Args:
-        target (dict): The json object to dig through.
-        keys (str): The keys to follow.
-
-    Returns:
-        Any: Whatever value is found at the end of following the specified keys.  None if nothing was not found.
-    """
-    try:
-        for k in keys:
-            target = target.get(k, {})
-
-        return target or None
-    except Exception:
-        log.debug("Crash in mine_for(), something must have gone *terribly* wrong", exc_info=True)

@@ -58,6 +58,16 @@ class WAction:
 
     @staticmethod
     def delete(wiki: Wiki, title: str, reason: str) -> bool:
+        """Deletes a page.  PRECONDITION: `wiki` must be logged in and have the ability to delete pages for this to work.
+
+        Args:
+            wiki (Wiki): The Wiki to use.
+            title (str): The title to delete
+            reason (str): The reason for deleting this page.
+
+        Returns:
+            bool: `True` if this action succeeded.
+        """
         response = WAction._post_action(wiki, "delete", {"title": title, "reason": reason})
 
         if WAction.is_success("delete", response):

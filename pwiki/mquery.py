@@ -78,10 +78,9 @@ class MQuery:
                 if not (cont := get_continue_params(response)):
                     break
 
-                # params.update(cont)
                 params |= cont
 
-        return dict(out)  # | {t: None for t in titles if t not in out}
+        return dict(out)
 
     ##################################################################################################
     ######################################### P R O P  N O  C O N T ##################################

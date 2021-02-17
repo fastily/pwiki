@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pwiki.gquery import GQuery
 from pwiki.ns import NS
 from pwiki.query_utils import flatten_generator
@@ -5,14 +7,111 @@ from pwiki.query_utils import flatten_generator
 from .base import QueryTestCase
 
 
-class TestPropNoCont(QueryTestCase):
-    """Tests pwiki's GQuery methods"""
+class TestListCont(QueryTestCase):
+    """Tests GQuery's list cont methods"""
+
+    def test_contribs(self):
+        # test 1
+        l = next(GQuery.contribs(self.wiki, "FastilyClone", True, limit=2))
+
+        self.assertEqual(2, len(l))
+        self.assertEqual("File:FCTest1.png", l[0].title)
+        self.assertFalse(l[0].is_minor)
+        self.assertTrue(l[0].is_page_create)
+
+        self.assertEqual("File:FCTest2.svg", l[1].title)
+        self.assertFalse(l[1].is_minor)
+        self.assertTrue(l[1].is_page_create)
+
+        # test 2
+        l = next(g := GQuery.contribs(self.wiki, "FastilyClone", ns=[NS.USER], limit=2))
+
+        self.assertEqual(2, len(l))
+        self.assertEqual("User:FastilyClone/Page/1", l[0].title)
+        self.assertEqual("s2", l[0].summary)
+        self.assertTrue(l[0].is_top)
+
+        self.assertEqual("User:FastilyClone/Page/1", l[1].title)
+        self.assertEqual("s1", l[1].summary)
+        self.assertFalse(l[1].is_top)
+
+        l = next(g)
+
+        self.assertEqual(1, len(l))
+        self.assertEqual("User:FastilyClone/Page/1", l[0].title)
+        self.assertEqual("s0", l[0].summary)
+        self.assertFalse(l[0].is_top)
+        self.assertTrue(l[0].is_page_create)
+
+        # test 3
+        with self.assertRaises(StopIteration):
+            next(GQuery.contribs(self.wiki, "NotARealAccountFastily"))
+
+    def test_category_members(self):
+        # test 1
+        self.assertCountEqual(["User:Fastily/Sandbox/Page/2", "File:FastilyTest.png"], next(GQuery.category_members(self.wiki, "Category:Fastily Test2", limit="max")))
+
+        # test 2
+        self.assertListEqual(["File:FastilyTest.png"], next(GQuery.category_members(self.wiki, "Category:Fastily Test2", [NS.FILE], "max")))
+
+        # test 3
+        with self.assertRaises(StopIteration):
+            next(GQuery.category_members(self.wiki, "Category:DoesNotExist Fastily1234"))
+
+    def test_list_duplicate_files(self):
+        self.assertTrue(l := next(GQuery.list_duplicate_files(self.wiki)))
+        self.assertTrue(l[0].startswith("File:"))
 
     def test_prefix_index(self):
-        self.assertSetEqual({"User:Fastily/Sandbox/Page/1", "User:Fastily/Sandbox/Page/2", "User:Fastily/Sandbox/Page/3"}, set(flatten_generator(GQuery.prefix_index(self.wiki, NS.USER, "Fastily/Sandbox/Page/"))))
+        self.assertCountEqual(["User:Fastily/Sandbox/Page/1", "User:Fastily/Sandbox/Page/2", "User:Fastily/Sandbox/Page/3"], flatten_generator(GQuery.prefix_index(self.wiki, NS.USER, "Fastily/Sandbox/Page/")))
+
+        with self.assertRaises(StopIteration):
+            next(GQuery.prefix_index(self.wiki, NS.USER, "Fastily/DoesNotExistEver1234"))
+
+    def test_logs(self):
+        l = next(GQuery.logs(self.wiki, log_type="delete", user="Fastily", ns=NS.FILE, limit=3))
+        self.assertEqual(3, len(l))
+        for e in l:
+            self.assertEqual("Fastily", e.user)
+            self.assertTrue(e.title.startswith("File:"))
+            self.assertEqual("delete", e.action)
+
+        l = next(GQuery.logs(self.wiki, "File:FCTest1.png", "upload"))
+        self.assertEqual(1, len(l))
+        self.assertEqual("FastilyClone", l[0].user)
+        self.assertEqual(datetime.fromisoformat("2015-10-20T00:28:32+00:00"), l[0].timestamp)
+
+    def test_random(self):
+        l = next(GQuery.random(self.wiki))
+        self.assertEqual(1, len(l))
+
+        l = next(GQuery.random(self.wiki, [NS.FILE], 2))
+        self.assertEqual(2, len(l))
+        for e in l:
+            self.assertTrue(e.startswith("File:"))
+
+    def test_search(self):
+        self.assertEqual(1, len(next(GQuery.search(self.wiki, "Fastily"))))
+
+        l = next(GQuery.search(self.wiki, "FastilyClone", [NS.USER]))
+        self.assertEqual(1, len(l))
+        self.assertTrue(l[0].startswith("User:"))
+
+    def test_user_uploads(self):
+        self.assertCountEqual(["File:FCTest2.svg", "File:FCTest1.png"], flatten_generator(GQuery.user_uploads(self.wiki, "FastilyClone")))
+
+        with self.assertRaises(StopIteration):
+            next(GQuery.user_uploads(self.wiki, "DoesNotExistFastily"))
+
+
+class TestPropCont(QueryTestCase):
+    """Tests GQuery's prop cont methods"""
+
+    def test_categories_on_page(self):
+        self.assertCountEqual(["Category:Fastily Test", "Category:Fastily Test2"], next(GQuery.categories_on_page(self.wiki, "User:Fastily/Sandbox/Page/2", "max")))
 
     def test_revisions(self):
-        # base
+        # test 1 - base
         result = next(g := GQuery.revisions(self.wiki, "User:Fastily/Sandbox/RevisionTest", 2))
         self.assertEqual(2, len(result))
         self.assertEqual("FSock", result[0].user)
@@ -23,7 +122,7 @@ class TestPropNoCont(QueryTestCase):
         self.assertEqual("Fastily", result[0].user)
         self.assertIsNone(result[0].text)
 
-        # reversed, with text
+        # test 2 - reversed, with text
         result = next(g := GQuery.revisions(self.wiki, "User:Fastily/Sandbox/RevisionTest", 2, True, include_text=True))
         self.assertEqual(2, len(result))
         self.assertEqual("hello!", result[0].text)
@@ -33,5 +132,6 @@ class TestPropNoCont(QueryTestCase):
         self.assertEqual(1, len(result))
         self.assertEqual("c", result[0].summary)
 
-    def test_user_uploads(self):
-        self.assertSetEqual({"File:FCTest2.svg", "File:FCTest1.png"}, set(flatten_generator(GQuery.user_uploads(self.wiki, "FastilyClone"))))
+        # test 3 - non-existent
+        with self.assertRaises(StopIteration):
+            next(GQuery.revisions(self.wiki, "DoesNotExistFastily"))

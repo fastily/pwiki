@@ -6,7 +6,7 @@ import logging
 
 from collections.abc import Generator
 from datetime import datetime
-from typing import Any, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Union
 
 from .dwrap import Contrib, Log, Revision
 from .ns import NS
@@ -24,16 +24,30 @@ class GQuery:
     """Collection of queries which fetch and yield results via Generator."""
 
     @staticmethod
-    def _list_cont(wiki: Wiki, limit_value: Union[int, str], template: QConstant, extra_pl: dict = None):
+    def _list_cont(wiki: Wiki, limit_value: Union[int, str], template: QConstant, extra_pl: dict = None) -> Generator[list, None, None]:
+        """Performs a list query with query continuation.  Use this for fetching queries that take the form of a list.  Fetches up to `limit_value` number of results each iteration.
+
+        Args:
+            wiki (Wiki): The Wiki object to use
+            limit_value (Union[int, str]): The maximum number of elements to return each iteration.  The maximum is normally 500 for non-bots and 5000 for bots; alternatively, use `str` `"max"`.
+            template (QConstant): The QConstant to use.
+            extra_pl (dict, optional): Extra parameters to the passed along with the request.  Useful for queries that accept optional configuration. Defaults to None.
+
+        Raises:
+            OSError: If the query failed for whatever reason.  Usually this indiciates network failure.
+
+        Yields:
+            Generator[list, None, None]: A Generator which yields a `list` (as returned by `template`'s `retrieve_results()`) containing the results of the query.
+        """
         params = {**template.pl_with_limit(limit_value), "list": template.name} | (extra_pl or {})
         while True:
             if not (response := query_and_validate(wiki, params, desc=f"peform a list_cont query with '{template.name}'")):
                 raise OSError(f"Critical failure performing a list_cont query with {template.name}, cannot proceed")
 
-            if template.name not in (q := mine_for(response, "query")):
+            if template.name not in (q := mine_for(response, "query")) or not (result := template.retrieve_results(q[template.name])):
                 break
 
-            yield template.retrieve_results(q[template.name])
+            yield result
 
             if not (cont := get_continue_params(response)):
                 break
@@ -41,7 +55,22 @@ class GQuery:
             params.update(cont)
 
     @staticmethod
-    def _prop_cont(wiki: Wiki, title: str, limit_value: Union[int, str], template: QConstant, extra_pl: dict = None) -> Generator[Any, None, None]:
+    def _prop_cont(wiki: Wiki, title: str, limit_value: Union[int, str], template: QConstant, extra_pl: dict = None) -> Generator[list, None, None]:
+        """Performs a prop query with query continuation.  Use this for fetching page properties that take the form of a list.
+
+        Args:
+            wiki (Wiki): The Wiki object to use.
+            titles (list[str]): The titles to work on.
+            limit_value (Union[int, str]): The maximum number of elements to return each iteration.  The maximum is normally 500 for non-bots and 5000 for bots; alternatively, use `str` `"max"`.
+            template (QConstant): The QConstant to use.
+            extra_pl (dict, optional): Extra parameters to the passed along with the request.  Useful for queries that accept optional configuration. Defaults to None.
+
+        Raises:
+            OSError: If the query failed for whatever reason.  Usually this indiciates network failure.
+
+        Yields:
+            Generator[list, None, None]: A `Generator` which yields a `list` (as returned by `template`'s `retrieve_results()`) containing the results of the query.
+        """
         params = {**template.pl_with_limit(limit_value), "prop": template.name, "titles": title} | (extra_pl or {})
 
         while True:
@@ -64,6 +93,18 @@ class GQuery:
 
     @staticmethod
     def contribs(wiki: Wiki, user: str, older_first: bool = False, ns: list[Union[NS, str]] = [], limit: Union[int, str] = 1) -> Generator[list[Contrib], None, None]:
+        """Fetches contributions of a user.
+
+        Args:
+            wiki (Wiki): The Wiki object to use
+            user (str): The username to query, excluding the `User:` prefix.
+            older_first (bool, optional): Set `True` to fetch older elements first. Defaults to False.
+            ns (list[Union[NS, str]], optional): Only return results that are in these namespaces.  Optional, set empty list to disable.  Defaults to [].
+            limit (Union[int, str], optional): The maximum number of elements to return per iteration.  Defaults to 1.
+
+        Returns:
+            Generator[list[Contrib], None, None]: A `Generator` which yields a `list` of `Contrib` as specified.
+        """
         pl = {"ucuser": user}
         if ns:
             pl["ucnamespace"] = wiki.ns_manager.create_filter(*ns)
@@ -73,15 +114,53 @@ class GQuery:
         return GQuery._list_cont(wiki, limit, ListCont.CONTRIBS, pl)
 
     @staticmethod
-    def category_members(wiki: Wiki, title: str, ns: list[Union[NS, str]] = [], limit: Union[int, str] = 1) -> list:
+    def category_members(wiki: Wiki, title: str, ns: list[Union[NS, str]] = [], limit: Union[int, str] = 1) -> Generator[list[str], None, None]:
+        """Fetches the elements in a category.
+
+        Args:
+            wiki (Wiki): The Wiki object to use
+            title (str): The title of the category to fetch elements from.  Must include `Category:` prefix.
+            ns (list[Union[NS, str]], optional): Only return results that are in these namespaces.  Optional, set empty list to disable. Defaults to [].
+            limit (Union[int, str], optional): The maximum number of elements to return per iteration. Defaults to 1.
+
+        Returns:
+            Generator[list[str], None, None]: A `Generator` which yields a `list` containing the category's category members.
+        """
         return GQuery._list_cont(wiki, limit, ListCont.CATEGORY_MEMBERS, {"cmtitle": title} | ({"cmnamespace": wiki.ns_manager.create_filter(*ns)} if ns else {}))
 
     @staticmethod
-    def list_duplicate_files(wiki: Wiki, limit: Union[int, str] = 1) -> list:
+    def list_duplicate_files(wiki: Wiki, limit: Union[int, str] = 1) -> Generator[list[str], None, None]:
+        """List files on a wiki which have duplicates by querying the Special page `Special:ListDuplicatedFiles`.
+
+        Args:
+            wiki (Wiki): The Wiki object to use
+            limit (Union[int, str], optional): The maximum number of elements to return per iteration. Defaults to 1.
+
+        Returns:
+            Generator[list[str], None, None]: A `Generator` which yields a `list` containing files that have duplicates on the wiki.
+        """
         return GQuery._list_cont(wiki, limit, ListCont.DUPLICATE_FILES)
 
     @staticmethod
     def logs(wiki: Wiki, title: str = None, log_type: str = None, log_action: str = None, user: str = None, ns: Union[NS, str] = None, tag: str = None, start: datetime = None, end: datetime = None, older_first: bool = False, limit: Union[int, str] = 1) -> Generator[list[Log], None, None]:
+        """Fetches `Special:Log` entries from a wiki.
+
+        Args:
+            wiki (Wiki): The Wiki object to use
+            title (str, optional): The title of the page to get logs for, if applicable. Defaults to None.
+            log_type (str, optional): The type of log to fetch (e.g. `"delete"`). Defaults to None.
+            log_action (str, optional): The type and sub-action of the log to fetch (e.g. `"delete/restore"`).  Overrides `log_type`.  Defaults to None.
+            user (str, optional): The user associated with the log action, if applicable.  Do not include `User:` prefix.  Defaults to None.
+            ns (Union[NS, str], optional): Only return results that are in this namespace. Defaults to None.
+            tag (str, optional): Only return results that are tagged with this tag. Defaults to None.
+            start (datetime, optional): Set to filter out revisions older than this date.  If no timezone is specified in the datetime, then UTC is assumed. Defaults to None.
+            end (datetime, optional): Set to filter out revisions newer than this date.  If no timezone is specified in the datetime, then UTC is assumed.. Defaults to None.
+            older_first (bool, optional): Set to `True` to fetch older log entries first. Defaults to False.
+            limit (Union[int, str], optional): The maximum number of elements to return per iteration. Defaults to 1.
+
+        Returns:
+            Generator[list[Log], None, None]: A `Generator` which yields a `list` of `Log` as specified.
+        """
         pl = {}
         if title:
             pl["letitle"] = title
@@ -105,7 +184,7 @@ class GQuery:
         return GQuery._list_cont(wiki, limit, ListCont.LOGS, pl)
 
     @staticmethod
-    def prefix_index(wiki: Wiki, ns: Union[NS, str], prefix: str, limit: Union[int, str] = 1) -> list[str]:
+    def prefix_index(wiki: Wiki, ns: Union[NS, str], prefix: str, limit: Union[int, str] = 1) -> Generator[list[str], None, None]:
         """Performs a prefix index query and returns all matching titles.
 
         Args:
@@ -115,20 +194,41 @@ class GQuery:
             limit (Union[int, str], optional): The maxmimum number of elements to fetch each iteration. Defaults to 1.
 
         Returns:
-            list[str]: A list of titles that match the specified prefix index query.
+            Generator[list[str], None, None]: A `Generator` which yields a `list` containing files that match the specified prefix index.
         """
         return GQuery._list_cont(wiki, limit, ListCont.PREFIX_INDEX, {"apnamespace": wiki.ns_manager.create_filter(ns), "apprefix": prefix})
 
     @staticmethod
-    def random(wiki: Wiki, ns: list[Union[NS, str]] = [], limit: Union[int, str] = 1) -> list:
-        return GQuery._list_cont(wiki, limit, ListCont.SEARCH, {"rnnamespace": wiki.ns_manager.create_filter(*ns)} if ns else {})
+    def random(wiki: Wiki, ns: list[Union[NS, str]] = [], limit: Union[int, str] = 1) -> Generator[list[str], None, None]:
+        """Fetches a list of random pages from the wiki.
+
+        Args:
+            wiki (Wiki): The Wiki object to use
+            ns (list[Union[NS, str]], optional): Only return results that are in these namespaces.  Optional, set empty list to disable. Defaults to [].
+            limit (Union[int, str], optional): The maxmimum number of elements to fetch each iteration.  Defaults to 1.
+
+        Returns:
+            Generator[list[str], None, None]: A `Generator` which yields a `list` containing random elements that match specified parameters.
+        """
+        return GQuery._list_cont(wiki, limit, ListCont.RANDOM, {"rnnamespace": wiki.ns_manager.create_filter(*ns)} if ns else {})
 
     @staticmethod
-    def search(wiki: Wiki, phrase: str, ns: list[Union[NS, str]] = [], limit: Union[int, str] = 1) -> list:
-        return GQuery._list_cont(wiki, limit, ListCont.RANDOM, {"srsearch": phrase} | ({"srnamespace": wiki.ns_manager.create_filter(*ns)} if ns else {}))
+    def search(wiki: Wiki, phrase: str, ns: list[Union[NS, str]] = [], limit: Union[int, str] = 1) -> Generator[list[str], None, None]:
+        """Perform a search on the wiki.
+
+        Args:
+            wiki (Wiki): The Wiki object to use
+            phrase (str): The phrase to query with
+            ns (list[Union[NS, str]], optional): Only return results that are in these namespaces.  Optional, set empty list to disable. Defaults to [].
+            limit (Union[int, str], optional): The maxmimum number of elements to fetch each iteration.  Defaults to 1.
+
+        Returns:
+            Generator[list[str], None, None]: A `Generator` which yields a `list` containing the results of the search.
+        """
+        return GQuery._list_cont(wiki, limit, ListCont.SEARCH, {"srsearch": phrase} | ({"srnamespace": wiki.ns_manager.create_filter(*ns)} if ns else {}))
 
     @staticmethod
-    def user_uploads(wiki: Wiki, user: str, limit: Union[int, str] = 1) -> list[str]:
+    def user_uploads(wiki: Wiki, user: str, limit: Union[int, str] = 1) -> Generator[list[str], None, None]:
         """Gets the uploads of a user.
 
         Args:
@@ -137,7 +237,7 @@ class GQuery:
             limit (Union[int, str], optional): The maxmimum number of elements to fetch each iteration. Defaults to 1.
 
         Returns:
-            list[str]: The files uploaded by `user`.
+            Generator[list[str], None, None]: A `Generator` which yields a `list` containing the files uploaded by `user`.
         """
         return GQuery._list_cont(wiki, limit, ListCont.USER_UPLOADS, {"aiuser": user})
 
@@ -147,6 +247,16 @@ class GQuery:
 
     @staticmethod
     def categories_on_page(wiki: Wiki, title: str, limit: Union[int, str] = 1) -> Generator[list[str], None, None]:
+        """Fetch the categories used on a page.
+
+        Args:
+            wiki (Wiki): The Wiki object to use
+            title (str): The title to query.
+            limit (Union[int, str], optional): The maxmimum number of elements to fetch each iteration. Defaults to 1.
+
+        Returns:
+            Generator[list[str], None, None]: A `Generator` which yields a `list` containing the categories contained on `title`.
+        """
         return GQuery._prop_cont(wiki, title, limit, PropCont.CATEGORIES)
 
     @staticmethod
@@ -163,7 +273,7 @@ class GQuery:
             include_text (bool, optional): If `True`, then also fetch the wikitext of each revision.  Will populate the Revision.text field.  Defaults to False.
 
         Returns:
-            Iterator[list[Revision]]: A generator which fetches revisions as specified.
+            Generator[list[Revision], None, None]: A `Generator` which yields a `list` containing the Revision objects of `title`.
         """
         pl = {"rvprop": "comment|timestamp|user"}
         if older_first:

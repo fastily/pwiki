@@ -5,7 +5,7 @@ from datetime import datetime
 from .utils import mine_for
 
 
-class DataEntry:
+class _DataEntry:
     """Base template class for more structured data returned by the API."""
 
     def __init__(self, user: str = None, title: str = None, summary: str = None, timestamp: str = None):
@@ -31,8 +31,15 @@ class DataEntry:
         return f"User: {self.user} | Title: {self.title} | Summary: {self.summary} | Timestamp: {self.timestamp}"
 
 
-class Contrib(DataEntry):
+class Contrib(_DataEntry):
+    """Represents a contribution (i.e. edit) made by a user, as obtained from `Special:MyContributions`."""
+
     def __init__(self, e: dict):
+        """Initializer, creates a new Contrib
+
+        Args:
+            e (dict): A json object from the `"contributions"` list in the response from the server.
+        """
         super().__init__(e.get("user"), e.get("title"), e.get("comment"), e.get("timestamp"))
 
         self.is_page_create: bool = e.get("new")
@@ -40,9 +47,15 @@ class Contrib(DataEntry):
         self.is_top: bool = e.get("top")
 
 
-class ImageInfo(DataEntry):
+class ImageInfo(_DataEntry):
+    """Represents an image info revision to a media file."""
 
     def __init__(self, e: dict):
+        """Initializer, creates a new ImageInfo
+
+        Args:
+            e (dict): A json object from the `"imageinfo"` list in the response from the server.
+        """
         super().__init__(e.get("user"), summary=e.get("comment"), timestamp=e.get("timestamp"))
 
         self.size: int = e.get("size")
@@ -52,8 +65,15 @@ class ImageInfo(DataEntry):
         self.sha1: str = e.get("sha1")
 
 
-class Log(DataEntry):
+class Log(_DataEntry):
+    """Represents an log entry from `Special:Log`."""
+
     def __init__(self, e: dict):
+        """Initializer, creates a new Log
+
+        Args:
+            e (dict): A json object from the `"logevents"` list in the response from the server.
+        """
         super().__init__(e.get("user"), e.get("title"), e.get("comment"), e.get("timestamp"))
 
         self.type: str = e.get("type")
@@ -61,7 +81,7 @@ class Log(DataEntry):
         self.tags: list[str] = e.get("tags")
 
 
-class Revision(DataEntry):
+class Revision(_DataEntry):
     """Represents an edit to a page on a wiki"""
 
     def __init__(self, e: dict):
@@ -75,4 +95,9 @@ class Revision(DataEntry):
         self.text: str = mine_for(e, "slots", "main", "content")
 
     def __repr__(self) -> str:
+        """Creates a `str` representation of this Revision.  Useful for debugging.
+
+        Returns:
+            str: The str representation of this Revision.
+        """
         return f"{super().__repr__()} | text: {self.text}"

@@ -28,6 +28,11 @@ class TestPropNoCont(QueryTestCase):
 class TestPropCont(QueryTestCase):
     """Tests MQuery's PropCont methods"""
 
+    def test_categories_on_page(self):
+        m = MQuery.categories_on_page(self.wiki, ["User:Fastily/Sandbox/Page/2", "User:Fastily/NotARealPage123"])
+        self.assertCountEqual(["Category:Fastily Test", "Category:Fastily Test2"], m["User:Fastily/Sandbox/Page/2"])
+        self.assertFalse(m["User:Fastily/NotARealPage123"])
+
     def test_duplicate_files(self):
         expected = {"File:FastilyTest.svg": ["File:FastilyTestCopy.svg"], "File:FastilyTestCircle2.svg": [], "File:FastilyDoesNotExistFile.flac": []}
         self.assertDictEqual(expected, MQuery.duplicate_files(self.wiki, list(expected.keys())))

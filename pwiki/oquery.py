@@ -7,8 +7,7 @@ import logging
 from typing import TYPE_CHECKING
 
 from .ns import NSManager
-from .query_constants import QConstant
-from .query_utils import chunker, extract_body, get_continue_params, mine_for, query_and_validate
+from .query_utils import chunker, extract_body, mine_for, query_and_validate
 
 if TYPE_CHECKING:
     from .wiki import Wiki
@@ -42,27 +41,27 @@ class OQuery:
 
         return out
 
-    @staticmethod
-    def _prop_cont_single(wiki: Wiki, title: str, template: QConstant, extra_pl: dict = None) -> list:
-        out = []
+    # @staticmethod
+    # def _prop_cont_single(wiki: Wiki, title: str, template: QConstant, extra_pl: dict = None) -> list:
+    #     out = []
 
-        params = {**template.pl_with_limit(), "prop": template.name, "titles": title} | (extra_pl or {})
+    #     params = {**template.pl_with_limit(), "prop": template.name, "titles": title} | (extra_pl or {})
 
-        while True:
-            if not (response := query_and_validate(wiki, params, desc=f"peform a prop_cont_single query with '{template.name}'")):
-                raise OSError(f"Critical failure performing a _prop_cont_single query with {template.name}, cannot proceed")
+    #     while True:
+    #         if not (response := query_and_validate(wiki, params, desc=f"peform a prop_cont_single query with '{template.name}'")):
+    #             raise OSError(f"Critical failure performing a _prop_cont_single query with {template.name}, cannot proceed")
 
-            if not ((l := mine_for(response, "query", "pages")) and template.name in (p := l[0])):
-                break
+    #         if not ((l := mine_for(response, "query", "pages")) and template.name in (p := l[0])):
+    #             break
 
-            out += template.retrieve_results(p[template.name])
+    #         out += template.retrieve_results(p[template.name])
 
-            if not (cont := get_continue_params(response)):
-                break
+    #         if not (cont := get_continue_params(response)):
+    #             break
 
-            params.update(cont)
+    #         params.update(cont)
 
-        return out
+    #     return out
 
     # @staticmethod
     # def _list_cont(wiki: Wiki, template: QConstant, extra_pl: dict = None) -> list:
@@ -146,7 +145,7 @@ class OQuery:
             if response := query_and_validate(wiki, {"list": "users", "usprop": "groups", "ususers": "|".join(chunk)}, wiki.is_bot, "determine user rights"):
                 for p in mine_for(response, "query", "users"):
                     try:
-                        out[p["name"]] = None if p.keys() & {"invalid", "missing"} else p["groups"] #TODO: p.get("groups", None)?
+                        out[p["name"]] = None if p.keys() & {"invalid", "missing"} else p["groups"]  # TODO: p.get("groups", None)?
                     except Exception:
                         log.debug("%s: Unable able to parse list value from: %s", wiki, p, exc_info=True)
 
