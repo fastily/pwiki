@@ -45,7 +45,7 @@ class TestPropCont(QueryTestCase):
 
     def test_file_usage(self):
         m = MQuery.file_usage(self.wiki, ["File:FastilyTest.svg", "File:Fastily NonExistent File.png"])
-        self.assertSetEqual({"User:Fastily/Sandbox/ImageLinks", "User:Fastily/Sandbox/Page"}, set(m["File:FastilyTest.svg"]))
+        self.assertCountEqual(["User:Fastily/Sandbox/ImageLinks", "User:Fastily/Sandbox/Page"], m["File:FastilyTest.svg"])
         self.assertListEqual([], m["File:Fastily NonExistent File.png"])
 
     def test_global_usage(self):

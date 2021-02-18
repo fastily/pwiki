@@ -2,15 +2,18 @@
 import logging
 import pickle
 
+from datetime import datetime
 from pathlib import Path
 from typing import Union
 
 from requests import Session
 
-from .dwrap import Revision
+from .dwrap import Contrib, ImageInfo, Log, Revision
 from .gquery import GQuery
+from .mquery import MQuery
 from .ns import MAIN_NAME, NS, NSManager
 from .oquery import OQuery
+from .query_constants import MAX
 from .query_utils import flatten_generator
 from .waction import WAction
 
@@ -251,6 +254,106 @@ class Wiki:
     ######################################## Q U E R I E S ###########################################
     ##################################################################################################
 
+    def categories_on_page(self, title: str) -> list[str]:
+        """Fetch the categories used on a page.
+
+        Args:
+            title (str): The title to query.
+
+        Returns:
+            list[str]: The `list` of categories used on `title`.
+        """
+        log.info("%s: fetching categories on pages: %s", self, title)
+        return MQuery.categories_on_page(self, [title]).get(title)
+
+    def category_members(self, title: str, ns: list[Union[NS, str]] = []) -> list[str]:
+        """Fetches the elements in a category.
+
+        Args:
+            title (str): The title of the category to fetch elements from.  Must include `Category:` prefix.
+            ns (list[Union[NS, str]], optional): Only return results that are in these namespaces.  Optional, set empty list to disable. Defaults to [].
+
+        Returns:
+            list[str]: a `list` containing `title`'s category members.
+        """
+        log.info("%s: fetching category members of '%s'", self, title)
+        return flatten_generator(GQuery.category_members(self, title, ns, MAX))
+
+    def category_size(self, title: str) -> int:
+        """Queries the wiki and gets the number of pages categorized in `title`.
+
+        Args:
+            title (str): The category to get the size of.  Must start with `Category:` prefix.
+
+        Returns:
+            int: The number of pages in this category.
+        """
+        log.info("%s: fetching category size for: '%s'", self, title)
+        return MQuery.category_size(self, [title]).get(title)
+
+    def contribs(self, user: str, older_first: bool = False, ns: list[Union[NS, str]] = []) -> list[Contrib]:
+        """Fetches contributions of a user.  Warning: this fetches all of `user`'s contributions!
+
+        Args:
+            user (str): The username to query, excluding the `User:` prefix.
+            older_first (bool, optional): Set `True` to fetch older elements first. Defaults to False.
+            ns (list[Union[NS, str]], optional): Only return results that are in these namespaces.  Optional, set empty list to disable.  Defaults to [].
+
+        Returns:
+            list[Contrib]: The contributions of `user`.
+        """
+        log.info("%s: fetching contributions of '%s'", self, user)
+        return flatten_generator(GQuery.contribs(self, user, older_first, ns, MAX))
+
+    def duplicate_files(self, title: str, local_only: bool = True) -> list[str]:
+        """Find dupliates of `title` if possible.
+
+        Args:
+            title (str): The title to get duplicates of.  Must start with `File:` prefix.
+            local_only (bool, optional): Set `False` to also search the associated shared media repository wiki.  If that sounded like a foreign language to you, then ignore this parameter. Defaults to True.
+
+        Returns:
+            list[str]: The `list` of files that duplicate `title`.
+        """
+        log.info("%s: fetching duplicates of %s", self, title)
+        return MQuery.duplicate_files(self, [title], local_only).get(title)
+
+    def exists(self, title: str) -> bool:
+        """Query the wiki and determine if `title` exists on the wiki.
+
+        Args:
+            title (str): the title to query.
+
+        Returns:
+            bool: `True` if `title` exists on the wiki.
+        """
+        log.info("%s: determining if '%s' exists", self, title)
+        return MQuery.exists(self, [title]).get(title)
+
+    def external_links(self, title: str) -> list[str]:
+        """Fetches external links on a page.
+
+        Args:
+            title (str): The title to query
+
+        Returns:
+            list[str]: The `list` of external links contained in the text of `title`.
+        """
+        log.info("%s: fetching external links on %s", self, title)
+        return MQuery.external_links(self, [title]).get(title)
+
+    def file_usage(self, title: str) -> list[str]:
+        """Fetch the titles of all pages embedding/displaying `title`.
+
+        Args:
+            title (str): The file to query.
+
+        Returns:
+            list[str]: The `list` of all pages displaying `title`.
+        """
+        log.info("%s: fetching file usage for '%s'", self, title)
+        return MQuery.file_usage(self, [title]).get(title)
+
     def first_editor_of(self, title: str) -> str:
         """Gets the user who created `title`.
 
@@ -261,6 +364,42 @@ class Wiki:
             str: The username of the user who created `title`.  Does not include `User:` prefix.  Returns `None` if the page does not exist.
         """
         return l[0].user if (l := next(GQuery.revisions(self, title, older_first=True), None)) else None
+
+    def global_usage(self, title: str) -> list[tuple]:
+        """Fetch the global file usage of a media file.  Only works with wikis that utilize a shared media respository wiki.
+
+        Args:
+            title (str): The file to get global usage usage of. Must start with `File:` prefix
+
+        Returns:
+            list[tuple]: A `list` of `tuple`s (page title, wiki hostname) containing the global usages of the file.
+        """
+        log.info("%s: fetching global usage of %s", self, title)
+        return MQuery.global_usage(self, [title]).get(title)
+
+    def image_info(self, title: str) -> list[ImageInfo]:
+        """Fetch image (file) info for media files.  This is basically image metadata for each uploaded media file under the specified title. See `dwrap.ImageInfo` for details.
+
+        Args:
+            title (str): The file to get image info of.  Must start with the `File:` prefix
+
+        Returns:
+            list[ImageInfo]: The `list` of `ImageInfo` objects associated with `title`.
+        """
+        log.info("%s: fetching image info for %s", self, title)
+        return MQuery.image_info(self, [title]).get(title)
+
+    def images_on_page(self, title: str) -> list[str]:
+        """Fetch images/media files used on a page.
+
+        Args:
+            title (str): The title to query
+
+        Returns:
+            list[str]: The `list` of images/files that are used on `title`.
+        """
+        log.info("%s: determining what files are embedded on %s", self, title)
+        return MQuery.images_on_page(self, [title]).get(title)
 
     def last_editor_of(self, title: str) -> str:
         """Gets the user who most recently edited `title`.
@@ -273,6 +412,28 @@ class Wiki:
         """
         return l[0].user if (l := next(GQuery.revisions(self, title), None)) else None
 
+    def links_on_page(self, title: str, *ns: Union[NS, str]) -> list[str]:
+        """Fetch wiki links on a page.
+
+        Args:
+            title (str): The title to query
+            ns (Union[NS, str]): Only return results in these namespaces.  Optional, leave empty to disable.
+
+        Returns:
+            list[str]: The `list` of wiki links contained in the text of `title`
+        """
+        log.info("%s: fetching wikilinks on %s", self, title)
+        return MQuery.links_on_page(self, [title], *ns).get(title)
+
+    def list_duplicate_files(self) -> list[str]:
+        """List files on a wiki which have duplicates by querying the Special page `Special:ListDuplicatedFiles`.  This reads the entire list, and may return up to 5000 elements.
+
+        Returns:
+            list[str]: A `list` containing files that have duplicates on the wiki.
+        """
+        log.info("%s: getting files with duplicates from Special:ListDuplicatedFiles...", self)
+        return flatten_generator(GQuery.list_duplicate_files(self, MAX))
+
     def list_user_rights(self, username: str = None) -> list[str]:
         """Lists user rights for the specified user.
 
@@ -282,11 +443,28 @@ class Wiki:
         Returns:
             list[str]: The rights for the specified user.  `None` if something went wrong.
         """
-        if not username or not (username := self.username):  # no username specified and not logged in.
-            return []
+        log.info("%s: Fetching user rights for '%s'", self, u := username or self.username)
+        return OQuery.list_user_rights(self, [u]).get(u) if u else []
 
-        log.info("%s: Fetching user rights for '%s'", self, username)
-        return OQuery.list_user_rights(self, [username]).get(username)
+    def logs(self, title: str = None, log_type: str = None, log_action: str = None, user: str = None, ns: Union[NS, str] = None, tag: str = None, start: datetime = None, end: datetime = None, older_first: bool = False) -> list[Log]:
+        """Fetches `Special:Log` entries from a wiki. PRECONDITION: if `start` and `end` are both set, then `start` must occur before `end`.  WARNING: Not recommended to call this with no arguments on large Wikis, this methods returns all matching logs.
+
+        Args:
+            title (str, optional): The title of the page to get logs for, if applicable. Defaults to None.
+            log_type (str, optional): The type of log to fetch (e.g. `"delete"`). Defaults to None.
+            log_action (str, optional): The type and sub-action of the log to fetch (e.g. `"delete/restore"`).  Overrides `log_type`.  Defaults to None.
+            user (str, optional): The user associated with the log action, if applicable.  Do not include `User:` prefix.  Defaults to None.
+            ns (Union[NS, str], optional): Only return results that are in this namespace. Defaults to None.
+            tag (str, optional): Only return results that are tagged with this tag. Defaults to None.
+            start (datetime, optional): Set to filter out revisions older than this date.  If no timezone is specified in the datetime, then UTC is assumed. Defaults to None.
+            end (datetime, optional): Set to filter out revisions newer than this date.  If no timezone is specified in the datetime, then UTC is assumed. Defaults to None.
+            older_first (bool, optional): Set to `True` to fetch older log entries first. Defaults to False.
+
+        Returns:
+            list[Log]: A `list` of `Log` as specified.
+        """
+        log.info("%s: Fetching logs...", self)
+        return flatten_generator(GQuery.logs(self, title, log_type, log_action, user, ns, tag, start, end, older_first, MAX))
 
     def normalize_title(self, title: str) -> str:
         """Normalizes titles to match their canonical versions.  Usually this means fixing capitalization or replacing underscores with spaces.
@@ -300,7 +478,44 @@ class Wiki:
         log.info("%s: Normalizing '%s'", self, title)
         return OQuery.normalize_titles(self, [title]).get(title)
 
-    def resolve_redirect(self, title:str) -> str:
+    def page_text(self, title: str) -> str:
+        """Queries the Wiki for the text of `title`.
+
+        Args:
+            title (str): The title to get page text of.
+
+        Returns:
+            str: The text of `title`.  `None` if `title` does not exist.
+        """
+        log.info("%s: fetching page text of %s", self, title)
+        return MQuery.page_text(self, [title]).get(title)
+
+    def prefix_index(self, ns: Union[NS, str], prefix: str) -> list[str]:
+        """Performs a prefix index query and returns all matching titles.
+
+        Args:
+            ns (Union[NS, str]): The namespace to search in.
+            prefix (str): Fetches all titles in the specified namespace that start with this str.  To return subpages only, append a `/` character to this param.
+
+        Returns:
+            list[str]: A `list` containing files that match the specified prefix index.
+        """
+        log.info("%s: Getting prefix index for ns '%s' and prefix '%s'", ns, prefix)
+        return flatten_generator(GQuery.prefix_index(self, ns, prefix, MAX))
+
+    def random(self, ns: list[Union[NS, str]] = []) -> str:
+        """Fetches a random page from the wiki.
+
+        Args:
+            ns (list[Union[NS, str]], optional): Only return results that are in these namespaces.  Optional, set empty list to disable. Defaults to [].
+
+        Returns:
+            str: A random page from the wiki as specified, or `None` if this was not possible.
+        """
+        log.info("%s: Fetching a random page", self)
+        return result[0] if (result := next(GQuery.random(self, ns), None)) else None
+
+    def resolve_redirect(self, title: str) -> str:
         """Fetch the target of a redirect page.
 
         Args:
@@ -311,19 +526,46 @@ class Wiki:
         """
         return OQuery.resolve_redirects(self, [title]).get(title)
 
-    def revisions(self, title: str, older_first: bool = False, include_text: bool = True) -> list[Revision]:
+    def revisions(self, title: str, older_first: bool = False, start: datetime = None, end: datetime = None, include_text: bool = False) -> list[Revision]:
         """Fetches all the revisions of `title`.  Plan accordingly when querying pages that have many revisions!
 
         Args:
             title (str): The title to get revisions for.
-            older_first (bool, optional): Set `True` to get older revisions first. Defaults to False.
-            include_text (bool, optional): Set `True` to populate the `text` field of each `Revision` in the returned list. Defaults to True.
+            older_first (bool, optional): Set `True` to get older revisions first.. Defaults to False.
+            start (datetime, optional): Set to filter out revisions older than this date.  If no timezone is specified in the datetime, then UTC is assumed. Defaults to None.
+            end (datetime, optional): Set to filter out revisions newer than this date. If no timezone is specified in the datetime, then UTC is assumed. Defaults to None.
+            include_text (bool, optional): If `True`, then also fetch the wikitext of each revision.  Will populate the `Revision.text` field.  Warning: enabling this is expensive for large pages with many revisions.  Defaults to False.
 
         Returns:
-            list[Revision]: A list with the revisions of `title` as specified.
+            list[Revision]: A `list` containing the `Revision` objects of `title`
         """
         log.info("%s: Fetching revisions of '%s'", self, title)
-        return flatten_generator(GQuery.revisions(self, title, older_first=older_first, include_text=include_text))
+        return flatten_generator(GQuery.revisions(self, title, MAX, older_first, start, end, include_text))
+
+    def search(self, phrase: str, ns: list[Union[NS, str]] = []) -> list[str]:
+        """Perform a search on the wiki.
+
+        Args:
+            phrase (str): The phrase to query with
+            ns (list[Union[NS, str]], optional): Only return results that are in these namespaces.  Optional, set empty list to disable. Defaults to [].
+
+        Returns:
+            list[str]: A `list` containing the results of the search.
+        """
+        log.info("%s: Searching the wiki for '%s'", self, phrase)
+        return flatten_generator(GQuery.search(self, phrase, ns, MAX))
+
+    def templates_on_page(self, title: str) -> list[str]:
+        """Fetch templates transcluded on a page.
+
+        Args:
+            title (str): The title to query
+
+        Returns:
+            list[str]: A list of tempalates transcluded on `title
+        """
+        log.info("%s: determining what templates are transcluded on %s", self, title)
+        return MQuery.templates_on_page(self, [title]).get(title)
 
     def uploadable_filetypes(self) -> set:
         """Queries the Wiki for all acceptable file types which may be uploaded to this Wiki.  PRECONDITION: the target Wiki permits file uploads.
@@ -333,6 +575,18 @@ class Wiki:
         """
         log.info("%s: Fetching a list of acceptable file upload extensions.", self)
         return OQuery.uploadable_filetypes(self)
+
+    def user_uploads(self, user: str) -> list[str]:
+        """Gets the uploads of a user.
+
+        Args:
+            user (str): The username to query, without the `User:` prefix.
+
+        Returns:
+            list[str]: A `list` containing the files uploaded by `user`.
+        """
+        log.info("%s: Fetching uploads for '%s'", self, user)
+        return flatten_generator(GQuery.user_uploads(self, user, MAX))
 
     def whoami(self) -> str:
         """Get this Wiki's username from the server.  If not logged in, then this will return your external IP address.

@@ -92,6 +92,21 @@ class GQuery:
     ##################################################################################################
 
     @staticmethod
+    def category_members(wiki: Wiki, title: str, ns: list[Union[NS, str]] = [], limit: Union[int, str] = 1) -> Generator[list[str], None, None]:
+        """Fetches the elements in a category.
+
+        Args:
+            wiki (Wiki): The Wiki object to use
+            title (str): The title of the category to fetch elements from.  Must include `Category:` prefix.
+            ns (list[Union[NS, str]], optional): Only return results that are in these namespaces.  Optional, set empty list to disable. Defaults to [].
+            limit (Union[int, str], optional): The maximum number of elements to return per iteration. Defaults to 1.
+
+        Returns:
+            Generator[list[str], None, None]: A `Generator` which yields a `list` containing the category's category members.
+        """
+        return GQuery._list_cont(wiki, limit, ListCont.CATEGORY_MEMBERS, {"cmtitle": title} | ({"cmnamespace": wiki.ns_manager.create_filter(*ns)} if ns else {}))
+
+    @staticmethod
     def contribs(wiki: Wiki, user: str, older_first: bool = False, ns: list[Union[NS, str]] = [], limit: Union[int, str] = 1) -> Generator[list[Contrib], None, None]:
         """Fetches contributions of a user.
 
@@ -114,21 +129,6 @@ class GQuery:
         return GQuery._list_cont(wiki, limit, ListCont.CONTRIBS, pl)
 
     @staticmethod
-    def category_members(wiki: Wiki, title: str, ns: list[Union[NS, str]] = [], limit: Union[int, str] = 1) -> Generator[list[str], None, None]:
-        """Fetches the elements in a category.
-
-        Args:
-            wiki (Wiki): The Wiki object to use
-            title (str): The title of the category to fetch elements from.  Must include `Category:` prefix.
-            ns (list[Union[NS, str]], optional): Only return results that are in these namespaces.  Optional, set empty list to disable. Defaults to [].
-            limit (Union[int, str], optional): The maximum number of elements to return per iteration. Defaults to 1.
-
-        Returns:
-            Generator[list[str], None, None]: A `Generator` which yields a `list` containing the category's category members.
-        """
-        return GQuery._list_cont(wiki, limit, ListCont.CATEGORY_MEMBERS, {"cmtitle": title} | ({"cmnamespace": wiki.ns_manager.create_filter(*ns)} if ns else {}))
-
-    @staticmethod
     def list_duplicate_files(wiki: Wiki, limit: Union[int, str] = 1) -> Generator[list[str], None, None]:
         """List files on a wiki which have duplicates by querying the Special page `Special:ListDuplicatedFiles`.
 
@@ -143,7 +143,7 @@ class GQuery:
 
     @staticmethod
     def logs(wiki: Wiki, title: str = None, log_type: str = None, log_action: str = None, user: str = None, ns: Union[NS, str] = None, tag: str = None, start: datetime = None, end: datetime = None, older_first: bool = False, limit: Union[int, str] = 1) -> Generator[list[Log], None, None]:
-        """Fetches `Special:Log` entries from a wiki.
+        """Fetches `Special:Log` entries from a wiki. PRECONDITION: if `start` and `end` are both set, then `start` must occur before `end`.
 
         Args:
             wiki (Wiki): The Wiki object to use
@@ -154,7 +154,7 @@ class GQuery:
             ns (Union[NS, str], optional): Only return results that are in this namespace. Defaults to None.
             tag (str, optional): Only return results that are tagged with this tag. Defaults to None.
             start (datetime, optional): Set to filter out revisions older than this date.  If no timezone is specified in the datetime, then UTC is assumed. Defaults to None.
-            end (datetime, optional): Set to filter out revisions newer than this date.  If no timezone is specified in the datetime, then UTC is assumed.. Defaults to None.
+            end (datetime, optional): Set to filter out revisions newer than this date.  If no timezone is specified in the datetime, then UTC is assumed. Defaults to None.
             older_first (bool, optional): Set to `True` to fetch older log entries first. Defaults to False.
             limit (Union[int, str], optional): The maximum number of elements to return per iteration. Defaults to 1.
 
@@ -270,7 +270,7 @@ class GQuery:
             older_first (bool, optional): Set to `True` to fetch older revisions first. Defaults to False.
             start (datetime, optional): Set to filter out revisions older than this date.  If no timezone is specified in the datetime, then UTC is assumed. Defaults to None.
             end (datetime, optional): Set to filter out revisions newer than this date. If no timezone is specified in the datetime, then UTC is assumed.  Defaults to None.
-            include_text (bool, optional): If `True`, then also fetch the wikitext of each revision.  Will populate the Revision.text field.  Defaults to False.
+            include_text (bool, optional): If `True`, then also fetch the wikitext of each revision.  Will populate the `Revision.text` field.  Defaults to False.
 
         Returns:
             Generator[list[Revision], None, None]: A `Generator` which yields a `list` containing the Revision objects of `title`.

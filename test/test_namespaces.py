@@ -28,10 +28,10 @@ class TestNamespaces(QueryTestCase):
         self.assertEqual("File talk:Example.jpg", self.wiki.convert_ns("Image:Example.jpg", NS.FILE_TALK))
 
     def test_filter_by_ns(self):
-        self.assertSetEqual({"Foo"}, set(self.wiki.filter_by_ns(["User:Example", "Foo", "Talk:Hello"], NS.MAIN)))
-        self.assertSetEqual({"Copper", "Talk:Silver", "Gold"}, set(self.wiki.filter_by_ns(["Copper", "Talk:Silver", "Gold", "User talk:Iridium"], "Main", NS.TALK)))
-        self.assertSetEqual(set(), set(self.wiki.filter_by_ns(["Chicken", "Talk:Cow", "Pig"], NS.PROJECT)))
-        self.assertSetEqual(set(), set(self.wiki.filter_by_ns(["Category:Sun", "Talk:Moon", "Template:Stars"])))
+        self.assertListEqual(["Foo"], self.wiki.filter_by_ns(["User:Example", "Foo", "Talk:Hello"], NS.MAIN))
+        self.assertCountEqual(["Copper", "Talk:Silver", "Gold"], self.wiki.filter_by_ns(["Copper", "Talk:Silver", "Gold", "User talk:Iridium"], "Main", NS.TALK))
+        self.assertFalse(self.wiki.filter_by_ns(["Chicken", "Talk:Cow", "Pig"], NS.PROJECT))
+        self.assertFalse(self.wiki.filter_by_ns(["Category:Sun", "Talk:Moon", "Template:Stars"]))
 
     def test_talk_page_of(self):
         self.assertEqual("User talk:Me", self.wiki.talk_page_of("User:Me"))

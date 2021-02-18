@@ -22,7 +22,7 @@ class TestOQuery(QueryTestCase):
         self.assertDictEqual(expected, OQuery.normalize_titles(self.wiki, list(expected.keys())))
 
     def test_resolve_redirects(self):
-        expected = {"User:Fastily/Sandbox/Redirect2": "User:Fastily/Sandbox/RedirectTarget", "User:Fastily/Sandbox/Redirect3": "User:Fastily/Sandbox/Redirect3"}
+        expected = {"User:Fastily/Sandbox/Redirect2": "User:Fastily/Sandbox/RedirectTarget", "User:Fastily/Sandbox/Redirect3": "User:Fastily/Sandbox/Redirect3", "User:Fastily/DoesNotExist123": "User:Fastily/DoesNotExist123"}
         self.assertDictEqual(expected, OQuery.resolve_redirects(self.wiki, list(expected.keys())))
 
     def test_uploadable_filetypes(self):

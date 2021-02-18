@@ -5,6 +5,7 @@ from typing import Any, Callable, Union
 from .dwrap import Contrib, ImageInfo, Log, Revision
 from .utils import mine_for
 
+MAX = "max"
 
 class QConstant:
     """Template information for API queries.  Can generate query parameters to send and contains the result retreival function."""
@@ -23,7 +24,7 @@ class QConstant:
         self.limit_key = limit_key
         self.retrieve_results = retrieve_results or (lambda l: [e["title"] for e in l])
 
-    def pl_with_limit(self, limit_value: Union[int, str] = "max") -> dict:
+    def pl_with_limit(self, limit_value: Union[int, str] = MAX) -> dict:
         """Get the parameter list (`self.pl`) for this QConstant and include this QConstant's `self.limit_key` and the specified `limit_value` if possible.
 
         Args:

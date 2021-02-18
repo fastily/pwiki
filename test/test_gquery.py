@@ -2,6 +2,7 @@ from datetime import datetime
 
 from pwiki.gquery import GQuery
 from pwiki.ns import NS
+from pwiki.query_constants import MAX
 from pwiki.query_utils import flatten_generator
 
 from .base import QueryTestCase
@@ -9,6 +10,17 @@ from .base import QueryTestCase
 
 class TestListCont(QueryTestCase):
     """Tests GQuery's list cont methods"""
+
+    def test_category_members(self):
+        # test 1
+        self.assertCountEqual(["User:Fastily/Sandbox/Page/2", "File:FastilyTest.png"], next(GQuery.category_members(self.wiki, "Category:Fastily Test2", limit=MAX)))
+
+        # test 2
+        self.assertListEqual(["File:FastilyTest.png"], next(GQuery.category_members(self.wiki, "Category:Fastily Test2", [NS.FILE], MAX)))
+
+        # test 3
+        with self.assertRaises(StopIteration):
+            next(GQuery.category_members(self.wiki, "Category:DoesNotExist Fastily1234"))
 
     def test_contribs(self):
         # test 1
@@ -46,17 +58,6 @@ class TestListCont(QueryTestCase):
         # test 3
         with self.assertRaises(StopIteration):
             next(GQuery.contribs(self.wiki, "NotARealAccountFastily"))
-
-    def test_category_members(self):
-        # test 1
-        self.assertCountEqual(["User:Fastily/Sandbox/Page/2", "File:FastilyTest.png"], next(GQuery.category_members(self.wiki, "Category:Fastily Test2", limit="max")))
-
-        # test 2
-        self.assertListEqual(["File:FastilyTest.png"], next(GQuery.category_members(self.wiki, "Category:Fastily Test2", [NS.FILE], "max")))
-
-        # test 3
-        with self.assertRaises(StopIteration):
-            next(GQuery.category_members(self.wiki, "Category:DoesNotExist Fastily1234"))
 
     def test_list_duplicate_files(self):
         self.assertTrue(l := next(GQuery.list_duplicate_files(self.wiki)))
@@ -108,7 +109,7 @@ class TestPropCont(QueryTestCase):
     """Tests GQuery's prop cont methods"""
 
     def test_categories_on_page(self):
-        self.assertCountEqual(["Category:Fastily Test", "Category:Fastily Test2"], next(GQuery.categories_on_page(self.wiki, "User:Fastily/Sandbox/Page/2", "max")))
+        self.assertCountEqual(["Category:Fastily Test", "Category:Fastily Test2"], next(GQuery.categories_on_page(self.wiki, "User:Fastily/Sandbox/Page/2", MAX)))
 
     def test_revisions(self):
         # test 1 - base

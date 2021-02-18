@@ -22,32 +22,6 @@ class MQuery:
     """Collection of queries optimized for performing mass/bulk data retrieval from the API"""
 
     @staticmethod
-    def _prop_no_cont(wiki: Wiki, titles: list[str], template: QConstant) -> dict:
-        """Performs a prop query and does not do any query continuation.  Use this for fetching page properties that are one-off in nature.
-
-        Args:
-            wiki (Wiki): The Wiki object to use.
-            titles (list[str]): The titles to work on.
-            template (QConstant): The QConstant to use.
-
-        Returns:
-            dict: A dict where each key is a title and the value is the corresponding value that was retrieved from the server.  A `None` value means something probably went wrong server side.
-        """
-        out = dict.fromkeys(titles)
-
-        for chunk in chunker(titles, wiki.prop_title_max):
-            if response := query_and_validate(wiki, {**template.pl, "prop": template.name, "titles": "|".join(chunk)}, desc=f"peform a prop_no_cont query with '{template.name}'"):
-                for p in mine_for(response, "query", "pages"):
-                    try:
-                        out[p["title"]] = template.retrieve_results(p)
-                    except Exception:
-                        log.debug("%s: Unable able to parse prop value from: %s", wiki, p, exc_info=True)
-
-                denormalize_result(out, response)
-
-        return out
-
-    @staticmethod
     def _prop_cont(wiki: Wiki, titles: list[str], template: QConstant, extra_pl: dict = None) -> dict:
         """Performs a prop query with query continuation.  Use this for fetching page properties that take the form of a list.  All available values will be fetched.
 
@@ -82,37 +56,35 @@ class MQuery:
 
         return dict(out)
 
+    @staticmethod
+    def _prop_no_cont(wiki: Wiki, titles: list[str], template: QConstant) -> dict:
+        """Performs a prop query and does not do any query continuation.  Use this for fetching page properties that are one-off in nature.
+
+        Args:
+            wiki (Wiki): The Wiki object to use.
+            titles (list[str]): The titles to work on.
+            template (QConstant): The QConstant to use.
+
+        Returns:
+            dict: A dict where each key is a title and the value is the corresponding value that was retrieved from the server.  A `None` value means something probably went wrong server side.
+        """
+        out = dict.fromkeys(titles)
+
+        for chunk in chunker(titles, wiki.prop_title_max):
+            if response := query_and_validate(wiki, {**template.pl, "prop": template.name, "titles": "|".join(chunk)}, desc=f"peform a prop_no_cont query with '{template.name}'"):
+                for p in mine_for(response, "query", "pages"):
+                    try:
+                        out[p["title"]] = template.retrieve_results(p)
+                    except Exception:
+                        log.debug("%s: Unable able to parse prop value from: %s", wiki, p, exc_info=True)
+
+                denormalize_result(out, response)
+
+        return out
+
     ##################################################################################################
     ######################################### P R O P  N O  C O N T ##################################
     ##################################################################################################
-
-    @staticmethod
-    def page_text(wiki: Wiki, titles: list[str]) -> dict:
-        """Queries the Wiki for the text of a title.
-
-        Args:
-            wiki (Wiki): The Wiki object to use.
-            titles (list[str]): The titles to query.
-
-        Returns:
-            dict: A `dict` where each key is the title and each value is a `str` with the wikitext of the title.  If a title does not exist, the str will be replaced with `None`.
-        """
-        log.debug("%s: fetching page text for %s", wiki, titles)
-        return MQuery._prop_no_cont(wiki, titles, PropNoCont.PAGE_TEXT)
-
-    @staticmethod
-    def exists(wiki: Wiki, titles: list[str]) -> dict:
-        """Queries the Wiki to determine if the specified list of titles exists.
-
-        Args:
-            wiki (Wiki): The Wiki object to use.
-            titles (list[str]): The titles to query.
-
-        Returns:
-            dict: A `dict` where each key is a title and each value is a bool indiciating if the title exists (`True`) or not (`False`).
-        """
-        log.debug("%s: determining if pages exist: %s", wiki, titles)
-        return MQuery._prop_no_cont(wiki, titles, PropNoCont.EXISTS)
 
     @staticmethod
     def category_size(wiki: Wiki, titles: list[str]) -> dict:
@@ -125,8 +97,33 @@ class MQuery:
         Returns:
             dict: A dict where each key is the category name and each value is an `int` representing the number of elements categorized in this category.
         """
-        log.debug("%s: fetching category sizes for: %s", wiki, titles)
         return MQuery._prop_no_cont(wiki, titles, PropNoCont.CATEGORY_SIZE)
+
+    @staticmethod
+    def exists(wiki: Wiki, titles: list[str]) -> dict:
+        """Queries the Wiki to determine if the specified list of titles exists.
+
+        Args:
+            wiki (Wiki): The Wiki object to use.
+            titles (list[str]): The titles to query.
+
+        Returns:
+            dict: A `dict` where each key is a title and each value is a bool indiciating if the title exists (`True`) or not (`False`).
+        """
+        return MQuery._prop_no_cont(wiki, titles, PropNoCont.EXISTS)
+
+    @staticmethod
+    def page_text(wiki: Wiki, titles: list[str]) -> dict:
+        """Queries the Wiki for the text of a title.
+
+        Args:
+            wiki (Wiki): The Wiki object to use.
+            titles (list[str]): The titles to query.
+
+        Returns:
+            dict: A `dict` where each key is the title and each value is a `str` with the wikitext of the title.  If a title does not exist, the str will be replaced with `None`.
+        """
+        return MQuery._prop_no_cont(wiki, titles, PropNoCont.PAGE_TEXT)
 
     ##################################################################################################
     ########################################## P R O P  C O N T ######################################
@@ -143,7 +140,6 @@ class MQuery:
         Returns:
             dict: A `dict` such that each key is the title and each value is the list of categories the page is categorized in.
         """
-        log.debug("%s: fetching categories on pages: %s", wiki, titles)
         return MQuery._prop_cont(wiki, titles, PropCont.CATEGORIES)
 
     @staticmethod
@@ -158,8 +154,6 @@ class MQuery:
         Returns:
             dict:  A `dict` such that each key is the title and each value is the list of files that duplicate the specified file.
         """
-        log.debug("%s: fetching duplicates of %s", wiki, titles)
-
         file_prefix = wiki.ns_manager.canonical_prefix(NS.FILE)
         result = MQuery._prop_cont(wiki, titles, PropCont.DUPLICATE_FILES, {"dflocalonly": 1} if local_only else {})
         return result if None in result.values() else {k: [file_prefix + e for e in v] for k, v in result.items()}
@@ -173,9 +167,8 @@ class MQuery:
             titles (list[str]): The titles to query
 
         Returns:
-            dict: A `dict` such that each key is the title and each value is the list of external links contained in the text of the page.
+            dict: A `dict` such that each key is the title and each value is the `list` of external links contained in the text of the page.
         """
-        log.debug("%s: fetching external links on %s", wiki, titles)
         return MQuery._prop_cont(wiki, titles, PropCont.EXTERNAL_LINKS)
 
     @staticmethod
@@ -189,7 +182,6 @@ class MQuery:
         Returns:
             dict: A dict such that each key is the title and each value is the list of pages displaying the file.
         """
-        log.debug("%s: fetching file usage: %s", wiki, titles)
         return MQuery._prop_cont(wiki, titles, PropCont.FILEUSAGE)
 
     @staticmethod
@@ -201,9 +193,8 @@ class MQuery:
             titles (list[str]): The files to get global usage usage of.  Each list element must include the `File:` prefix
 
         Returns:
-            dict: A dict such that each key is the title and each value is the list of tuples (page title, wiki domain) containing the global usages of the file.
+            dict: A dict such that each key is the title and each value is the list of tuples (page title, wiki hostname) containing the global usages of the file.
         """
-        log.debug("%s: fetching global usage of %s", wiki, titles)
         return MQuery._prop_cont(wiki, titles, PropCont.GLOBAL_USAGE)
 
     @staticmethod
@@ -217,7 +208,6 @@ class MQuery:
         Returns:
             dict: A dict such that each key is the title and each value is the list of ImageInfo objects associated with the title.
         """
-        log.debug("%s: fetching image info for %s", wiki, titles)
         return MQuery._prop_cont(wiki, titles, PropCont.IMAGE_INFO)
 
     @staticmethod
@@ -231,7 +221,6 @@ class MQuery:
         Returns:
             dict: A dict such that each key is the title and each value is the list of images/files that are used on the page.
         """
-        log.debug("%s: determining what files are embedded on %s", wiki, titles)
         return MQuery._prop_cont(wiki, titles, PropCont.IMAGES)
 
     @staticmethod
@@ -241,11 +230,11 @@ class MQuery:
         Args:
             wiki (Wiki): The Wiki object to use
             titles (list[str]): The titles to query
+            ns (Union[NS, str]): Only return results in these namespaces.  Optional, leave empty to disable.
 
         Returns:
             dict: A `dict` such that each key is the title and each value is the list of wiki links contained in the text of the page.
         """
-        log.debug("%s: fetching wikilinks on %s", wiki, titles)
         return MQuery._prop_cont(wiki, titles, PropCont.WIKILINKS_ON_PAGE, {"plnamespace": wiki.ns_manager.create_filter(*ns)} if ns else {})
 
     @staticmethod
@@ -259,7 +248,6 @@ class MQuery:
         Returns:
             dict: A `dict` such that each key is the title and each value is the list of tempalates transcluded on the page.
         """
-        log.debug("%s: determining what templates are transcluded on %s", wiki, titles)
         return MQuery._prop_cont(wiki, titles, PropCont.TEMPLATES)
 
     @staticmethod
