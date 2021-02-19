@@ -217,6 +217,7 @@ class Wiki:
         Returns:
             bool: `True` if the edit was successful.
         """
+        log.info("%s: Editing '%s'...", self, title)
         return WAction.edit(self, title, text, summary, prepend, append, minor)
 
     def login(self, username: str, password: str) -> bool:
@@ -227,28 +228,32 @@ class Wiki:
             password (str): The password to login with
 
         Returns:
-            bool: True if successful
+            bool: `True` if logging in was successful.
         """
-        return WAction.login(self, username, password)
+        log.info("%s: Attempting login for %s", self, username)
 
-    def upload(self, path: Path, title: str, desc: str = "", summary: str = "", unstash=True, max_retries=5) -> Union[bool, str]:
+        if result := WAction.login(self, username, password):
+            log.info("%s: Successfully logged in as '%s'", self, username)
+        else:
+            log.error("%s: Failed to log in as '%s'", self, username)
+
+        return result
+
+    def upload(self, path: Path, title: str, desc: str = "", summary: str = "", max_retries=5) -> bool:
         """Uploads a file to the target Wiki.
 
         Args:
             path (Path): the local path on your computer pointing to the file to upload
             title (str): The title to upload the file to, excluding the "`File:`" namespace.
-            desc (str, optional): The text to go on the file description page.  Does nothing if `unstash` is `False`. Defaults to "".
-            summary (str, optional): The upload log summary to use. Does nothing if `unstash` is `False`. Defaults to "".
-            unstash (bool, optional): Indicates if the file should be unstashed (published) after upload. Defaults to True.
+            desc (str, optional): The text to go on the file description page.  Defaults to "".
+            summary (str, optional): The upload log summary to use.  Defaults to "".
             max_retries (int, optional): The maximum number of retry attempts in the event of an error. Defaults to 5.
 
         Returns:
-            Union[bool, str]: 
-                * `unstash=True`: returns a bool indicating if the unstash operation succeeded.
-                * `unstash=False`: returns a str with the filekey
-                * `None`: Error, something went wrong
+            bool: `True` if the upload was successful.
         """
-        return WAction.upload(self, path, title, desc, summary, unstash, max_retries)
+        log.info("%s: Uploading '%s' to '%s'", self, path, title)
+        return WAction.unstash(self, filekey, title, desc, summary, max_retries) if (filekey := WAction.upload_only(self, path, title, max_retries)) else False
 
     ##################################################################################################
     ######################################## Q U E R I E S ###########################################
@@ -531,7 +536,7 @@ class Wiki:
 
         Args:
             title (str): The title to get revisions for.
-            older_first (bool, optional): Set `True` to get older revisions first.. Defaults to False.
+            older_first (bool, optional): Set `True` to get older revisions first. Defaults to False.
             start (datetime, optional): Set to filter out revisions older than this date.  If no timezone is specified in the datetime, then UTC is assumed. Defaults to None.
             end (datetime, optional): Set to filter out revisions newer than this date. If no timezone is specified in the datetime, then UTC is assumed. Defaults to None.
             include_text (bool, optional): If `True`, then also fetch the wikitext of each revision.  Will populate the `Revision.text` field.  Warning: enabling this is expensive for large pages with many revisions.  Defaults to False.
@@ -587,6 +592,32 @@ class Wiki:
         """
         log.info("%s: Fetching uploads for '%s'", self, user)
         return flatten_generator(GQuery.user_uploads(self, user, MAX))
+
+    def what_links_here(self, title: str, redirects_only: bool = False) -> list[str]:
+        """Fetch pages that wiki link (locally) to a page.
+
+        Args:
+            title (str): The title to query
+            redirects_only (bool, optional): Set `True` to get the titles that redirect to this page. Defaults to False.
+
+        Returns:
+            list[str]: The list of pages that link to `title`.
+        """
+        log.info("%s: determining what pages link to %s", self, title)
+        return MQuery.what_links_here(self, [title], redirects_only).get(title)
+
+    def what_transcludes_here(self, title: str, *ns: Union[NS, str]) -> list[str]:
+        """Fetch pages that translcude a page.  If querying for templates, you must include the `Template:` prefix.
+
+        Args:
+            title (str): The title to query
+            ns (Union[NS, str]): Only return results in these namespaces.  Optional, leave empty to disable.
+
+        Returns:
+            list[str]: The list of pages that transclude `title`.
+        """
+        log.info("%s: fetching transclusions of %s", self, title)
+        return MQuery.what_transcludes_here(self, [title], *ns).get(title)
 
     def whoami(self) -> str:
         """Get this Wiki's username from the server.  If not logged in, then this will return your external IP address.

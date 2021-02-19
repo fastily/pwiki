@@ -117,5 +117,12 @@ class TestWikiQuery(QueryTestCase):
     def test_user_uploads(self):
         self.assertCountEqual(["File:FCTest2.svg", "File:FCTest1.png"], self.wiki.user_uploads("FastilyClone"))
 
+    def test_what_links_here(self):
+        self.assertListEqual(["User:Fastily/Sandbox/Link"], self.wiki.what_links_here("User:Fastily/Sandbox/Link/3"))
+        self.assertListEqual(["User:Fastily/Sandbox/Link/4"], self.wiki.what_links_here("User:Fastily/Sandbox/Link/1", True))
+
+    def test_what_transcludes_here(self):
+        self.assertCountEqual(["User:Fastily/Sandbox/T", "FastilyTest"], self.wiki.what_transcludes_here("Template:FastilyTest"))
+
     def test_whoami(self):
         self.assertTrue(self.wiki.whoami())

@@ -262,7 +262,6 @@ class MQuery:
         Returns:
             dict: A `dict` such that each key is the title and each value is the list of pages that link to the specified page.
         """
-        log.debug("%s: determining what pages link to %s", wiki, titles)
         return MQuery._prop_cont(wiki, titles, PropCont.LINKS_HERE, {"lhshow": ("" if redirects_only else "!") + "redirect"})
 
     @staticmethod
@@ -276,5 +275,4 @@ class MQuery:
         Returns:
             dict: A `dict` such that each key is the title and each value is the list of pages that transclude the specified page.
         """
-        log.debug("%s: fetching transclusions of %s", wiki, titles)
         return MQuery._prop_cont(wiki, titles, PropCont.TRANSCLUDED_IN, {"tinamespace": wiki.ns_manager.create_filter(*ns)} if ns else {})

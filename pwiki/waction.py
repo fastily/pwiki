@@ -5,7 +5,7 @@ import logging
 
 from pathlib import Path
 from time import sleep
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 
 from .oquery import OQuery
 from .utils import has_error, make_params, mine_for, read_error
@@ -22,7 +22,7 @@ class WAction:
     """Collection of functions which can perform write actions on a Wiki"""
 
     @staticmethod
-    def _post_action(wiki: Wiki, action: str, form: dict = None, apply_token: bool = True, timeout: int = 15) -> dict:
+    def _post_action(wiki: Wiki, action: str, form: dict = None, apply_token: bool = True, timeout: int = 15, extra_args: dict = None) -> dict:
         """Convienence method, performs the actual POST of the action to the server.
 
         Args:
@@ -37,24 +37,30 @@ class WAction:
         pl = make_params(action, form) | ({"token": wiki.csrf_token} if apply_token else {})
 
         try:
-            return wiki.client.post(wiki.endpoint, data=pl, timeout=timeout).json()
+            return wiki.client.post(wiki.endpoint, data=pl, **({"timeout": timeout} | (extra_args or {}))).json()
         except Exception:
             log.error("%s: Could not reach server or read response while performing %s with params %s", wiki, action, pl, exc_info=True)
 
         return {}
 
     @staticmethod
-    def is_success(action: str, response: dict, success_vals: tuple = ("Success",)) -> bool:
-        """Checks if the server responded with a `Success` message for the specified `response`.
+    def _action_and_validate(wiki: Wiki, action: str, form: dict = None, apply_token: bool = True, timeout: int = 15, success_vals: tuple = ("Success",), extra_args: dict = None) -> dict:
 
-        Args:
-            action (str): The action which was just performed
-            response (dict): The json response from the server
+        if not (response := WAction._post_action(wiki, action, form, apply_token, timeout, extra_args)):
+            log.error("%s: No response from server while trying to perform action '%s'", wiki, action)
+            log.debug("Sent parameters: %s", form)
+            return
 
-        Returns:
-            bool: True if the server responded with a `Success` message.
-        """
-        return mine_for(response, action, "result") in success_vals
+        if has_error(response):
+            log.error("%s: Failed to perform action '%s', server said: %s", wiki, action, read_error(action, response))
+            log.debug(response)
+            return
+
+        if (status := mine_for(response, action, "result")) in success_vals:
+            return response
+
+        log.error("%s: Failed to perform action '%s', got bad result from server: %s", wiki, action, status)
+        log.debug(response)
 
     @staticmethod
     def delete(wiki: Wiki, title: str, reason: str) -> bool:
@@ -68,13 +74,7 @@ class WAction:
         Returns:
             bool: `True` if this action succeeded.
         """
-        response = WAction._post_action(wiki, "delete", {"title": title, "reason": reason})
-
-        if WAction.is_success("delete", response):
-            return True
-
-        log.error("%s: Could not delete '%s', server said: %s", wiki, title, read_error("delete", response))
-        return False
+        return bool(WAction._action_and_validate(wiki, "delete", {"title": title, "reason": reason}))
 
     @staticmethod
     def edit(wiki: Wiki, title: str, text: str = None, summary: str = "", prepend: str = None, append: str = None, minor: bool = False) -> bool:
@@ -95,34 +95,24 @@ class WAction:
         Returns:
             bool: `True` if the edit was successful.
         """
-        log.info("%s: Editing '%s'", wiki, title)
-
-        if text and (prepend or append):
-            raise ValueError("Invalid arguemnts, cannot use text and prepend/append together.  Choose one or the other.")
-        if not any((text, prepend, append)):
-            raise ValueError("Invalid arguments - text, prepend, or append was not specified!")
-
         pl = {"title": title, "summary": summary}
 
         if text:
             pl["text"] = text
-        if append:
-            pl["appendtext"] = append
-        if prepend:
-            pl["prependtext"] = prepend
+        elif append or prepend:
+            if append:
+                pl["appendtext"] = append
+            if prepend:
+                pl["prependtext"] = prepend
+        else:
+            raise ValueError("Can't do anything: text, prepend, or append were not specified!")
 
         if minor:
             pl["minor"] = 1
         if wiki.is_bot:
             pl["bot"] = 1
 
-        response = WAction._post_action(wiki, "edit", pl)
-
-        if WAction.is_success("edit", response):
-            return True
-
-        log.error("%s: Could not edit '%s', server said: %s", wiki, title, read_error("edit", response))
-        return False
+        return bool(WAction._action_and_validate(wiki, "edit", pl))
 
     @staticmethod
     def login(wiki: Wiki, username: str, password: str) -> bool:
@@ -136,16 +126,10 @@ class WAction:
         Returns:
             bool: True if successful
         """
-        log.info("%s: Attempting login for %s", wiki, username)
-
-        response = WAction._post_action(wiki, "login", {"lgname": username, "lgpassword": password, "lgtoken": OQuery.fetch_token(wiki, True)}, False)
-        if has_error(response):
-            log.error("%s: failed to fetch tokens, server said: %s", wiki, read_error("login", response))
+        if not (response := WAction._action_and_validate(wiki, "login", {"lgname": username, "lgpassword": password, "lgtoken": OQuery.fetch_token(wiki, True)}, False)):
             return False
 
         wiki.username = mine_for(response, "login", "lgusername")
-        log.info("%s: Successfully logged in as %s", wiki, wiki.username)
-
         wiki.csrf_token = OQuery.fetch_token(wiki)
         wiki._refresh_rights()
         wiki.is_logged_in = True
@@ -153,7 +137,7 @@ class WAction:
         return True
 
     @staticmethod
-    def unstash_upload(wiki: Wiki, filekey: str, title: str, desc: str = "", summary: str = "", max_retries=5, retry_interval=5) -> bool:
+    def unstash(wiki: Wiki, filekey: str, title: str, desc: str = "", summary: str = "", max_retries=5, retry_interval=5) -> bool:
         """Attempt to unstash a file uploaded to the file stash.
 
         Args:
@@ -170,84 +154,52 @@ class WAction:
         """
         log.info("%s: Unstashing '%s' as '%s'", wiki, filekey, title)
 
-        pl = make_params("upload", {"filename": title, "text": desc, "comment": summary, "filekey": filekey, "ignorewarnings": 1})
-
         tries = 0
-        while tries < max_retries:
-            response = WAction._post_action(wiki, "upload", pl, timeout=360)
-
-            if WAction.is_success("upload", response):
-                return True
-
-            log.error("%s: Could not unstash, server said %s.  Attempt %d of %d. Sleeping %ds...", wiki, read_error("upload", response), tries+1, max_retries, retry_interval)
-            log.debug(response)
-
+        status = False
+        while tries < max_retries and not (status := bool(WAction._action_and_validate(wiki, "upload", {"filename": title, "text": desc, "comment": summary, "filekey": filekey, "ignorewarnings": 1}, timeout=360))):
+            log.warning("%s: Unstash failed, this is a attempt %d of %d. Sleeping %ds...", wiki, tries + 1, max_retries, retry_interval)
             sleep(retry_interval)
             tries += 1
 
-        return False
+        return status
 
     @staticmethod
-    def upload(wiki: Wiki, path: Path, title: str, desc: str = "", summary: str = "", unstash=True, max_retries=5) -> Union[bool, str]:
-        """Uploads a file to the target Wiki.
+    def upload_only(wiki: Wiki, path: Path, title: str, max_retries: int = 5) -> str:
+        """Uploads a file to the target Wiki.  Note: you will need to unstash (publish) your uploads post-upload in order for them to be visible on the wiki.
 
         Args:
             wiki (Wiki): The Wiki object to use
-            path (Path): the local path on your computer pointing to the file to upload
+            path (Path): The local path on your computer pointing to the file to upload
             title (str): The title to upload the file to, excluding the "`File:`" namespace.
-            desc (str, optional): The text to go on the file description page.  Does nothing if `unstash` is `False`. Defaults to "".
-            summary (str, optional): The upload log summary to use. Does nothing if `unstash` is `False`. Defaults to "".
-            unstash (bool, optional): Indicates if the file should be unstashed (published) after upload. Defaults to True.
             max_retries (int, optional): The maximum number of retry attempts in the event of an error. Defaults to 5.
 
+        Raises:
+            OSError: if `path` does not exist or is an empty file.
+
         Returns:
-            Union[bool, str]: 
-                * `unstash=True`: returns a bool indicating if the unstash operation succeeded.
-                * `unstash=False`: returns a str with the filekey
-                * `None`: Error, something went wrong
+            str: the filekey, or `None` if something went wrong.
         """
-        fsize = path.stat().st_size
+        if not path.is_file() or not (fsize := path.stat().st_size):
+            raise OSError(f"Nothing to upload, '{path}' does not exist or is an empty file.")
+
         total_chunks = fsize // _CHUNKSIZE + 1
-
-        log.info("%s: Uploading '%s' to '%s'", wiki, path, title)
-
-        payload = make_params("upload", {"filename": title, "offset": 0, "ignorewarnings": 1, "filesize": fsize, "token": wiki.csrf_token, "stash": 1})
+        pl = {"filename": title, "offset": 0, "ignorewarnings": 1, "filesize": fsize, "token": wiki.csrf_token, "stash": 1}
+        chunk_count = err_count = 0
 
         with path.open('rb') as f:
-            buffer = f.read(_CHUNKSIZE)
-            chunk_count = 0
-
-            err_count = 0
-            while True:
-                if err_count > 5:
-                    log.error("%s: Encountered %d errors, aborting", wiki, err_count)
-                    return
-
+            while buffer := f.read(_CHUNKSIZE):
                 log.info("%s: Uploading chunk %d of %d from '%s'", wiki, chunk_count+1, total_chunks, path)
 
-                response = wiki.client.post(wiki.endpoint, data=payload, files={'chunk': (path.name, buffer, "multipart/form-data")}, timeout=420)
-                if not response:
-                    log.warning("%s: Did not get response from server when uploading '%s', retrying...", wiki, path)
-                    err_count += 1
+                if (response := WAction._action_and_validate(wiki, "upload", pl, timeout=420, success_vals=("Continue", "Success"), extra_args={"files": {'chunk': (path.name, buffer, "multipart/form-data")}})) and (filekey := mine_for(response, "upload", "filekey")):
+                    chunk_count += 1
+                    pl["offset"] = _CHUNKSIZE * chunk_count
+                    pl["filekey"] = filekey
                     continue
 
-                response = response.json()
-                if not WAction.is_success("upload", response, ("Continue", "Success")):
-                    log.error("%s: uploading chunk failed, server said %s", wiki, read_error("upload", response))
-                    err_count += 1
-                    continue
+                err_count += 1
+                log.warning("%s: Encountered error while uploading, this was %d/%d", wiki, err_count, max_retries)
+                if err_count > max_retries:
+                    log.error("%s: Exceeded error threshold, abort.", wiki)
+                    return
 
-                if "filekey" not in response["upload"]:
-                    log.error("%s: filekey was not found in response body when uploading '%s'", wiki, path)
-                    log.debug(response)
-                    err_count += 1
-                    continue
-
-                payload["filekey"] = response["upload"]["filekey"]
-                chunk_count += 1
-                payload["offset"] = _CHUNKSIZE * chunk_count
-
-                if not (buffer := f.read(_CHUNKSIZE)):
-                    break
-
-        return WAction.unstash_upload(wiki, payload["filekey"], title, desc, summary, max_retries) if unstash else payload["filekey"]
+        return pl.get("filekey")
