@@ -22,6 +22,38 @@ class WAction:
     """Collection of functions which can perform write actions on a Wiki"""
 
     @staticmethod
+    def _action_and_validate(wiki: Wiki, action: str, form: dict = None, apply_token: bool = True, timeout: int = 15, success_vals: tuple = ("Success",), extra_args: dict = None) -> dict:
+        """Performs a `_post_action()` and checks the results for errors.  If there is an error, it will be logged accordingly.
+
+        Args:
+            wiki (Wiki): The Wiki object to use
+            action (str): The id of the action to perform.
+            form (dict, optional): The parameters to POST to the server, if applicable. Defaults to None.
+            apply_token (bool, optional): Set `True` to also send the Wiki's csrf token in the POST. Defaults to True.
+            timeout (int, optional): The length of time (in seconds) to wait before marking the action as failed. Defaults to 15.
+            success_vals (tuple, optional): The keyword responses returned by the server which indicate a successful action.  Optional, set `None` to skip this check.  Defaults to ("Success",).
+            extra_args (dict, optional): Any `kwargs` that should be passed to the underlying requests Session object when performing a POST. Defaults to None.
+
+        Returns:
+            dict: The json response from the server, or `None` if something went wrong.
+        """
+        if not (response := WAction._post_action(wiki, action, form, apply_token, timeout, extra_args)):
+            log.error("%s: No response from server while trying to perform action '%s'", wiki, action)
+            log.debug("Sent parameters: %s", form)
+            return
+
+        if has_error(response):
+            log.error("%s: Failed to perform action '%s', server said: %s", wiki, action, read_error(action, response))
+            log.debug(response)
+            return
+
+        if not success_vals or (status := mine_for(response, action, "result")) in success_vals:
+            return response
+
+        log.error("%s: Failed to perform action '%s', got bad result from server: %s", wiki, action, status)
+        log.debug(response)
+
+    @staticmethod
     def _post_action(wiki: Wiki, action: str, form: dict = None, apply_token: bool = True, timeout: int = 15, extra_args: dict = None) -> dict:
         """Convienence method, performs the actual POST of the action to the server.
 
@@ -30,6 +62,8 @@ class WAction:
             action (str): The action to perform.
             form (dict, optional): The parameters to POST to the server, if applicable. Defaults to None.
             apply_token (bool, optional): Set `True` to also send the Wiki's csrf token in the POST. Defaults to True.
+            timeout (int, optional): The length of time (in seconds) to wait before marking the action as failed. Defaults to 15.
+            extra_args (dict, optional): Any `kwargs` that should be passed to the underlying requests Session object when performing a POST. Defaults to None.
 
         Returns:
             dict: The response from the server.  Empty dict if there was an error.
@@ -44,25 +78,6 @@ class WAction:
         return {}
 
     @staticmethod
-    def _action_and_validate(wiki: Wiki, action: str, form: dict = None, apply_token: bool = True, timeout: int = 15, success_vals: tuple = ("Success",), extra_args: dict = None) -> dict:
-
-        if not (response := WAction._post_action(wiki, action, form, apply_token, timeout, extra_args)):
-            log.error("%s: No response from server while trying to perform action '%s'", wiki, action)
-            log.debug("Sent parameters: %s", form)
-            return
-
-        if has_error(response):
-            log.error("%s: Failed to perform action '%s', server said: %s", wiki, action, read_error(action, response))
-            log.debug(response)
-            return
-
-        if (status := mine_for(response, action, "result")) in success_vals:
-            return response
-
-        log.error("%s: Failed to perform action '%s', got bad result from server: %s", wiki, action, status)
-        log.debug(response)
-
-    @staticmethod
     def delete(wiki: Wiki, title: str, reason: str) -> bool:
         """Deletes a page.  PRECONDITION: `wiki` must be logged in and have the ability to delete pages for this to work.
 
@@ -74,7 +89,7 @@ class WAction:
         Returns:
             bool: `True` if this action succeeded.
         """
-        return bool(WAction._action_and_validate(wiki, "delete", {"title": title, "reason": reason}))
+        return bool(WAction._action_and_validate(wiki, "delete", {"title": title, "reason": reason}, success_vals=None))
 
     @staticmethod
     def edit(wiki: Wiki, title: str, text: str = None, summary: str = "", prepend: str = None, append: str = None, minor: bool = False) -> bool:
@@ -83,10 +98,10 @@ class WAction:
         Args:
             wiki (Wiki): The Wiki to use.
             title (str): The title to edit.
-            text (str, optional): Text to replace the current page's contents with. Mutually exclusive with `prepend`/`append`. Defaults to None.
+            text (str, optional): Text to replace the current page's contents with.  Overrides `prepend`/`append`.  Defaults to None.
             summary (str, optional): The edit summary to use. Defaults to "".
-            prepend (str, optional): Text to prepend to the page. Mutually exclusive with `text`. Defaults to None.
-            append (str, optional): Text to append to the page.  Mutually exclusive with `text`. Defaults to None.
+            prepend (str, optional): Text to prepend to the page. Defaults to None.
+            append (str, optional): Text to append to the page. Defaults to None.
             minor (bool, optional): Set `True` to mark this edit as minor. Defaults to False.
 
         Raises:

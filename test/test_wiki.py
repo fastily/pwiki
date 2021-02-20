@@ -1,8 +1,44 @@
 from datetime import datetime
+from unittest import mock, TestCase
 
 from pwiki.ns import NS
 
-from .base import QueryTestCase
+from .base import file_to_json, new_wiki, QueryTestCase
+
+
+@mock.patch("pwiki.waction.WAction._post_action")
+class TestWikiAction(QueryTestCase):
+    """Tests Wiki's action methods."""
+
+    def test_delete(self, mock: mock.Mock):
+        mock.return_value = file_to_json("delete")
+        self.assertTrue(self.wiki.delete("User:Fastily", "foobar"))
+        mock.assert_called_once()
+
+    def test_edit(self, mock: mock.Mock):
+        # test 1
+        mock.return_value = file_to_json("edit")
+        self.assertTrue(self.wiki.edit("User:Fastily", "Text foobar", "example summary"))
+        mock.assert_called_once()
+
+        # test 2
+        with self.assertRaises(ValueError):
+            self.wiki.edit("Foo")
+
+
+class TestWikiAuth(TestCase):
+    """Tests Wiki's authentication-related functionality."""
+
+    @mock.patch("pwiki.waction.WAction._post_action")
+    def test_login(self, mock: mock.Mock):
+        mock.return_value = file_to_json("login")
+
+        wiki = new_wiki(cookie_jar=None)
+        self.assertTrue(wiki.login("FSock", "not long enough"))
+        mock.assert_called_once()
+
+        self.assertTrue(wiki.is_logged_in)
+        self.assertEqual("FSock", wiki.username)
 
 
 class TestWikiQuery(QueryTestCase):

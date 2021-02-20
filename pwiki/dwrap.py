@@ -8,19 +8,16 @@ from .utils import mine_for
 class _DataEntry:
     """Base template class for more structured data returned by the API."""
 
-    def __init__(self, user: str = None, title: str = None, summary: str = None, timestamp: str = None):
+    def __init__(self, e: dict):
         """Initializer, creates a new DataEntry.
 
         Args:
-            user (str, optional): The user associated with this entry. `User:` prefix should be omitted. Defaults to None.
-            title (str, optional): The page title associated with this entry. Defaults to None.
-            summary (str, optional): The summary associated with this entry. Defaults to None.
-            timestamp (str, optional): The timestamp (in ISO 8601) the entry occured at. Defaults to None.
+            e (dict): A json object from the list in the response from the server.
         """
-        self.user: str = user
-        self.title: str = title
-        self.summary: str = summary
-        self.timestamp: datetime = datetime.fromisoformat(timestamp.replace("Z", "+00:00")) if timestamp else None
+        self.user: str = e.get("user")
+        self.title: str = e.get("title")
+        self.summary: str = e.get("comment")
+        self.timestamp: datetime = datetime.fromisoformat(ts.replace("Z", "+00:00")) if (ts := e.get("timestamp")) else None
 
     def __repr__(self) -> str:
         """Creates a str representation of this DataEntry.  Useful for debugging.
@@ -40,7 +37,7 @@ class Contrib(_DataEntry):
         Args:
             e (dict): A json object from the `"contributions"` list in the response from the server.
         """
-        super().__init__(e.get("user"), e.get("title"), e.get("comment"), e.get("timestamp"))
+        super().__init__(e)
 
         self.is_page_create: bool = e.get("new")
         self.is_minor: bool = e.get("minor")
@@ -56,7 +53,7 @@ class ImageInfo(_DataEntry):
         Args:
             e (dict): A json object from the `"imageinfo"` list in the response from the server.
         """
-        super().__init__(e.get("user"), summary=e.get("comment"), timestamp=e.get("timestamp"))
+        super().__init__(e)
 
         self.size: int = e.get("size")
         self.width: int = e.get("width")
@@ -74,7 +71,7 @@ class Log(_DataEntry):
         Args:
             e (dict): A json object from the `"logevents"` list in the response from the server.
         """
-        super().__init__(e.get("user"), e.get("title"), e.get("comment"), e.get("timestamp"))
+        super().__init__(e)
 
         self.type: str = e.get("type")
         self.action: str = e.get("action")
@@ -90,7 +87,7 @@ class Revision(_DataEntry):
         Args:
             e (dict): A json object from the `"revisions"` list in the response from the server.
         """
-        super().__init__(e.get("user"), summary=e.get("comment"), timestamp=e.get("timestamp"))
+        super().__init__(e)
 
         self.text: str = mine_for(e, "slots", "main", "content")
 

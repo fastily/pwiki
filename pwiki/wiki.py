@@ -4,7 +4,7 @@ import pickle
 
 from datetime import datetime
 from pathlib import Path
-from typing import Union
+from typing import Any, Callable, Union
 
 from requests import Session
 
@@ -203,6 +203,19 @@ class Wiki:
     ######################################## A C T I O N S ###########################################
     ##################################################################################################
 
+    def delete(self, title: str, reason: str) -> bool:
+        """Deletes a page.  PRECONDITION: `wiki` must be logged in and have the ability to delete pages for this to work.
+
+        Args:
+            title (str): The title to delete
+            reason (str): The reason for deleting this page.
+
+        Returns:
+            bool: `True` if this action succeeded.
+        """
+        log.info("%s: Deleting '%s'...", self, title)
+        return WAction.delete(self, title, reason)
+
     def edit(self, title: str, text: str = None, summary: str = "", prepend: str = None, append: str = None, minor: bool = False) -> bool:
         """Attempts to edit a page on the Wiki.  Can replace text or append/prepend text.
 
@@ -259,6 +272,18 @@ class Wiki:
     ######################################## Q U E R I E S ###########################################
     ##################################################################################################
 
+    def _xq_simple(self, func: Callable[..., dict], title: str, *extra_args: Any) -> Any:
+        """Convienence method which makes it easy to execute `MQuery` or `MQuery`-like functions with a single title.  Shorthand for `func(self, [title]).get(title)`.
+
+        Args:
+            func (Callable[..., dict]): The `MQuery` or `MQuery`-like method to call.
+            title (str): The title to act on.
+
+        Returns:
+            Any: The value obtained by performing a `.get(title)` call on the `dict` returned by `func`.
+        """
+        return func(self, [title], *extra_args).get(title)
+
     def categories_on_page(self, title: str) -> list[str]:
         """Fetch the categories used on a page.
 
@@ -269,7 +294,7 @@ class Wiki:
             list[str]: The `list` of categories used on `title`.
         """
         log.info("%s: fetching categories on pages: %s", self, title)
-        return MQuery.categories_on_page(self, [title]).get(title)
+        return self._xq_simple(MQuery.categories_on_page, title)
 
     def category_members(self, title: str, ns: list[Union[NS, str]] = []) -> list[str]:
         """Fetches the elements in a category.
@@ -294,7 +319,7 @@ class Wiki:
             int: The number of pages in this category.
         """
         log.info("%s: fetching category size for: '%s'", self, title)
-        return MQuery.category_size(self, [title]).get(title)
+        return self._xq_simple(MQuery.category_size, title)
 
     def contribs(self, user: str, older_first: bool = False, ns: list[Union[NS, str]] = []) -> list[Contrib]:
         """Fetches contributions of a user.  Warning: this fetches all of `user`'s contributions!
@@ -321,7 +346,7 @@ class Wiki:
             list[str]: The `list` of files that duplicate `title`.
         """
         log.info("%s: fetching duplicates of %s", self, title)
-        return MQuery.duplicate_files(self, [title], local_only).get(title)
+        return self._xq_simple(MQuery.duplicate_files, title, local_only)
 
     def exists(self, title: str) -> bool:
         """Query the wiki and determine if `title` exists on the wiki.
@@ -333,7 +358,7 @@ class Wiki:
             bool: `True` if `title` exists on the wiki.
         """
         log.info("%s: determining if '%s' exists", self, title)
-        return MQuery.exists(self, [title]).get(title)
+        return self._xq_simple(MQuery.exists, title)
 
     def external_links(self, title: str) -> list[str]:
         """Fetches external links on a page.
@@ -345,7 +370,7 @@ class Wiki:
             list[str]: The `list` of external links contained in the text of `title`.
         """
         log.info("%s: fetching external links on %s", self, title)
-        return MQuery.external_links(self, [title]).get(title)
+        return self._xq_simple(MQuery.external_links, title)
 
     def file_usage(self, title: str) -> list[str]:
         """Fetch the titles of all pages embedding/displaying `title`.
@@ -357,7 +382,7 @@ class Wiki:
             list[str]: The `list` of all pages displaying `title`.
         """
         log.info("%s: fetching file usage for '%s'", self, title)
-        return MQuery.file_usage(self, [title]).get(title)
+        return self._xq_simple(MQuery.file_usage, title)
 
     def first_editor_of(self, title: str) -> str:
         """Gets the user who created `title`.
@@ -380,7 +405,7 @@ class Wiki:
             list[tuple]: A `list` of `tuple`s (page title, wiki hostname) containing the global usages of the file.
         """
         log.info("%s: fetching global usage of %s", self, title)
-        return MQuery.global_usage(self, [title]).get(title)
+        return self._xq_simple(MQuery.global_usage, title)
 
     def image_info(self, title: str) -> list[ImageInfo]:
         """Fetch image (file) info for media files.  This is basically image metadata for each uploaded media file under the specified title. See `dwrap.ImageInfo` for details.
@@ -392,7 +417,7 @@ class Wiki:
             list[ImageInfo]: The `list` of `ImageInfo` objects associated with `title`.
         """
         log.info("%s: fetching image info for %s", self, title)
-        return MQuery.image_info(self, [title]).get(title)
+        return self._xq_simple(MQuery.image_info, title)
 
     def images_on_page(self, title: str) -> list[str]:
         """Fetch images/media files used on a page.
@@ -404,7 +429,7 @@ class Wiki:
             list[str]: The `list` of images/files that are used on `title`.
         """
         log.info("%s: determining what files are embedded on %s", self, title)
-        return MQuery.images_on_page(self, [title]).get(title)
+        return self._xq_simple(MQuery.images_on_page, title)
 
     def last_editor_of(self, title: str) -> str:
         """Gets the user who most recently edited `title`.
@@ -428,7 +453,7 @@ class Wiki:
             list[str]: The `list` of wiki links contained in the text of `title`
         """
         log.info("%s: fetching wikilinks on %s", self, title)
-        return MQuery.links_on_page(self, [title], *ns).get(title)
+        return self._xq_simple(MQuery.links_on_page, title, *ns)
 
     def list_duplicate_files(self) -> list[str]:
         """List files on a wiki which have duplicates by querying the Special page `Special:ListDuplicatedFiles`.  This reads the entire list, and may return up to 5000 elements.
@@ -481,7 +506,7 @@ class Wiki:
             str: The normalized version of `title`.
         """
         log.info("%s: Normalizing '%s'", self, title)
-        return OQuery.normalize_titles(self, [title]).get(title)
+        return self._xq_simple(OQuery.normalize_titles, title)
 
     def page_text(self, title: str) -> str:
         """Queries the Wiki for the text of `title`.
@@ -493,7 +518,7 @@ class Wiki:
             str: The text of `title`.  `None` if `title` does not exist.
         """
         log.info("%s: fetching page text of %s", self, title)
-        return MQuery.page_text(self, [title]).get(title)
+        return self._xq_simple(MQuery.page_text, title)
 
     def prefix_index(self, ns: Union[NS, str], prefix: str) -> list[str]:
         """Performs a prefix index query and returns all matching titles.
@@ -529,7 +554,7 @@ class Wiki:
         Returns:
             str: The redirect target.  If `title` was not a redirect, then `title` will be returned.
         """
-        return OQuery.resolve_redirects(self, [title]).get(title)
+        return self._xq_simple(OQuery.resolve_redirects, title)
 
     def revisions(self, title: str, older_first: bool = False, start: datetime = None, end: datetime = None, include_text: bool = False) -> list[Revision]:
         """Fetches all the revisions of `title`.  Plan accordingly when querying pages that have many revisions!
@@ -570,7 +595,7 @@ class Wiki:
             list[str]: A list of tempalates transcluded on `title
         """
         log.info("%s: determining what templates are transcluded on %s", self, title)
-        return MQuery.templates_on_page(self, [title]).get(title)
+        return self._xq_simple(MQuery.templates_on_page, title)
 
     def uploadable_filetypes(self) -> set:
         """Queries the Wiki for all acceptable file types which may be uploaded to this Wiki.  PRECONDITION: the target Wiki permits file uploads.
@@ -604,7 +629,7 @@ class Wiki:
             list[str]: The list of pages that link to `title`.
         """
         log.info("%s: determining what pages link to %s", self, title)
-        return MQuery.what_links_here(self, [title], redirects_only).get(title)
+        return self._xq_simple(MQuery.what_links_here, title, redirects_only)
 
     def what_transcludes_here(self, title: str, *ns: Union[NS, str]) -> list[str]:
         """Fetch pages that translcude a page.  If querying for templates, you must include the `Template:` prefix.
@@ -617,7 +642,7 @@ class Wiki:
             list[str]: The list of pages that transclude `title`.
         """
         log.info("%s: fetching transclusions of %s", self, title)
-        return MQuery.what_transcludes_here(self, [title], *ns).get(title)
+        return self._xq_simple(MQuery.what_transcludes_here, title, *ns)
 
     def whoami(self) -> str:
         """Get this Wiki's username from the server.  If not logged in, then this will return your external IP address.

@@ -41,50 +41,6 @@ class OQuery:
 
         return out
 
-    # @staticmethod
-    # def _prop_cont_single(wiki: Wiki, title: str, template: QConstant, extra_pl: dict = None) -> list:
-    #     out = []
-
-    #     params = {**template.pl_with_limit(), "prop": template.name, "titles": title} | (extra_pl or {})
-
-    #     while True:
-    #         if not (response := query_and_validate(wiki, params, desc=f"peform a prop_cont_single query with '{template.name}'")):
-    #             raise OSError(f"Critical failure performing a _prop_cont_single query with {template.name}, cannot proceed")
-
-    #         if not ((l := mine_for(response, "query", "pages")) and template.name in (p := l[0])):
-    #             break
-
-    #         out += template.retrieve_results(p[template.name])
-
-    #         if not (cont := get_continue_params(response)):
-    #             break
-
-    #         params.update(cont)
-
-    #     return out
-
-    # @staticmethod
-    # def _list_cont(wiki: Wiki, template: QConstant, extra_pl: dict = None) -> list:
-    #     out = []
-
-    #     params = {**template.pl_with_limit(), "list": template.name} | (extra_pl or {})
-    #     while True:
-    #         if not (response := query_and_validate(wiki, params, desc=f"peform a list_cont query with '{template.name}'")):
-    #             return
-
-    #         if template.name not in (q := mine_for(response, "query")):
-    #             log.error("'%s' was not found in query result while doing a list_cont, something is very wrong.", template.name)
-    #             return
-
-    #         out += template.retrieve_results(q[template.name])
-
-    #         if not (cont := get_continue_params(response)):
-    #             break
-
-    #         params.update(cont)
-
-    #     return out
-
     @staticmethod
     def fetch_token(wiki: Wiki, login_token: bool = False) -> str:
         """Fetch a csrf or login token from the server.  By default, this method will retrieve a csrf token.

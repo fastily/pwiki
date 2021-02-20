@@ -42,7 +42,7 @@ def mine_for(target: dict, *keys: str) -> Any:
         keys (str): The keys to follow.
 
     Returns:
-        Any: Whatever value is found at the end of following the specified keys.  None if nothing was not found.
+        Any: Whatever value is found at the end of following the specified keys.  `None` if nothing was not found.
     """
     try:
         for k in keys:
