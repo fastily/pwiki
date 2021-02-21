@@ -48,7 +48,7 @@ class TestWikiQuery(QueryTestCase):
         self.assertListEqual(["Category:Fastily Test"], self.wiki.categories_on_page("User:Fastily/Sandbox/Page/3"))
 
     def test_category_members(self):
-        self.assertCountEqual(["File:FastilyTest.png"], self.wiki.category_members("Category:Fastily Test2", [NS.FILE]))
+        self.assertCountEqual(["File:FastilyTest.png"], self.wiki.category_members("Category:Fastily Test2", NS.FILE))
 
     def test_category_size(self):
         self.assertEqual(2, self.wiki.category_size("Category:Fastily Test2"))

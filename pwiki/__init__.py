@@ -1,1 +1,1 @@
-__all__ = ['wgen', 'wiki']
+__all__ = ['gquery', 'mquery', 'wgen', 'wiki']

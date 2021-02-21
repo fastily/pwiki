@@ -108,6 +108,8 @@ class Wiki:
         self._refresh_rights()
         self.is_logged_in = True
 
+        log.debug("%s: successfully loaded cookies from '%s'", self, cookie_jar)
+
         return True
 
     def save_cookies(self, output_path: Path = _DEFAULT_COOKIE_JAR):
@@ -296,18 +298,18 @@ class Wiki:
         log.info("%s: fetching categories on pages: %s", self, title)
         return self._xq_simple(MQuery.categories_on_page, title)
 
-    def category_members(self, title: str, ns: list[Union[NS, str]] = []) -> list[str]:
+    def category_members(self, title: str, ns: Union[list[Union[NS, str]], NS, str] = []) -> list[str]:
         """Fetches the elements in a category.
 
         Args:
             title (str): The title of the category to fetch elements from.  Must include `Category:` prefix.
-            ns (list[Union[NS, str]], optional): Only return results that are in these namespaces.  Optional, set empty list to disable. Defaults to [].
+            ns (Union[list[Union[NS, str]], NS, str], optional): Only return results that are in these namespaces.  Optional, set empty list to disable. Defaults to [].
 
         Returns:
             list[str]: a `list` containing `title`'s category members.
         """
         log.info("%s: fetching category members of '%s'", self, title)
-        return flatten_generator(GQuery.category_members(self, title, ns, MAX))
+        return flatten_generator(GQuery.category_members(self, title, ns if isinstance(ns, list) else [ns], MAX))
 
     def category_size(self, title: str) -> int:
         """Queries the wiki and gets the number of pages categorized in `title`.
@@ -452,7 +454,7 @@ class Wiki:
         Returns:
             list[str]: The `list` of wiki links contained in the text of `title`
         """
-        log.info("%s: fetching wikilinks on %s", self, title)
+        log.info("%s: fetching wikilinks on '%s'", self, title)
         return self._xq_simple(MQuery.links_on_page, title, *ns)
 
     def list_duplicate_files(self) -> list[str]:
@@ -517,7 +519,7 @@ class Wiki:
         Returns:
             str: The text of `title`.  `None` if `title` does not exist.
         """
-        log.info("%s: fetching page text of %s", self, title)
+        log.info("%s: fetching page text of '%s'", self, title)
         return self._xq_simple(MQuery.page_text, title)
 
     def prefix_index(self, ns: Union[NS, str], prefix: str) -> list[str]:
@@ -641,7 +643,7 @@ class Wiki:
         Returns:
             list[str]: The list of pages that transclude `title`.
         """
-        log.info("%s: fetching transclusions of %s", self, title)
+        log.info("%s: fetching transclusions of '%s'", self, title)
         return self._xq_simple(MQuery.what_transcludes_here, title, *ns)
 
     def whoami(self) -> str:
