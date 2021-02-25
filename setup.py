@@ -13,7 +13,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/fastily/pwiki",
     include_package_data=True,
-    packages=setuptools.find_packages(),
+    packages=setuptools.find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     install_requires=['requests'],
     classifiers=[
         "Natural Language :: English",

@@ -9,7 +9,7 @@ from pwiki.wiki import Wiki
 
 
 def file_to_json(name: str) -> dict:
-    return json.loads(Path(f"./test/res/{name}.json").read_text())
+    return json.loads(Path(f"./tests/res/{name}.json").read_text())
 
 
 def new_wiki(**kwargs):
