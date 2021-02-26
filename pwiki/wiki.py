@@ -298,18 +298,18 @@ class Wiki:
         log.info("%s: fetching categories on pages: %s", self, title)
         return self._xq_simple(MQuery.categories_on_page, title)
 
-    def category_members(self, title: str, ns: Union[list[Union[NS, str]], NS, str] = []) -> list[str]:
+    def category_members(self, title: str, *ns: Union[NS, str]) -> list[str]:
         """Fetches the elements in a category.
 
         Args:
             title (str): The title of the category to fetch elements from.  Must include `Category:` prefix.
-            ns (Union[list[Union[NS, str]], NS, str], optional): Only return results that are in these namespaces.  Optional, set empty list to disable. Defaults to [].
+            ns (Union[NS, str], optional): Only return results that are in these namespaces.  Optional, set empty list to disable. Defaults to [].
 
         Returns:
             list[str]: a `list` containing `title`'s category members.
         """
         log.info("%s: fetching category members of '%s'", self, title)
-        return flatten_generator(GQuery.category_members(self, title, ns if isinstance(ns, list) else [ns], MAX))
+        return flatten_generator(GQuery.category_members(self, title, list(ns), MAX))
 
     def category_size(self, title: str) -> int:
         """Queries the wiki and gets the number of pages categorized in `title`.
