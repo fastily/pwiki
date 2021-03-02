@@ -143,20 +143,21 @@ class MQuery:
         return MQuery._prop_cont(wiki, titles, PropCont.CATEGORIES)
 
     @staticmethod
-    def duplicate_files(wiki: Wiki, titles: list[str], local_only: bool = True) -> dict:
-        """Find dupliates of the specified files if possible.
+    def duplicate_files(wiki: Wiki, titles: list[str], local_only: bool = True, shared_only: bool = False) -> dict:
+        """Find duplicates of the specified files if possible.
 
         Args:
             wiki (Wiki): The Wiki object to use
             titles (list[str]): The list of files to get duplicates of (must start with `File:` prefix).
-            local_only (bool, optional): Set `False` to also search the associated shared media repository wiki.  If that sounded like a foreign language to you, then ignore this parameter.  Defaults to True.
+            local_only (bool, optional): Set `False` to also search the associated shared media repository wiki. Defaults to True.
+            shared_only (bool, optional): Set `True` to only return duplicates from the shared media repository.  Do not set to `True` if `local_only` is `True` or you will get strange behavior.  Defaults to False.
 
         Returns:
             dict:  A `dict` such that each key is the title and each value is the list of files that duplicate the specified file.
         """
         file_prefix = wiki.ns_manager.canonical_prefix(NS.FILE)
-        result = MQuery._prop_cont(wiki, titles, PropCont.DUPLICATE_FILES, {"dflocalonly": 1} if local_only else {})
-        return result if None in result.values() else {k: [file_prefix + e for e in v] for k, v in result.items()}
+        result = MQuery._prop_cont(wiki, titles, PropCont.DUPLICATE_FILES_SHARED if shared_only else PropCont.DUPLICATE_FILES, {"dflocalonly": 1} if local_only else {})
+        return result if None in result.values() else {k: [file_prefix + e.replace("_", " ") for e in v] for k, v in result.items()}
 
     @staticmethod
     def external_links(wiki: Wiki, titles: list[str]) -> dict:

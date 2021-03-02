@@ -1,6 +1,7 @@
 """Classes for use by a client to interact with a MediaWiki instance's API"""
 import logging
 import pickle
+import re
 
 from datetime import datetime
 from pathlib import Path
@@ -253,6 +254,20 @@ class Wiki:
             log.error("%s: Failed to log in as '%s'", self, username)
 
         return result
+
+    def replace_text(self, title: str, pattern: Union[re.Pattern, str], replacement: str = "", summary: str = "") -> bool:
+        """Convenience method, edits `title` and replaces all instances of `target_text` with `replacement` in its text.
+
+        Args:
+            title (str): The page to edit.
+            pattern (Union[re.Pattern, str]): The regular expression describing the text to replace on `title`.
+            replacement (str, optional): The text to replace all matches of `pattern` with. Defaults to "".
+            summary (str, optional): The edit summary to use. Defaults to "".
+
+        Returns:
+            bool: True if the operation was successful.
+        """
+        return (s := re.sub(pattern, replacement, original := self.page_text(title))) == original or self.edit(title, s, summary)
 
     def upload(self, path: Path, title: str, desc: str = "", summary: str = "", max_retries=5) -> bool:
         """Uploads a file to the target Wiki.

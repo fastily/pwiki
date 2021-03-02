@@ -51,6 +51,7 @@ class PropCont:
     """Collection of QConstant objects which fulfill the page prop with continuation strategy."""
     CATEGORIES = QConstant("categories", limit_key="cllimit")
     DUPLICATE_FILES = QConstant("duplicatefiles", limit_key="dflimit", retrieve_results=lambda l: [e["name"] for e in l])
+    DUPLICATE_FILES_SHARED = QConstant("duplicatefiles", limit_key="dflimit", retrieve_results=lambda l: [e["name"] for e in l if e.get("shared")])
     GLOBAL_USAGE = QConstant("globalusage", limit_key="gulimit", retrieve_results=lambda l: [(e["title"], e["wiki"]) for e in l])
     EXTERNAL_LINKS = QConstant("extlinks", {"elexpandurl": 1}, "ellimit", lambda l: [e["url"] for e in l])
     FILEUSAGE = QConstant("fileusage", limit_key="fulimit")

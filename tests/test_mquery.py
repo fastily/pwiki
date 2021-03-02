@@ -37,6 +37,9 @@ class TestPropCont(QueryTestCase):
         expected = {"File:FastilyTest.svg": ["File:FastilyTestCopy.svg"], "File:FastilyTestCircle2.svg": [], "File:FastilyDoesNotExistFile.flac": []}
         self.assertDictEqual(expected, MQuery.duplicate_files(self.wiki, list(expected.keys())))
 
+        expected = {"File:FastilyTest.svg": []}
+        self.assertDictEqual(expected, MQuery.duplicate_files(self.wiki, list(expected.keys()), False, True))
+
     def test_external_links(self):
         m = MQuery.external_links(self.wiki, ["User:Fastily/Sandbox/ExternalLink", "User:Fastily/Sandbox", "User:Fastily/DoesNotExist789"])
         self.assertCountEqual(["https://www.google.com", "https://www.facebook.com", "https://github.com"], m["User:Fastily/Sandbox/ExternalLink"])
