@@ -14,6 +14,7 @@ if TYPE_CHECKING:
 
 log = logging.getLogger(__name__)
 
+
 def basic_query(wiki: Wiki, pl: dict, big_query: bool = False) -> dict:
     """Performs a query action and returns the response from the server as json.
 

@@ -20,4 +20,5 @@ dist
 venv_pwiki
 
 scratch.py
+scratch*.xml
 pwiki.pickle
