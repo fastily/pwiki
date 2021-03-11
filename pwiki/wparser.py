@@ -300,6 +300,30 @@ class WikiTemplate:
             m[k].title = wiki.nss(v) if wiki.which_ns(v) == template_ns else v
 
 
+class WikiExt:
+    """Represents an extension tag.  Extensions technically aren't supported, so this is a meta class which will be interpreted as WikiText during lexing."""
+
+    def __init__(self, name: str = None, attr: str = None) -> None:
+        """Creates a new `WikiExt` object
+
+        Args:
+            name (str, optional): The name of the extension tag. Defaults to None.
+            attr (str, optional): The attribute str of the extension tag. Defaults to None.
+        """
+        self.name: str = name
+        self.attr: str = attr
+        self.inner: WikiText = None
+        self.close: str = None
+
+    def _squash(self) -> WikiText:
+        """Converts this `WikiExt` to `WikiText`.  Specifically: converts the tag back into wikitext, and preserves `WikiTemplate` objects.
+
+        Returns:
+            WikiText: The resulting `WikiText` object
+        """
+        return WikiText(f"<{self.name}{self.attr or ''}>", self.inner, self.close)
+
+
 class WParser:
     """Entry point for the WParser module"""
 
@@ -329,9 +353,11 @@ class WParser:
 
         pl = make_params("parse", pl)
 
-        # pl = make_params("parse", {"prop": "parsetree"} | ({"page": title} if title else {"contentmodel": "wikitext", "text": text}))  # TODO: not mutually exlusive
         try:
-            return WParser._parse_wiki_text(ElementTree.fromstring(mine_for(wiki.client.post(wiki.endpoint, data=pl).json(), "parse", "parsetree")))
+            raw_xml = mine_for(wiki.client.post(wiki.endpoint, data=pl).json(), "parse", "parsetree")
+            log.debug(raw_xml)
+
+            return WParser._parse_wiki_text(ElementTree.fromstring(raw_xml))
         except Exception:
             log.error("%s: Error occured while querying server with params: %s", wiki, pl, exc_info=True)
 
@@ -354,13 +380,39 @@ class WParser:
         for x in root:
             if x.tag == "template":
                 out += WParser._parse_wiki_template(x)
-            elif flatten:
+            elif x.tag == "ext":
+                out += WParser._parse_wiki_ext(x)
+            elif flatten:  # catches reamining tags and tries to make sense of them
                 out += WParser._parse_wiki_text(x, flatten)  # handle templates in h1 tags
 
             if x.tail:
                 out += x.tail
 
         return out
+
+    @staticmethod
+    def _parse_wiki_ext(root: ElementTree.Element) -> WikiText:
+        """Parses an XML `Element` as a `WikiExt`, and then converts the result into a `WikiText` object.
+
+        Args:
+            root (ElementTree.Element): The `Element` to parse
+
+        Returns:
+            WikiText: The resulting `WikiText` from parsing
+        """
+        out = WikiExt()
+
+        for x in root:
+            if x.tag == "name":
+                out.name = x.text
+            elif x.tag == "attr":
+                out.attr = x.text
+            elif x.tag == "inner":
+                out.inner = WParser._parse_wiki_text(x)
+            elif x.tag == "close":
+                out.close = x.text
+
+        return out._squash()
 
     @staticmethod
     def _parse_wiki_template(root: ElementTree.Element) -> WikiTemplate:
