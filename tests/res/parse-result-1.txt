@@ -1,0 +1,20 @@
+Blah
+
+==HEADER 1==
+{{Tl|1=PARAM 1|pp1=[[Foo]]|bar=baz|another={{Tlx|1=FOOBAR|n=123456}}|tester=123|last=test 1 {{=}}|empty=|empty2=}}
+
+<!-- comment -->
+
+Outside text
+
+=={{int:license-header}}==
+more text
+
+==Test==
+more text
+
+==Section==
+{{Ombox|text=Front {{Tlx|1=PD-simple}} Back}}
+
+==Another Section==
+Start <!-- comment -->Stop

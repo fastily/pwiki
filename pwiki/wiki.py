@@ -51,6 +51,10 @@ class Wiki:
 
         self.ns_manager: NSManager = OQuery.fetch_namespaces(self)
 
+    def __del__(self) -> None:
+        """Finalizer, releases resources used by the internal requests session"""
+        self.client.close()
+
     def __repr__(self) -> str:
         """Generate a str representation of this Wiki object.  Useful for logging.
 

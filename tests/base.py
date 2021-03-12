@@ -1,4 +1,4 @@
-"""Shared template TestCase classes for use in pwiki tests"""
+"""Shared template TestCase classes and methods for use in pwiki tests"""
 
 import json
 
@@ -8,8 +8,32 @@ from unittest import TestCase
 from pwiki.wiki import Wiki
 
 
+_RES = Path("./tests/res/")
+
+
+def file_to_text(name: str, ext: str = "txt") -> str:
+    """Gets the text from the specified `res` file as a `str`.
+
+    Args:
+        name (str): The name of the file, without its extension.
+        ext (str, optional): The extension of the file.  Don't include the leading `.`. Defaults to "txt".
+
+    Returns:
+        str: The contents of `name`.
+    """
+    return (_RES / f"{name}.{ext}").read_text()
+
+
 def file_to_json(name: str) -> dict:
-    return json.loads(Path(f"./tests/res/{name}.json").read_text())
+    """Gets the text from the specified `res` file as json.  This is a shortcut for `json.loads(file_to_text(name, "json"))`.
+
+    Args:
+        name (str): The name of the file, without its extension.
+
+    Returns:
+        dict: The contents of `name`, as json.
+    """
+    return json.loads(file_to_text(name, "json"))
 
 
 def new_wiki(**kwargs):

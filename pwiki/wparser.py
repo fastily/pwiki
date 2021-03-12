@@ -1,4 +1,4 @@
-"""Methods and classes for parsing wikitext into a object-oriented format which is easier to work with."""
+"""Methods and classes for parsing wikitext into a object-oriented format which is easier to work with. BEWARE: This is an experimental module and may not work for 100% of cases; you have been warned..."""
 
 from __future__ import annotations
 
@@ -80,6 +80,17 @@ class WikiText:
         """
         return self.as_text(True)
 
+    def __eq__(self, o: Any) -> bool:
+        """Compares two `WikiText` objects for equality.
+
+        Args:
+            o (Any): The object to compare with self.
+
+        Returns:
+            bool: True if the objects are the same type and contain the same elements in the same order.
+        """
+        return isinstance(WikiText, o) and self._l == o._l
+
     @property
     def templates(self) -> list[WikiTemplate]:
         """Convenience property, gets the templates contained in this WikiText.  CAVEAT: this does not recursively search sub-templates, see `all_templates()` for more details.
@@ -119,16 +130,17 @@ class WikiText:
 class WikiTemplate:
     """Represents a MediaWiki template.  These usually contain a title and parameters."""
 
-    def __init__(self, title: str = None, parent: WikiText = None) -> None:
+    def __init__(self, title: str = None, parent: WikiText = None, params: dict[str, WikiText] = None) -> None:
         """Initializer, creates a new `WikiTemplate` object
 
         Args:
             title (str, optional): The `name` of this WikiTemplate. Defaults to None.
             parent (WikiText, optional): The WikiText associated with this WikiTemplate.  Defaults to None.
+            params (dict[str, WikiText], optional): Default parameters to initialize this WikiTemplate with.  Defaults to None.
         """
         self.parent: WikiText = parent
         self.title: str = title
-        self._params: dict[str, WikiText] = {}
+        self._params: dict[str, WikiText] = params or {}
 
     def __contains__(self, item: Any) -> bool:
         """Check if the key `item` is the name of a parameter
@@ -182,6 +194,17 @@ class WikiTemplate:
             str: The `str` representation of this `WikiTemplate`.  The result will not be indented, see `self.as_text()` for details.
         """
         return self.as_text()
+
+    def __eq__(self, o: Any) -> bool:
+        """Compares two `WikiTemplate`s for equality.  Checks for matching titles (does not automatically normalize, if you want this, then call normalize() before checking equality!) and matching parameters.  CAVEAT: does not compare order of parameters (not that it matters anyways)
+
+        Args:
+            o (Any): The other object to compare
+
+        Returns:
+            bool: True if the objects are simillar.
+        """
+        return isinstance(o, WikiTemplate) and self.title == o.title and self._params == o._params
 
     def has_key(self, key: str, empty_ok=True) -> bool:
         """Check if the key `item` is the name of a parameter in this WikiTemplate.
