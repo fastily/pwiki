@@ -89,7 +89,7 @@ class WikiText:
         Returns:
             bool: True if the objects are the same type and contain the same elements in the same order.
         """
-        return isinstance(WikiText, o) and self._l == o._l
+        return isinstance(o, WikiText) and self._l == o._l
 
     @property
     def templates(self) -> list[WikiTemplate]:
@@ -109,8 +109,9 @@ class WikiText:
         out = []
         q = deque(self.templates)
         while q:
-            q.extend((curr := q.pop()).templates)
-            out.append(curr)
+            out.append(curr := q.pop())
+            for wt in curr.values():
+                q.extend(wt.templates)
 
         return out
 
@@ -130,17 +131,21 @@ class WikiText:
 class WikiTemplate:
     """Represents a MediaWiki template.  These usually contain a title and parameters."""
 
-    def __init__(self, title: str = None, parent: WikiText = None, params: dict[str, WikiText] = None) -> None:
+    def __init__(self, title: str = None, parent: WikiText = None, params: dict[str, Union[str, WikiText]] = None) -> None:
         """Initializer, creates a new `WikiTemplate` object
 
         Args:
             title (str, optional): The `name` of this WikiTemplate. Defaults to None.
             parent (WikiText, optional): The WikiText associated with this WikiTemplate.  Defaults to None.
-            params (dict[str, WikiText], optional): Default parameters to initialize this WikiTemplate with.  Defaults to None.
+            params (dict[str, Union[str, WikiText]], optional): Default parameters to initialize this WikiTemplate with.  Defaults to None.
         """
         self.parent: WikiText = parent
         self.title: str = title
-        self._params: dict[str, WikiText] = params or {}
+        self._params: dict[str, WikiText] = {}
+
+        if params:
+            for k, v in params.items():
+                self[k] = v
 
     def __contains__(self, item: Any) -> bool:
         """Check if the key `item` is the name of a parameter

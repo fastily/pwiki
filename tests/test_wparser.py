@@ -6,6 +6,8 @@ from .base import file_to_text, QueryTestCase
 
 from unittest import TestCase
 
+_FIXTURE_1 = {"Space": "blue", "Reality": "red", "Power": "purple", "Mind": "yellow", "Time": "green", "Soul": "orange"}
+
 
 class TestElementHandling(QueryTestCase):
     """Tests WParser with simple snippets of wikitext"""
@@ -79,11 +81,10 @@ class TestWikiText(TestCase):
     """Tests instance methods of WikiText"""
 
     def test_iadd(self):
-
         parts = ("We have said goodbye before ", "so it stands to reason... ", "We'll say hello again.")
         expected = "".join(parts)
 
-        # initializer
+        # Initializer
         self.assertEqual(expected, str(WikiText(*parts)))
 
         # Other WikiTexts
@@ -98,5 +99,57 @@ class TestWikiText(TestCase):
         self.assertEqual("No amount of money ever bought a second of time. \n{{Wakanda|1=Forever!}}", str(result))
 
     def test_bool(self):
-        self.assertTrue(WikiText("I can do this all day"))
+        self.assertTrue(WikiText("We are Groot"))
         self.assertFalse(WikiText())
+
+    def test_str(self):
+        raw = "\n\nI am Iron Man     "
+        self.assertEqual(raw, WikiText(raw).as_text())
+        self.assertEqual(raw.strip(), str(WikiText(raw)))
+
+    def test_eq(self):
+        raw1 = "I have nothing to prove to you."
+        raw2 = "That's not a cat.  That's a Flerken!"
+        self.assertEqual(WikiText(raw1), WikiText(raw1))
+        self.assertNotEqual(WikiText(raw1), WikiText(raw2))
+
+        self.assertEqual(WikiText(raw1, WikiTemplate("Iron", {"1": "Monger"})), WikiText(raw1, WikiTemplate("Iron", {"1": "Monger"})))
+        self.assertNotEqual(WikiText(raw1, WikiTemplate("Iron", params={"1": "Monger"})), WikiText(raw1, WikiTemplate("Iron", params={"1": "Patriot"})))
+
+    def test_as_text(self):
+        wt = WikiText(" Space ", WikiTemplate("Tesseract", params={"1": "blue"}), WikiText(" Stone\n\n"))
+        expected = " Space {{Tesseract|1=blue}} Stone\n\n"
+        self.assertEqual(expected, wt.as_text())
+        self.assertEqual(expected.strip(), wt.as_text(True))
+
+    def test_templates(self):
+        # no templates
+        wt = WikiText()
+        self.assertFalse(wt.templates)
+
+        wt = WikiText("Groot")
+        self.assertFalse(wt.templates)
+
+        # multiples
+        t1 = WikiTemplate("Sceptre", params={"1": "yellow"})
+        t2 = WikiTemplate("Eye of Agamotto", params={"2": "green"})
+        result = WikiText("You want my property? ", t1, "You can't have it!", t2).templates
+
+        self.assertIn(t1, result)
+        self.assertIn(t2, result)
+        self.assertEqual(2, len(result))
+
+        # nesting
+        t1 = WikiTemplate("S.H.I.E.L.D.")
+        t2 = WikiTemplate("Heli", params={"carrier": WikiText(t1)})
+        raw = WikiText("Avengers ", t2, " Initiative")
+        result = raw.templates
+        self.assertIn(t2, result)
+        self.assertEqual(1, len(result))
+
+        result = raw.all_templates()
+        self.assertIn(t1, result)
+        self.assertIn(t2, result)
+        self.assertEqual(2, len(result))
+
+        # raw = ["The city is flying ", "and we're fighting an army of robots, ", "and I have a bow and arrow."]
