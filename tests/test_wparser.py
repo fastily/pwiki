@@ -1,15 +1,13 @@
 from textwrap import dedent
 
-from pwiki.wparser import WParser, WikiTemplate, WikiText
+from pwiki.wparser import WikiExt, WikiTemplate, WikiText, WParser
 
-from .base import file_to_text, QueryTestCase
+from .base import file_to_text, WikiTestCase
 
 from unittest import TestCase
 
-_FIXTURE_1 = {"Space": "blue", "Reality": "red", "Power": "purple", "Mind": "yellow", "Time": "green", "Soul": "orange"}
 
-
-class TestElementHandling(QueryTestCase):
+class TestElementHandling(WikiTestCase):
     """Tests WParser with simple snippets of wikitext"""
 
     def test_wikitext(self):
@@ -65,7 +63,7 @@ class TestElementHandling(QueryTestCase):
         self.assertEqual(expected, str(WParser.parse(self.wiki, text=expected)))
 
 
-class TestGeneral(QueryTestCase):
+class TestGeneral(WikiTestCase):
     """Tests WParser with more complex, mixed samples of wikitext"""
 
     def test_mixed_sets(self):
@@ -78,7 +76,7 @@ class TestGeneral(QueryTestCase):
 
 
 class TestWikiText(TestCase):
-    """Tests instance methods of WikiText"""
+    """Tests instance methods of `WikiText`"""
 
     def test_iadd(self):
         parts = ("We have said goodbye before ", "so it stands to reason... ", "We'll say hello again.")
@@ -95,7 +93,7 @@ class TestWikiText(TestCase):
         self.assertEqual(expected, str(result))
 
         # Mixed
-        result = WikiText("No amount of money ever", " bought a second of time. \n", WikiTemplate("Wakanda", params={"1": "Forever!"}))
+        result = WikiText("No amount of money ever", " bought a second of time. \n", WikiTemplate("Wakanda", {"1": "Forever!"}))
         self.assertEqual("No amount of money ever bought a second of time. \n{{Wakanda|1=Forever!}}", str(result))
 
     def test_bool(self):
@@ -114,10 +112,10 @@ class TestWikiText(TestCase):
         self.assertNotEqual(WikiText(raw1), WikiText(raw2))
 
         self.assertEqual(WikiText(raw1, WikiTemplate("Iron", {"1": "Monger"})), WikiText(raw1, WikiTemplate("Iron", {"1": "Monger"})))
-        self.assertNotEqual(WikiText(raw1, WikiTemplate("Iron", params={"1": "Monger"})), WikiText(raw1, WikiTemplate("Iron", params={"1": "Patriot"})))
+        self.assertNotEqual(WikiText(raw1, WikiTemplate("Iron", {"1": "Monger"})), WikiText(raw1, WikiTemplate("War", {"1": "Machine"})))
 
     def test_as_text(self):
-        wt = WikiText(" Space ", WikiTemplate("Tesseract", params={"1": "blue"}), WikiText(" Stone\n\n"))
+        wt = WikiText(" Space ", WikiTemplate("Tesseract", {"1": "blue"}), WikiText(" Stone\n\n"))
         expected = " Space {{Tesseract|1=blue}} Stone\n\n"
         self.assertEqual(expected, wt.as_text())
         self.assertEqual(expected.strip(), wt.as_text(True))
@@ -131,8 +129,8 @@ class TestWikiText(TestCase):
         self.assertFalse(wt.templates)
 
         # multiples
-        t1 = WikiTemplate("Sceptre", params={"1": "yellow"})
-        t2 = WikiTemplate("Eye of Agamotto", params={"2": "green"})
+        t1 = WikiTemplate("Sceptre", {"1": "yellow"})
+        t2 = WikiTemplate("Eye of Agamotto", {"2": "green"})
         result = WikiText("You want my property? ", t1, "You can't have it!", t2).templates
 
         self.assertIn(t1, result)
@@ -141,7 +139,7 @@ class TestWikiText(TestCase):
 
         # nesting
         t1 = WikiTemplate("S.H.I.E.L.D.")
-        t2 = WikiTemplate("Heli", params={"carrier": WikiText(t1)})
+        t2 = WikiTemplate("Heli", {"carrier": WikiText(t1)})
         raw = WikiText("Avengers ", t2, " Initiative")
         result = raw.templates
         self.assertIn(t2, result)
@@ -152,4 +150,186 @@ class TestWikiText(TestCase):
         self.assertIn(t2, result)
         self.assertEqual(2, len(result))
 
-        # raw = ["The city is flying ", "and we're fighting an army of robots, ", "and I have a bow and arrow."]
+
+class TestWikiTemplate(WikiTestCase):
+    """Tests instance methods of `WikiTemplate`"""
+
+    def test_contains(self):
+        t = WikiTemplate("Saloon", {"1": "Stardrop", "host": "Gus"})
+
+        self.assertIn("host", t)
+        self.assertIn("1", t)
+        self.assertNotIn("Penny", t)
+
+    def test_get_item(self):
+        t = WikiTemplate("Museum", {"curator": "Gunther"})
+        self.assertEqual(WikiText("Gunther"), t["curator"])
+
+        with self.assertRaises(KeyError):
+            _ = t["junimo"]
+
+    def test_set_item(self):
+        t = WikiTemplate("Ginger Island", {"villager": "Leo"})
+
+        self.assertNotIn("hut", t)
+        t["hut"] = "Birdie"
+        self.assertIn("hut", t)
+
+        t1 = WikiTemplate("Host", {"1": "Mr. Qi"})
+        self.assertNotIn("Walnut Room", t)
+        t["Walnut Room"] = t1
+        self.assertIn("Walnut Room", t)
+
+        with self.assertRaises(TypeError):
+            t["Volcano"] = 1
+
+    def test_str(self):
+        t = WikiTemplate("Community Center", {"status": "restored"})
+        self.assertEqual("{{Community Center|status=restored}}", str(t))
+
+        t["pantry"] = WikiTemplate("Bundle", {"reward": "Greenhouse"})
+
+        self.assertEqual("{{Community Center|status=restored|pantry={{Bundle|reward=Greenhouse}}}}", str(t))
+
+    def test_eq(self):
+        t1 = WikiTemplate("General Store", {"owner": "Pierre"})
+        t2 = WikiTemplate("Tower", {"owner": "Wizard", "Ex": WikiTemplate("NPC", {"1": "Witch"})})
+
+        self.assertEqual(t1, WikiTemplate("General Store", {"owner": "Pierre"}))
+        self.assertEqual(t2, WikiTemplate("Tower", {"owner": "Wizard", "Ex": WikiTemplate("NPC", {"1": "Witch"})}))
+        self.assertNotEqual(t1, t2)
+
+    def test_has_key(self):
+        t = WikiTemplate("Town", {"1": "Pelican Town", "2": ""})
+
+        self.assertTrue(t.has_key("1"))
+        self.assertTrue(t.has_key("1", False))
+        self.assertTrue(t.has_key("2"))
+        self.assertFalse(t.has_key("2", False))
+
+        self.assertFalse(t.has_key("3"))
+        self.assertFalse(t.has_key("3", False))
+
+    def test_pop(self):
+        t = WikiTemplate("Beach", {"1": "Willy", "2": "Elliot"})
+
+        self.assertIn("1", t)
+        self.assertEqual(WikiText("Willy"), t.pop("1"))
+        self.assertNotIn("1", t)
+
+        self.assertIsNone(t.pop("5"))
+
+    def test_drop(self):
+        t = WikiTemplate("Mountain", {"1": WikiTemplate("NPC", {"1": "Linus"}), "2": WikiTemplate("NPC", {"1": "Robin"}), "3": WikiTemplate("NPC", {"1": "Demetrius"})})
+
+        target = t["2"].templates[0]
+        self.assertEqual(t["2"], target.parent)
+        self.assertIn("2", t)
+
+        target.drop()
+
+        self.assertIsNone(target.parent)
+        self.assertIn("2", t)
+        self.assertFalse(t["2"])
+
+    def test_remap(self):
+        t = WikiTemplate("Town", {"1": WikiTemplate("NPC", {"1": "Hailey"}), "2": WikiTemplate("NPC", {"1": "Emily"}), "3": WikiTemplate("NPC", {"1": "Penny"})})
+
+        target = t["3"]
+        self.assertIn("3", t)
+
+        t.remap("3", "teacher")
+
+        self.assertNotIn("3", t)
+        self.assertIn("teacher", t)
+        self.assertEqual(target, t["teacher"])
+
+        # should not fail
+        t.remap("4", "?")
+
+    def test_touch(self):
+        t = WikiTemplate("General Store", {"1": WikiTemplate("NPC", {"1": "Abigail"}), "2": WikiTemplate("NPC", {"1": "Pierre"})})
+
+        self.assertNotIn("3", t)
+
+        t.touch("3")
+
+        self.assertIn("3", t)
+        self.assertTrue(t.has_key("3"))
+        self.assertFalse(t.has_key("3", False))
+
+    def test_append_to_params(self):
+        t = WikiTemplate("NPC", {"name": "Le"})
+
+        self.assertEqual(WikiText("Le"), t["name"])
+        t.append_to_params("name", "ah")
+        self.assertEqual(WikiText("Leah"), t["name"])
+
+        self.assertNotIn("occupation", t)
+        t.append_to_params("occupation", WikiText("Artist"))
+        self.assertIn("occupation", t)
+        self.assertEqual(WikiText("Artist"), t["occupation"])
+
+        t["gifts"] = "truffle, "
+        t.append_to_params("gifts", WikiTemplate("Item", {"name": "Wine"}))
+        self.assertIn("gifts", t)
+        self.assertEqual(WikiText("truffle, ", WikiTemplate("Item", {"name": "Wine"})), t["gifts"])
+
+    def test_set_param(self):
+        t = WikiTemplate("NPC", {"name": "Clint"})
+
+        self.assertNotIn("birthday", t)
+        t.set_param("birthday", "Winter 26")
+        self.assertIn("birthday", t)
+
+    def test_keys(self):
+        self.assertCountEqual(("1", "2"), WikiTemplate("Mountain", {"1": WikiTemplate("NPC", {"1": "Dwarf"}), "2": WikiTemplate("NPC", {"1": "Maru"})}).keys())
+
+    def test_values(self):
+        t1 = WikiTemplate("NPC", {"1": "Dwarf"})
+        t2 = WikiTemplate("NPC", {"1": "Maru"})
+        self.assertCountEqual((WikiText(t1), WikiText(t2)), WikiTemplate("Mountain", {"1": t1, "2": t2}).values())
+
+    def test_as_text(self):
+        t = WikiTemplate("Town", {"1": WikiTemplate("NPC", {"1": "Kent"}), "2": WikiTemplate("NPC", {"1": "Vincent"})})
+
+        self.assertEqual("{{Town|1={{NPC|1=Kent}}|2={{NPC|1=Vincent}}}}", t.as_text())
+        self.assertEqual(dedent("""\
+            {{Town
+            |1={{NPC|1=Kent}}
+            |2={{NPC|1=Vincent}}
+            }}"""), t.as_text(True))
+
+    def test_normalize(self):
+        t1 = WikiTemplate("general_store", {"1": WikiTemplate("npc", {"1": "Abigail"})})
+        t2 = WikiTemplate("pelIcaN tOWN")
+        t3 = WikiTemplate("wikipedia Talk:pelIcaN tOWN")
+        t4 = WikiTemplate("wp:sKull cavern")
+
+        WikiTemplate.normalize(self.wiki, t1, t2, t3, t4)
+
+        self.assertEqual("General store", t1.title)
+        self.assertEqual(WikiText(WikiTemplate("npc", {"1": "Abigail"})), t1["1"])
+
+        self.assertEqual("PelIcaN tOWN", t2.title)
+        self.assertEqual("Wikipedia talk:PelIcaN tOWN", t3.title)
+        self.assertEqual("Wikipedia:SKull cavern", t4.title)
+
+    def test_normalize_bypass_redirect(self):
+        t1 = WikiTemplate("user:fastily/Sandbox/Redirect2")
+        t2 = WikiTemplate("user:Fastily/Sandbox/Redirect3")
+        t3 = WikiTemplate("User:Fastily/DoesNotExist123")
+
+        WikiTemplate.normalize(self.wiki, t1, t2, t3, bypass_redirects=True)
+
+        self.assertEqual("User:Fastily/Sandbox/RedirectTarget", t1.title)
+        self.assertEqual("User:Fastily/Sandbox/Redirect3", t2.title)
+        self.assertEqual("User:Fastily/DoesNotExist123", t3.title)
+
+
+class TestWikiExt(WikiTestCase):
+    """Tests instance methods of `WikiExt`"""
+
+    def test_sanity(self):
+        self.assertEqual(WikiText("<nowiki>Execute Order 66</nowiki>"), WikiExt("nowiki", inner="Execute Order 66", close="</nowiki>")._squash())
+        self.assertEqual(WikiText("<syntaxhighlight lang='python'>print('Luke, I am your father.')</syntaxhighlight>"), WikiExt("syntaxhighlight", " lang='python'", "print('Luke, I am your father.')", "</syntaxhighlight>")._squash())

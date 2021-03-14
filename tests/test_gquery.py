@@ -5,10 +5,10 @@ from pwiki.ns import NS
 from pwiki.query_constants import MAX
 from pwiki.query_utils import flatten_generator
 
-from .base import QueryTestCase
+from .base import WikiTestCase
 
 
-class TestListCont(QueryTestCase):
+class TestListCont(WikiTestCase):
     """Tests GQuery's list cont methods"""
 
     def test_category_members(self):
@@ -105,7 +105,7 @@ class TestListCont(QueryTestCase):
             next(GQuery.user_uploads(self.wiki, "DoesNotExistFastily"))
 
 
-class TestPropCont(QueryTestCase):
+class TestPropCont(WikiTestCase):
     """Tests GQuery's prop cont methods"""
 
     def test_categories_on_page(self):

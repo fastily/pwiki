@@ -3,11 +3,11 @@ from unittest import mock, TestCase
 
 from pwiki.ns import NS
 
-from .base import file_to_json, new_wiki, QueryTestCase
+from .base import file_to_json, new_wiki, WikiTestCase
 
 
 @mock.patch("pwiki.waction.WAction._post_action")
-class TestWikiAction(QueryTestCase):
+class TestWikiAction(WikiTestCase):
     """Tests Wiki's action methods."""
 
     def test_delete(self, mock: mock.Mock):
@@ -41,7 +41,7 @@ class TestWikiAuth(TestCase):
         self.assertEqual("FSock", wiki.username)
 
 
-class TestWikiQuery(QueryTestCase):
+class TestWikiQuery(WikiTestCase):
     """Tests wiki's query methods.  These are basically smoke tests because the backing modules are more thoroughly tested."""
 
     def test_categories_on_page(self):

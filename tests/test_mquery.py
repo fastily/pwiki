@@ -3,10 +3,10 @@ from datetime import datetime
 from pwiki.mquery import MQuery
 from pwiki.ns import NS
 
-from .base import QueryTestCase
+from .base import WikiTestCase
 
 
-class TestPropNoCont(QueryTestCase):
+class TestPropNoCont(WikiTestCase):
     """Tests MQuery's PropNoCont methods"""
 
     def test_category_size(self):
@@ -25,7 +25,7 @@ class TestPropNoCont(QueryTestCase):
         self.assertDictEqual(expected, MQuery.page_text(self.wiki, list(expected.keys())))
 
 
-class TestPropCont(QueryTestCase):
+class TestPropCont(WikiTestCase):
     """Tests MQuery's PropCont methods"""
 
     def test_categories_on_page(self):

@@ -1,9 +1,9 @@
 from pwiki.oquery import OQuery
 
-from .base import QueryTestCase
+from .base import WikiTestCase
 
 
-class TestOQuery(QueryTestCase):
+class TestOQuery(WikiTestCase):
     """Tests pwiki's OQuery methods"""
 
     def test_fetch_token(self):

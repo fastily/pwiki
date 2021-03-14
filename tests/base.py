@@ -36,15 +36,20 @@ def file_to_json(name: str) -> dict:
     return json.loads(file_to_text(name, "json"))
 
 
-def new_wiki(**kwargs):
+def new_wiki(**kwargs) -> Wiki:
+    """Convienence method, creates a new `Wiki` pointed to testwiki.  `kwargs` will be passed to the `Wiki` constructor.
+
+    Returns:
+        Wiki: A new Wiki pointed to testwiki.
+    """
     return Wiki("test.wikipedia.org", **kwargs)
 
 
-class QueryTestCase(TestCase):
+class WikiTestCase(TestCase):
     """Basic template for query tests"""
-
     _WIKI = new_wiki(cookie_jar=None)
 
     @classmethod
     def setUpClass(cls) -> None:
-        cls.wiki = QueryTestCase._WIKI
+        """Sets up an instance of a `Wiki` pointed to testwiki"""
+        cls.wiki = WikiTestCase._WIKI

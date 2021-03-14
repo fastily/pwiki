@@ -1,9 +1,9 @@
 from pwiki.ns import NS
 
-from .base import QueryTestCase
+from .base import WikiTestCase
 
 
-class TestNamespaces(QueryTestCase):
+class TestNamespaces(WikiTestCase):
     """Tests pwiki's namespace handling"""
 
     def test_which_ns(self):

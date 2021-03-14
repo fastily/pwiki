@@ -6,7 +6,7 @@ import logging
 
 from collections import deque
 from contextlib import suppress
-from typing import Any, KeysView, TYPE_CHECKING, Union, ValuesView
+from typing import Any, Callable, KeysView, TYPE_CHECKING, Union, ValuesView
 from xml.etree import ElementTree
 
 from .ns import NS
@@ -131,21 +131,21 @@ class WikiText:
 class WikiTemplate:
     """Represents a MediaWiki template.  These usually contain a title and parameters."""
 
-    def __init__(self, title: str = None, parent: WikiText = None, params: dict[str, Union[str, WikiText]] = None) -> None:
+    def __init__(self, title: str = None, params: dict[str, Union[str, WikiText]] = None, parent: WikiText = None) -> None:
         """Initializer, creates a new `WikiTemplate` object
 
         Args:
             title (str, optional): The `name` of this WikiTemplate. Defaults to None.
-            parent (WikiText, optional): The WikiText associated with this WikiTemplate.  Defaults to None.
             params (dict[str, Union[str, WikiText]], optional): Default parameters to initialize this WikiTemplate with.  Defaults to None.
+            parent (WikiText, optional): The WikiText associated with this WikiTemplate.  Defaults to None.
         """
-        self.parent: WikiText = parent
         self.title: str = title
         self._params: dict[str, WikiText] = {}
+        self.parent: WikiText = parent
 
         if params:
             for k, v in params.items():
-                self[k] = v
+                self[k] = v  # automatically ensure correct typing
 
     def __contains__(self, item: Any) -> bool:
         """Check if the key `item` is the name of a parameter
@@ -314,34 +314,52 @@ class WikiTemplate:
         return f"{{{{{self.title}{out}}}}}"
 
     @staticmethod
-    def normalize(wiki: Wiki, *tl: WikiTemplate) -> None:
-        """Normalizes titles of templates.  This usually fixes capitalization and removes random underscores.
+    def _normalize(wiki: Wiki, method: Callable[[Wiki, list[str]], dict], *tl: WikiTemplate) -> None:
+        """Helper method, normalizes titles of templates using `method`.
 
         Args:
-            wiki (Wiki): The Wiki object to use.  The `WikiTemplate` titles will be normalized against this `Wiki`.
+            wiki (Wiki): The `Wiki` object to use
+            method (Callable[[Wiki, list[str]], dict]): Either `OQuery.normalize_titles` or `OQuery.resolve_redirects`, depending on the goal you are trying to achieve.
             tl (WikiTemplate): The `WikiTemplate` objects to normalize.
         """
         template_ns = wiki.ns_manager.stringify(NS.TEMPLATE)
         m = {t.title: t for t in tl}
 
-        for k, v in OQuery.normalize_titles(wiki, list(m.keys())).items():
+        for k, v in method(wiki, list(m.keys())).items():
             m[k].title = wiki.nss(v) if wiki.which_ns(v) == template_ns else v
+
+    @staticmethod
+    def normalize(wiki: Wiki, *tl: WikiTemplate, bypass_redirects: bool = False) -> None:
+        """Normalizes titles of templates.  This usually fixes capitalization and removes random underscores.
+
+        Args:
+            wiki (Wiki): The `Wiki` object to use.  The `WikiTemplate` titles will be normalized against this `Wiki`.
+            tl (WikiTemplate): The `WikiTemplate` objects to normalize.
+            bypass_redirects (bool, optional): Set `True` to also bypass redirects. Defaults to False.
+        """
+
+        WikiTemplate._normalize(wiki, OQuery.normalize_titles, *tl)
+
+        if bypass_redirects:
+            WikiTemplate._normalize(wiki, OQuery.resolve_redirects, *tl)
 
 
 class WikiExt:
     """Represents an extension tag.  Extensions technically aren't supported, so this is a meta class which will be interpreted as WikiText during lexing."""
 
-    def __init__(self, name: str = None, attr: str = None) -> None:
+    def __init__(self, name: str = None, attr: str = None, inner: WikiText = None, close: str = None) -> None:
         """Creates a new `WikiExt` object
 
         Args:
             name (str, optional): The name of the extension tag. Defaults to None.
             attr (str, optional): The attribute str of the extension tag. Defaults to None.
+            inner (WikiText, optional): The inner text of the tag. Defaults to None.
+            close (str, optional): The closing tag (including carets). Defaults to None.
         """
         self.name: str = name
         self.attr: str = attr
-        self.inner: WikiText = None
-        self.close: str = None
+        self.inner: WikiText = inner
+        self.close: str = close
 
     def _squash(self) -> WikiText:
         """Converts this `WikiExt` to `WikiText`.  Specifically: converts the tag back into wikitext, and preserves `WikiTemplate` objects.
