@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Union
 
 from .ns import NS
 from .query_constants import PropCont, PropNoCont, QConstant
-from .query_utils import chunker, denormalize_result, get_continue_params, query_and_validate
+from .query_utils import chunker, denormalize_result, get_continue_params, query_and_validate, strip_underscores
 from .utils import mine_for
 
 if TYPE_CHECKING:
@@ -157,7 +157,7 @@ class MQuery:
         """
         file_prefix = wiki.ns_manager.canonical_prefix(NS.FILE)
         result = MQuery._prop_cont(wiki, titles, PropCont.DUPLICATE_FILES_SHARED if shared_only else PropCont.DUPLICATE_FILES, {"dflocalonly": 1} if local_only else {})
-        return result if None in result.values() else {k: [file_prefix + e.replace("_", " ") for e in v] for k, v in result.items()}
+        return result if None in result.values() else {k: strip_underscores(v, file_prefix) for k, v in result.items()}
 
     @staticmethod
     def external_links(wiki: Wiki, titles: list[str]) -> dict:
