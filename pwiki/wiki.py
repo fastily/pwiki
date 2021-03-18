@@ -17,6 +17,7 @@ from .oquery import OQuery
 from .query_constants import MAX
 from .query_utils import flatten_generator
 from .waction import WAction
+from .wparser import WParser, WikiText
 
 
 _DEFAULT_COOKIE_JAR = Path("./pwiki.pickle")
@@ -540,6 +541,18 @@ class Wiki:
         """
         log.info("%s: fetching page text of '%s'", self, title)
         return self._xq_simple(MQuery.page_text, title)
+
+    def parse(self, title: str = None, text: str = None) -> WikiText:
+        """Parses the title or text into `WikiText`/`WTemplate` objects.  If `title` and `text` are both specified, then `text` will be parsed as if it was on `title`.
+
+        Args:
+            title (str, optional): The title to use.  If `text` is not specified, then the text of `title` will be automatically fetched and parsed. Defaults to None.
+            text (str, optional): The text to parse. If `title` is specified, then the text will be parsed as if it is was published on `title`. Defaults to None.
+
+        Returns:
+            WikiText: The result of the parsing operation.  `None` if something went wrong.
+        """
+        return WParser.parse(self, title, text)
 
     def prefix_index(self, ns: Union[NS, str], prefix: str) -> list[str]:
         """Performs a prefix index query and returns all matching titles.

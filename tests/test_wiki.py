@@ -1,4 +1,5 @@
 from datetime import datetime
+from pwiki.wparser import WParser
 from unittest import mock, TestCase
 
 from pwiki.ns import NS
@@ -113,6 +114,10 @@ class TestWikiQuery(WikiTestCase):
 
     def test_normalize_title(self):
         self.assertEqual("Wikipedia:An", self.wiki.normalize_title("wp:an"))
+
+    def test_parse(self):
+        expected = "\n\n{{I love you|1=3000}}\n\n"
+        self.assertEqual(expected, self.wiki.parse(text=expected).as_text())
 
     def test_page_text(self):
         self.assertEqual("[[Category:Fastily Test]]", self.wiki.page_text("User:Fastily/Sandbox/Page/3"))

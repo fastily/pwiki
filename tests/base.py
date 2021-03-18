@@ -46,7 +46,7 @@ def new_wiki(**kwargs) -> Wiki:
 
 
 class WikiTestCase(TestCase):
-    """Basic template for query tests"""
+    """Basic template for read-only tests"""
     _WIKI = new_wiki(cookie_jar=None)
 
     @classmethod

@@ -223,17 +223,17 @@ class WikiTemplate:
         """
         return key in self and (empty_ok or bool(self._params.get(key)))
 
-    def pop(self, k: str) -> WikiText:
+    def pop(self, k: str = None) -> WikiText:
         """Removes the key, `k`, and its associated value from this `WikiTemplate`'s parameters, and then return the value.
 
         Args:
-            k (str): The key to lookup
+            k (str, optional): The key to lookup.  If `None`, then an arbitrary key-value pair will be popped.  Defaults to None.
 
         Returns:
             WikiText: The value formerly associated with `k`.  `None` if `k` is not in this `WikiTemplate`.
         """
         with suppress(KeyError):
-            return self._params.pop(k)
+            return self._params.pop(k) if k else self._params.popitem()
 
     def drop(self) -> None:
         """If possible, remove this `WikiTemplate` from its parent `WikiText`."""

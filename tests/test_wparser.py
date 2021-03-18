@@ -219,6 +219,10 @@ class TestWikiTemplate(WikiTestCase):
 
         self.assertIsNone(t.pop("5"))
 
+        self.assertIn("2", t)
+        self.assertEqual(WikiText("Elliot"), t.pop())
+        self.assertNotIn("2", t)
+
     def test_drop(self):
         t = WikiTemplate("Mountain", {"1": WikiTemplate("NPC", {"1": "Linus"}), "2": WikiTemplate("NPC", {"1": "Robin"}), "3": WikiTemplate("NPC", {"1": "Demetrius"})})
 
