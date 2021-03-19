@@ -17,7 +17,7 @@ from .oquery import OQuery
 from .query_constants import MAX
 from .query_utils import flatten_generator
 from .waction import WAction
-from .wparser import WParser, WikiText
+from .wparser import WikiText, WParser
 
 
 _DEFAULT_COOKIE_JAR = Path("./pwiki.pickle")

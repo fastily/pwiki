@@ -233,7 +233,7 @@ class WikiTemplate:
             WikiText: The value formerly associated with `k`.  `None` if `k` is not in this `WikiTemplate`.
         """
         with suppress(KeyError):
-            return self._params.pop(k) if k else self._params.popitem()
+            return self._params.pop(k) if k else self._params.popitem()[1]
 
     def drop(self) -> None:
         """If possible, remove this `WikiTemplate` from its parent `WikiText`."""
