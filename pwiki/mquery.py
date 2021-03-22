@@ -39,7 +39,7 @@ class MQuery:
         for chunk in chunker(titles, wiki.prop_title_max):
             params = {**template.pl_with_limit(), "prop": template.name, "titles": "|".join(chunk)} | (extra_pl or {})
 
-            while response := query_and_validate(wiki, params, desc=f"peform a prop_cont query with '{template.name}'"):
+            while response := query_and_validate(wiki, params, wiki.is_bot, f"peform a prop_cont query with '{template.name}'"):
                 for p in mine_for(response, "query", "pages"):
                     try:
                         out[p["title"]] += template.retrieve_results(p[template.name]) if template.name in p else []

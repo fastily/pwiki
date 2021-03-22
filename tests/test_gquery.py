@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from pwiki.gquery import GQuery
 from pwiki.ns import NS
@@ -133,6 +133,24 @@ class TestPropCont(WikiTestCase):
         self.assertEqual(1, len(result))
         self.assertEqual("c", result[0].summary)
 
-        # test 3 - non-existent
+        # test 3 - dates
+        result = next(GQuery.revisions(self.wiki, "User:Fastily/Sandbox/RevisionTest", 5, True, datetime(2021, 2, 9, 4, 32, tzinfo=timezone.utc)))
+        self.assertEqual(1, len(result))
+        self.assertEqual("c", result[0].summary)
+
+        result = next(GQuery.revisions(self.wiki, "User:Fastily/Sandbox/RevisionTest", 5, start=datetime(2021, 2, 9, 4, 29, tzinfo=timezone.utc), end=datetime(2021, 2, 9, 4, 32, tzinfo=timezone.utc)))  # newer first
+        self.assertEqual(2, len(result))
+        self.assertEqual("b", result[0].summary)
+        self.assertEqual("a", result[1].summary)
+
+        result = next(GQuery.revisions(self.wiki, "User:Fastily/Sandbox/RevisionTest", 5, True, datetime(2021, 2, 9, 4, 29, tzinfo=timezone.utc), datetime(2021, 2, 9, 4, 32, tzinfo=timezone.utc)))  # older first
+        self.assertEqual(2, len(result))
+        self.assertEqual("a", result[0].summary)
+        self.assertEqual("b", result[1].summary)
+
+        with self.assertRaises(ValueError):
+            GQuery.revisions(self.wiki, "Foobar", 99, True, datetime(2023, 2, 9, 4, 29, tzinfo=timezone.utc), datetime(2021, 2, 9, 4, 32, tzinfo=timezone.utc))
+
+        # test 4 - non-existent
         with self.assertRaises(StopIteration):
             next(GQuery.revisions(self.wiki, "DoesNotExistFastily"))

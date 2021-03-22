@@ -275,14 +275,25 @@ class GQuery:
         Returns:
             Generator[list[Revision], None, None]: A `Generator` which yields a `list` containing the Revision objects of `title`.
         """
+
+        if start and end and start >= end:
+            raise ValueError(f"start '{start}' cannot be equal to or after end '{end}' !")
+
         pl = {"rvprop": "comment|timestamp|user"}
+
         if older_first:
             pl["rvdir"] = "newer"
+        else:
+            start, end = end, start  # quirk of MediaWiki, older requires end < start
+
         if start:
             pl["rvstart"] = start.isoformat()
         if end:
             pl["rvend"] = end.isoformat()
         if include_text:
             pl["rvprop"] += "|content"
+
+        if "rvdir" not in pl:
+            pass
 
         return GQuery._prop_cont(wiki, title, limit, PropContSingle.REVISIONS, pl)

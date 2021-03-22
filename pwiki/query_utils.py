@@ -30,7 +30,7 @@ def basic_query(wiki: Wiki, pl: dict, big_query: bool = False) -> dict:
     try:
         return (wiki.client.post(wiki.endpoint, data=p) if big_query else wiki.client.get(wiki.endpoint, params=p)).json()
     except Exception:
-        log.error("%s: Could not reach server or read response while performing query with params: %s", wiki, p, exc_info=True)
+        log.error("%s: Could not reach server or read response while performing a (big_query: %s) query with params: %s", wiki, big_query, p, exc_info=True)
 
     return {}
 
