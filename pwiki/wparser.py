@@ -147,6 +147,15 @@ class WikiTemplate:
             for k, v in params.items():
                 self[k] = v  # automatically ensure correct typing
 
+
+    def __bool__(self) -> bool:
+        """Get a bool representation of this WikiTemplate object.
+
+        Returns:
+            bool: `True` if this WikiTemplate is not empty.
+        """
+        return bool(self.title)
+
     def __contains__(self, item: Any) -> bool:
         """Check if the key `item` is the name of a parameter
 

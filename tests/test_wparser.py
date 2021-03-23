@@ -154,6 +154,11 @@ class TestWikiText(TestCase):
 class TestWikiTemplate(WikiTestCase):
     """Tests instance methods of `WikiTemplate`"""
 
+    def test_bool(self):
+        self.assertTrue(WikiTemplate("Secret Woods"))
+        self.assertFalse(WikiTemplate(""))
+        self.assertFalse(WikiTemplate())
+
     def test_contains(self):
         t = WikiTemplate("Saloon", {"1": "Stardrop", "host": "Gus"})
 
