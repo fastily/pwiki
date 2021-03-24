@@ -284,6 +284,15 @@ class TestWikiTemplate(WikiTestCase):
         self.assertIn("gifts", t)
         self.assertEqual(WikiText("truffle, ", WikiTemplate("Item", {"name": "Wine"})), t["gifts"])
 
+    def test_get_param(self):
+        t = WikiTemplate("NPC", {"name": "Sandy", "location": "Oasis"})
+        self.assertEqual("Sandy", str(t.get_param("name")))
+        self.assertEqual("Sweet Pea", str(t.get_param("gifts", WikiText("Sweet Pea"))))
+        self.assertEqual("Sweet Pea", t.get_param("gifts", "Sweet Pea"))
+
+        self.assertIsNone(t.get_param("gifts"))
+
+
     def test_set_param(self):
         t = WikiTemplate("NPC", {"name": "Clint"})
 

@@ -147,7 +147,6 @@ class WikiTemplate:
             for k, v in params.items():
                 self[k] = v  # automatically ensure correct typing
 
-
     def __bool__(self) -> bool:
         """Get a bool representation of this WikiTemplate object.
 
@@ -280,6 +279,19 @@ class WikiTemplate:
             self[k] += e
         else:
             self[k] = e
+
+    def get_param(self, k: str, default: Union[str, WikiText] = None) -> Union[str, WikiText]:
+        """Returns the parameter value associated with `k` in this `WikiTemplate`'s params
+
+        Args:
+            k (str): The key associated with the value to look up.
+            default (Union[str, WikiText], optional): The value to return if `k` is not a parameter in this `WikiTemplate`. Defaults to None.
+
+        Returns:
+            WikiText: The `WikiText` associated with the specified `k`, otherwise `default` 
+        """
+
+        return self._params.get(k, default)
 
     def set_param(self, k: str, v: Union[str, WikiText, WikiTemplate]) -> None:
         """Associates key `k` with value `v` in this `WikiTemplate`'s parameter list.  Alias of `self[k] = v`.

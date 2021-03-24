@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import logging
 
-from collections.abc import Generator
+from collections.abc import Generator, Iterable
 from itertools import chain
 from typing import TYPE_CHECKING, Union
 
@@ -35,16 +35,19 @@ def basic_query(wiki: Wiki, pl: dict, big_query: bool = False) -> dict:
     return {}
 
 
-def chunker(l: list, size: int) -> tuple:
-    """Divides the input list, `l`, into equal sub-lists of size, `size`.  Any remainder will be in the last element.
+def chunker(l: Iterable[str], size: int) -> tuple:
+    """Divides the input Iterable, `l`, into equal sub-lists of size, `size`.  Any remainder will be in the last element.
 
     Args:
-        l (list): The input list
+        l (Iterable[str]): The input Iterable
         size (int): The maximum size of the sub-lists
 
     Returns:
         tuple: The output tuple containing all the sub-lists derived from `l`.
     """
+    if not isinstance(l, (list, tuple)):
+        l = list(l)
+
     return (l[pos:pos + size] for pos in range(0, len(l), size))
 
 
