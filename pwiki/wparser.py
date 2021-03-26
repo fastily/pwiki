@@ -9,10 +9,10 @@ from contextlib import suppress
 from typing import Any, Callable, KeysView, TYPE_CHECKING, Union, ValuesView
 from xml.etree import ElementTree
 
+from .dwrap import Revision
 from .ns import NS
 from .oquery import OQuery
-
-from .utils import make_params, mine_for
+from .utils import has_error, make_params, mine_for, read_error
 
 if TYPE_CHECKING:
     from .wiki import Wiki
@@ -290,7 +290,6 @@ class WikiTemplate:
         Returns:
             WikiText: The `WikiText` associated with the specified `k`, otherwise `default` 
         """
-
         return self._params.get(k, default)
 
     def set_param(self, k: str, v: Union[str, WikiText, WikiTemplate]) -> None:
@@ -395,6 +394,78 @@ class WParser:
     """Entry point for the WParser module"""
 
     @staticmethod
+    def _basic_parse(wiki: Wiki, pl: dict = None, big_query: bool = False, desc: str = "perform a parse action") -> dict:
+        """Template for performing a parse action on the server.  Also performs error checking on the result from the server.
+
+        Args:
+            wiki (Wiki): The Wiki object to use.
+            pl (dict, optional): The parameter list to send.  Omit `&action=parse`, this will be applied automatically. Defaults to None.
+            big_query (bool, optional): Set `True` to send the request as a `POST`. Useful for avoiding 414 errors. Defaults to False.
+            desc (str, optional): A description to use when logging this call. Defaults to "perform a parse action".
+
+        Returns:
+            dict: The response from the server, without the parent `parse` object.
+        """
+        pl = make_params("parse", pl)
+        try:
+            if not (response := (wiki.client.post(wiki.endpoint, data=pl) if big_query else wiki.client.get(wiki.endpoint, params=pl)).json()):
+                log.error("%s: No response from server while trying to %s", wiki, desc)
+                log.debug("Sent parameters: %s", pl)
+                return
+        except Exception:
+            log.error("Failed to reach server or recieved an invalid respnose while trying to %s.",  desc, exc_info=True)
+
+        if not has_error(response):
+            return mine_for(response, "parse")
+
+        log.error("%s: encountered error while trying to %s, server said: %s", wiki, desc, read_error("parse", response))
+        log.debug(response)
+
+    @staticmethod
+    def revision_metadata(wiki: Wiki, r: Revision, categories: bool = False, external_links: bool = False, images: bool = False, links: bool = False, templates: bool = False) -> dict:
+        """Fetches metadata from the `Revision`, `r`.
+
+        Args:
+            wiki (Wiki): The Wiki object to use
+            r (Revision): The `Revision` to get metadata of
+            categories (bool, optional): Set `True` to get the categories contained in this `Revision`. Defaults to False.
+            external_links (bool, optional): Set `True` to get the external links contained in this `Revision`. Defaults to False.
+            images (bool, optional): Set `True` to get the files contained in this `Revision`. Defaults to False.
+            links (bool, optional): Set `True` to get the links contained in this `Revision`. Defaults to False.
+            templates (bool, optional): Set `True` to get the templates contained in this `Revision`. Defaults to False.
+
+        Returns:
+            dict: A `dict` where each key is the type of metadata (these match the `bool` parameters of this method), and each value is a `list` with the associated type of metadata.
+        """
+        props = []
+        if categories:
+            props.append("categories")
+        if external_links:
+            props.append("externallinks")
+        if images:
+            props.append("images")
+        if links:
+            props.append("links")
+        if templates:
+            props.append("templates")
+
+        if not (result := WParser._basic_parse(wiki, {"prop": "|".join(props), "oldid": r.revid}, desc="retrieve revision metadata")):
+            return
+
+        out = {}
+        for k, v in result.items():
+            if k == "categories":
+                out[k] = wiki.ns_manager.batch_convert_ns([e["category"] for e in v], NS.CATEGORY, True)
+            elif k == "externallinks":
+                out["external_links"] = v
+            elif k == "images":
+                out[k] = wiki.ns_manager.batch_convert_ns(v, NS.FILE, True)
+            elif k in ("links", "templates"):
+                out[k] = [e["title"] for e in v]
+
+        return out
+
+    @staticmethod
     def parse(wiki: Wiki, title: str = None, text: str = None) -> WikiText:
         """Parses the title or text into `WikiText`/`WTemplate` objects.  If `title` and `text` are both specified, then `text` will be parsed as if it was on `title`.
 
@@ -418,15 +489,12 @@ class WParser:
         if text:
             pl |= {"contentmodel": "wikitext", "text": text}
 
-        pl = make_params("parse", pl)
+        if not (response := WParser._basic_parse(wiki, pl, True)):
+            return
 
-        try:
-            raw_xml = mine_for(wiki.client.post(wiki.endpoint, data=pl).json(), "parse", "parsetree")
-            log.debug(raw_xml)
-
-            return WParser._parse_wiki_text(ElementTree.fromstring(raw_xml))
-        except Exception:
-            log.error("%s: Error occured while querying server with params: %s", wiki, pl, exc_info=True)
+        raw_xml = mine_for(response, "parsetree")
+        log.debug(raw_xml)
+        return WParser._parse_wiki_text(ElementTree.fromstring(raw_xml))
 
     @staticmethod
     def _parse_wiki_text(root: ElementTree.Element, flatten: bool = True) -> WikiText:

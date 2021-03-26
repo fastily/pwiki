@@ -89,6 +89,7 @@ class Revision(_DataEntry):
         """
         super().__init__(e)
 
+        self.revid: int = int(e.get("revid", 0))  # default 0 because it is impossible to have a revision with id 0
         self.text: str = mine_for(e, "slots", "main", "content")
 
     def __repr__(self) -> str:

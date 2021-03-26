@@ -143,7 +143,7 @@ class Wiki:
         Returns:
             str: `title`, converted to namespace `ns`
         """
-        return self.ns_manager.canonical_prefix(ns) + self.nss(title)
+        return self.ns_manager.convert_ns(title, ns)
 
     def filter_by_ns(self, titles: list[str], *nsl: Union[str, NS]) -> list[str]:
         """Creates a copy of `titles` and strips out any title that isn't in the namespaces specified in `nsl`.
@@ -166,7 +166,7 @@ class Wiki:
         Returns:
             str: `title`, without a namespace.
         """
-        return self.ns_manager.ns_regex.sub("", title, 1)
+        return self.ns_manager.nss(title)
 
     def page_of(self, title: str) -> str:
         """Gets the content page associated with `title`.   If `title` is a content page, then `None` will be returned.

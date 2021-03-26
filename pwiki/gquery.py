@@ -278,7 +278,7 @@ class GQuery:
         if start and end and start >= end:
             raise ValueError(f"start '{start}' cannot be equal to or after end '{end}' !")
 
-        pl = {"rvprop": "comment|timestamp|user"}
+        pl = {"rvprop": "comment|ids|timestamp|user"}
 
         if older_first:
             pl["rvdir"] = "newer"

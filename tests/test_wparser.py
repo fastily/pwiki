@@ -74,6 +74,20 @@ class TestGeneral(WikiTestCase):
         self.assertTrue(WParser.parse(self.wiki, "Main Page"))
         self.assertTrue(WParser.parse(self.wiki, "Wikipedia:Requests"))
 
+    def test_revision_metadata(self):
+        revs = self.wiki.revisions("User:Fastily/Sandbox/RevisionParse")
+        self.assertEqual(4, len(revs))
+
+        self.assertDictEqual({
+            "categories": ["Category:Fastily Test"],
+            "external_links": ["https://github.com"],
+            "images": ["File:FastilyTestCircle2.svg"],
+            "links": ["User:Fastily"],
+            "templates": ["Template:FastilyTest"]}, WParser.revision_metadata(self.wiki, revs[1], True, True, True, True, True))
+
+        self.assertDictEqual({}, WParser.revision_metadata(self.wiki, revs[0]))
+        self.assertDictEqual(dict.fromkeys(["categories", "external_links"], []), WParser.revision_metadata(self.wiki, revs[0], True, True))
+
 
 class TestWikiText(TestCase):
     """Tests instance methods of `WikiText`"""
@@ -291,7 +305,6 @@ class TestWikiTemplate(WikiTestCase):
         self.assertEqual("Sweet Pea", t.get_param("gifts", "Sweet Pea"))
 
         self.assertIsNone(t.get_param("gifts"))
-
 
     def test_set_param(self):
         t = WikiTemplate("NPC", {"name": "Clint"})

@@ -116,6 +116,7 @@ class TestPropCont(WikiTestCase):
         result = next(g := GQuery.revisions(self.wiki, "User:Fastily/Sandbox/RevisionTest", 2))
         self.assertEqual(2, len(result))
         self.assertEqual("FSock", result[0].user)
+        self.assertEqual(465879, result[0].revid)
         self.assertEqual("b", result[1].summary)
 
         result = next(g)

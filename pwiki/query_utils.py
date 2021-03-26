@@ -140,17 +140,3 @@ def query_and_validate(wiki: Wiki, pl: dict, big_query: bool = False, desc: str 
 
     log.error("%s: encountered error while trying to %s, server said: %s", wiki, desc, read_error("query", response))
     log.debug(response)
-
-
-def strip_underscores(target: list[str], prefix: str = "", target_output: type[Union[list, set]] = list) -> Union[list[str], set[str]]:
-    """Convienence method, replaces underscores with spaces and adds an optional prefix.
-
-    Args:
-        target (list[str]): The list of elements to process
-        prefix (str, optional): A prefix to prepend to all `str` objects of the returned list.  This is usually a namespace prefix.  Defaults to "".
-        target_output (type[Union[list, set]], optional): The default return type. Defaults to list.
-
-    Returns:
-        Union[list[str], set[str]]: A copy of `target` where all of its elements have had underscores replaced with spaces.
-    """
-    return target_output(prefix + s.replace("_", " ") for s in target)
