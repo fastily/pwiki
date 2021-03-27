@@ -69,7 +69,8 @@ class NSManager:
         Returns:
             list[str]: The titles converted to namespace `ns`.
         """
-        return [self.convert_ns(s, ns, replace_underscores) for s in titles]
+        prefix = self.canonical_prefix(ns)
+        return [prefix + self.nss(t) for t in ([s.replace("_", " ") for s in titles] if replace_underscores else titles)]
 
     def canonical_prefix(self, ns: Union[NS, str]) -> str:
         """Gets the canonical prefix for the specified namespace.  This adds a `:` suffix to `ns`, or returns the empty string if `ns` is the Main namespace.
@@ -81,20 +82,6 @@ class NSManager:
             str: The canonical prefix for the specified namepsace.
         """
         return "" if (ns := self.stringify(ns)) == MAIN_NAME else ns + ":"
-
-    def convert_ns(self, title: str, ns: Union[str, NS], replace_underscores: bool = False) -> str:
-        """Converts the namespace of the specified title to another namespace.  PRECONDITION: `title` is well-formed.
-
-        Args:
-            title (str): The title to convert
-            ns (Union[str, NS]): The namespace to convert `title` to.
-            replace_underscores (bool, optional): Set `True` to replace underscore characters with the space characters in the returned value. Defaults to False.
-
-        Returns:
-            str: `title`, converted to namespace `ns`
-        """
-        out = self.canonical_prefix(ns) + self.nss(title)
-        return out.replace("_", " ") if replace_underscores else out
 
     def create_filter(self, *args: Union[NS, str]) -> str:
         """Convienence method, creates a pipe-fenced namespace filter for sending with queries.
