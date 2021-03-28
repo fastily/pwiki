@@ -1,5 +1,4 @@
 from datetime import datetime
-from pwiki.wparser import WParser
 from unittest import mock, TestCase
 
 from pwiki.ns import NS
@@ -9,7 +8,7 @@ from .base import file_to_json, new_wiki, WikiTestCase
 
 @mock.patch("pwiki.waction.WAction._post_action")
 class TestWikiAction(WikiTestCase):
-    """Tests Wiki's action methods."""
+    """Tests Wiki actions which write to/update the target wiki."""
 
     def test_delete(self, mock: mock.Mock):
         mock.return_value = file_to_json("delete")
@@ -25,6 +24,14 @@ class TestWikiAction(WikiTestCase):
         # test 2
         with self.assertRaises(ValueError):
             self.wiki.edit("Foo")
+
+
+class TestReadOnlyWikiAction(WikiTestCase):
+    """Tests Wiki actions which perform invisible/read-only updates the target wiki."""
+
+    def test_purge(self):
+        self.assertTrue(self.wiki.purge(["User talk:Fastily"]))
+        self.assertTrue(self.wiki.purge(["User:Fastily", "User:Fastily/Sandbox/TestConfig"]))
 
 
 class TestWikiAuth(TestCase):

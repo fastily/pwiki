@@ -3,6 +3,7 @@ import logging
 import pickle
 import re
 
+from collections.abc import Iterable
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, Union
@@ -259,6 +260,18 @@ class Wiki:
             log.error("%s: Failed to log in as '%s'", self, username)
 
         return result
+
+    def purge(self, titles: Iterable[str]) -> bool:
+        """Attempts to purge the server-side caches of `titles`.  Exits and outputs messages to standard out on the first failure.
+
+        Args:
+            titles (Iterable[str]): The titles to purge
+
+        Returns:
+            bool: `True` if all pages in `titles` were successfully purged. 
+        """
+        log.debug("Purging titles: %s", titles)
+        return WAction.purge(self, titles)
 
     def replace_text(self, title: str, pattern: Union[re.Pattern, str], replacement: str = "", summary: str = "") -> bool:
         """Convenience method, edits `title` and replaces all instances of `target_text` with `replacement` in its text.

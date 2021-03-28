@@ -3,11 +3,13 @@ from __future__ import annotations
 
 import logging
 
+from collections.abc import Iterable
 from pathlib import Path
 from time import sleep
 from typing import TYPE_CHECKING
 
 from .oquery import OQuery
+from .query_utils import chunker
 from .utils import has_error, make_params, mine_for, read_error
 
 if TYPE_CHECKING:
@@ -150,6 +152,18 @@ class WAction:
         wiki.is_logged_in = True
 
         return True
+
+    def purge(wiki: Wiki, titles: Iterable[str]) -> bool:
+        """Attempts to purge the server-side caches of `titles`.  Exits and outputs messages to standard out on the first failure.
+
+        Args:
+            wiki (Wiki): The Wiki object to use
+            titles (Iterable[str]): The titles to purge
+
+        Returns:
+            bool: `True` if all pages in `titles` were successfully purged. 
+        """
+        return all(WAction._post_action(wiki, "purge", {"titles": "|".join(chunk)}) for chunk in chunker(titles, wiki.prop_title_max))
 
     @staticmethod
     def unstash(wiki: Wiki, filekey: str, title: str, desc: str = "", summary: str = "", max_retries=5, retry_interval=5) -> bool:
