@@ -19,6 +19,5 @@ dist
 # virtualenv
 venv_pwiki
 
-scratch.py
-scratch*.xml
-pwiki.pickle
+scratch*
+*.pickle

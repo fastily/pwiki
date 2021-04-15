@@ -1,12 +1,13 @@
 """Classes for use by a client to interact with a MediaWiki instance's API"""
+
 import logging
 import pickle
 import re
 
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable, Union
+from typing import Any, Union
 
 from requests import Session
 
@@ -21,34 +22,33 @@ from .waction import WAction
 from .wparser import WikiText, WParser
 
 
-_DEFAULT_COOKIE_JAR = Path("./pwiki.pickle")
-
 log = logging.getLogger(__name__)
 
 
 class Wiki:
     """General wiki-interfacing functionality and config data"""
 
-    def __init__(self, domain: str = "en.wikipedia.org", username: str = None, password: str = None, cookie_jar: Path = _DEFAULT_COOKIE_JAR):
+    def __init__(self, domain: str = "en.wikipedia.org", username: str = None, password: str = None, cookie_jar: Path = Path(".")):
         """Initializer, creates a new Wiki object.
 
         Args:
             domain (str): The shorthand domain of the Wiki to target (e.g. "en.wikipedia.org")
             username (str, optional): The username to login as. Does nothing if `password` is not set.  Defaults to None.
             password (str, optional): The password to use when logging in. Does nothing if `username` is not set.  Defaults to None.
-            cookie_jar (Path, optional): The path to the saved cookies file.  Does nothing if set to `None` or if the specified path does not exist.  Defaults to `_DEFAULT_COOKIE_JAR` (`./pwiki.pickle`).
+            cookie_jar (Path, optional): The directory to save/read cookies to/from.  Disable by setting this to `None`.  Note that in order to save cookies you still have to call `self.save_cookies()`. Defaults to Path(".").
         """
         self.endpoint: str = f"https://{domain}/w/api.php"
         self.domain: str = domain
         self.client: Session = Session()
 
         self.username: str = None
+        self.cookie_jar: Path = cookie_jar
         self.is_logged_in: bool = False
         self.csrf_token: str = "+\\"
 
         self._refresh_rights()
 
-        if not self.load_cookies(cookie_jar) and username and password:
+        if not self._load_cookies(username) and username and password:
             self.login(username, password)
 
         self.ns_manager: NSManager = OQuery.fetch_namespaces(self)
@@ -65,7 +65,7 @@ class Wiki:
         """
         return f"[{self.username or '<Anonymous>'} @ {self.domain}]"
 
-    def _refresh_rights(self):
+    def _refresh_rights(self) -> None:
         """Refreshes the cached user rights fields.  If not logged in, then set the user rights to the defaults (i.e. no rights)."""
         if not self.username:
             self.rights: list = []
@@ -80,34 +80,35 @@ class Wiki:
     ######################################## C O O K I E S ###########################################
     ##################################################################################################
 
-    def clear_cookies(self, cookie_jar: Path = _DEFAULT_COOKIE_JAR):
-        """Deletes any saved cookies from disk.
+    def _cookie_path(self, username: str = None) -> Path:
+        """Determines the cookie save path and returns that.
 
         Args:
-            cookie_jar (Path, optional): The local Path to the cookie jar. Defaults to _DEFAULT_COOKIE_JAR.
+            username (str, optional): Force a search for this this username. If unset, then `self.username` will be used as the default.  Defaults to None.
+
+        Returns:
+            Path: The file `Path` to save the cookies of this instance to.  If no cookie_jar or username was set in the initializer, then return `None`.
         """
-        log.info("%s: Removing cookie jar at '%s'", self, cookie_jar)
+        return (self.cookie_jar / f"{self.domain}_{username}.pickle") if self.cookie_jar and (username := username or self.username) else None
 
-        cookie_jar.unlink(True)
-
-    def load_cookies(self, cookie_jar: Path = _DEFAULT_COOKIE_JAR) -> bool:
+    def _load_cookies(self, username: str = None) -> bool:
         """Load saved cookies from a file into this pwiki instance.
 
         Args:
-            cookie_jar (Path, optional): The path to the cookies. Defaults to `_DEFAULT_COOKIE_JAR` (`./pwiki.pickle`).
+            username (str, optional): The override username to use.  If unset, then `self.username` will be used as the default.  Defaults to None.
 
         Returns:
             bool: True if successful (confirmed with server that cookies are valid).
         """
-        if not cookie_jar or not cookie_jar.is_file():
+        if not (cookie_path := self._cookie_path(username)) or not cookie_path.is_file():
             return False
 
-        with cookie_jar.open('rb') as f:
+        with cookie_path.open('rb') as f:
             self.client.cookies = pickle.load(f)
 
         self.csrf_token = OQuery.fetch_token(self)
         if self.csrf_token == "+\\":
-            log.warning("Cookies loaded from '%s' are invalid!  Skipping cookies...", cookie_jar)
+            log.warning("Cookies loaded from '%s' are invalid!  Skipping cookies...", cookie_path)
             self.client.cookies.clear()
             return False
 
@@ -115,19 +116,28 @@ class Wiki:
         self._refresh_rights()
         self.is_logged_in = True
 
-        log.debug("%s: successfully loaded cookies from '%s'", self, cookie_jar)
+        log.debug("%s: successfully loaded cookies from '%s'", self, cookie_path)
 
         return True
 
-    def save_cookies(self, output_path: Path = _DEFAULT_COOKIE_JAR):
+    def clear_cookies(self) -> None:
+        """Deletes any saved cookies from disk."""
+        (p := self._cookie_path()).unlink(True)
+        log.info("%s: Removed cookies saved at '%s'", self, p)
+
+    def save_cookies(self) -> None:
         """Write the cookies of the Wiki object to disk, so they can be used in the future.
 
-        Args:
-            output_path (Path, optional): The local path to save the cookies at.  Defaults to _DEFAULT_COOKIE_JAR (`./pwiki.pickle`).
+        Raises:
+            ValueError: If a directory for cookies was not specified (i.e. set to `None`) when initializing this Wiki.
         """
-        log.info("%s: Saving cookies to '%s'", self, output_path)
+        if not (p := self._cookie_path()):
+            raise ValueError("No cookie path is specified, unable to save cookies")
 
-        with output_path.open('wb') as f:
+        log.info("%s: Saving cookies to '%s'", self, p)
+
+        p.parent.mkdir(parents=True, exist_ok=True)
+        with p.open('wb') as f:
             pickle.dump(self.client.cookies, f)
 
     ##################################################################################################
