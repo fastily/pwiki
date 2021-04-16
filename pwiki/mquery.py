@@ -224,18 +224,18 @@ class MQuery:
         return MQuery._prop_cont(wiki, titles, PropCont.IMAGES)
 
     @staticmethod
-    def links_on_page(wiki: Wiki, titles: list[str], *ns: Union[NS, str]) -> dict:
+    def links_on_page(wiki: Wiki, titles: list[str], ns: Union[list[Union[NS, str]], NS, str] = []) -> dict:
         """Fetch wiki links on a page.
 
         Args:
             wiki (Wiki): The Wiki object to use
             titles (list[str]): The titles to query
-            ns (Union[NS, str]): Only return results in these namespaces.  Optional, leave empty to disable.
+            ns (Union[list[Union[NS, str]], NS, str], optional): Restrict returned output to titles in these namespaces. Optional, set to empty list to disable. Defaults to [].
 
         Returns:
             dict: A `dict` such that each key is the title and each value is the list of wiki links contained in the text of the page.
         """
-        return MQuery._prop_cont(wiki, titles, PropCont.WIKILINKS_ON_PAGE, {"plnamespace": wiki.ns_manager.create_filter(*ns)} if ns else {})
+        return MQuery._prop_cont(wiki, titles, PropCont.WIKILINKS_ON_PAGE, {"plnamespace": nsf} if (nsf := wiki.ns_manager.create_filter(ns)) else {})
 
     @staticmethod
     def templates_on_page(wiki: Wiki, titles: list[str]) -> dict:
@@ -265,14 +265,15 @@ class MQuery:
         return MQuery._prop_cont(wiki, titles, PropCont.LINKS_HERE, {"lhshow": ("" if redirects_only else "!") + "redirect"})
 
     @staticmethod
-    def what_transcludes_here(wiki: Wiki, titles: list[str], *ns: Union[NS, str]) -> dict:
+    def what_transcludes_here(wiki: Wiki, titles: list[str], ns: Union[list[Union[NS, str]], NS, str] = []) -> dict:
         """Fetch pages that translcude a page.  If querying for templates, you must include the `Template:` prefix.
 
         Args:
             wiki (Wiki): The Wiki object to use
             titles (list[str]): The titles to query
+            ns (Union[list[Union[NS, str]], NS, str], optional): Restrict returned output to titles in these namespaces. Optional, set to empty list to disable. Defaults to [].
 
         Returns:
             dict: A `dict` such that each key is the title and each value is the list of pages that transclude the specified page.
         """
-        return MQuery._prop_cont(wiki, titles, PropCont.TRANSCLUDED_IN, {"tinamespace": wiki.ns_manager.create_filter(*ns)} if ns else {})
+        return MQuery._prop_cont(wiki, titles, PropCont.TRANSCLUDED_IN, {"tinamespace": nsf} if (nsf := wiki.ns_manager.create_filter(ns)) else {})

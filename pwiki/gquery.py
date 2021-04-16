@@ -104,7 +104,7 @@ class GQuery:
         Returns:
             Generator[list[str], None, None]: A `Generator` which yields a `list` containing the category's category members.
         """
-        return GQuery._list_cont(wiki, limit, ListCont.CATEGORY_MEMBERS, {"cmtitle": title} | ({"cmnamespace": wiki.ns_manager.create_filter(*ns)} if ns else {}))
+        return GQuery._list_cont(wiki, limit, ListCont.CATEGORY_MEMBERS, {"cmtitle": title} | ({"cmnamespace": wiki.ns_manager.create_filter(ns)} if ns else {}))
 
     @staticmethod
     def contribs(wiki: Wiki, user: str, older_first: bool = False, ns: list[Union[NS, str]] = [], limit: Union[int, str] = 1) -> Generator[list[Contrib], None, None]:
@@ -122,7 +122,7 @@ class GQuery:
         """
         pl = {"ucuser": user}
         if ns:
-            pl["ucnamespace"] = wiki.ns_manager.create_filter(*ns)
+            pl["ucnamespace"] = wiki.ns_manager.create_filter(ns)
         if older_first:
             pl["ucdir"] = "newer"
 
@@ -196,7 +196,7 @@ class GQuery:
         Returns:
             Generator[list[str], None, None]: A `Generator` which yields a `list` containing files that match the specified prefix index.
         """
-        return GQuery._list_cont(wiki, limit, ListCont.PREFIX_INDEX, {"apnamespace": wiki.ns_manager.create_filter(ns), "apprefix": prefix})
+        return GQuery._list_cont(wiki, limit, ListCont.PREFIX_INDEX, {"apnamespace": wiki.ns_manager.intify(ns), "apprefix": prefix})
 
     @staticmethod
     def random(wiki: Wiki, ns: list[Union[NS, str]] = [], limit: Union[int, str] = 1) -> Generator[list[str], None, None]:
@@ -210,7 +210,7 @@ class GQuery:
         Returns:
             Generator[list[str], None, None]: A `Generator` which yields a `list` containing random elements that match specified parameters.
         """
-        return GQuery._list_cont(wiki, limit, ListCont.RANDOM, {"rnnamespace": wiki.ns_manager.create_filter(*ns)} if ns else {})
+        return GQuery._list_cont(wiki, limit, ListCont.RANDOM, {"rnnamespace": wiki.ns_manager.create_filter(ns)} if ns else {})
 
     @staticmethod
     def search(wiki: Wiki, phrase: str, ns: list[Union[NS, str]] = [], limit: Union[int, str] = 1) -> Generator[list[str], None, None]:
@@ -225,7 +225,7 @@ class GQuery:
         Returns:
             Generator[list[str], None, None]: A `Generator` which yields a `list` containing the results of the search.
         """
-        return GQuery._list_cont(wiki, limit, ListCont.SEARCH, {"srsearch": phrase} | ({"srnamespace": wiki.ns_manager.create_filter(*ns)} if ns else {}))
+        return GQuery._list_cont(wiki, limit, ListCont.SEARCH, {"srsearch": phrase} | ({"srnamespace": wiki.ns_manager.create_filter(ns)} if ns else {}))
 
     @staticmethod
     def user_uploads(wiki: Wiki, user: str, limit: Union[int, str] = 1) -> Generator[list[str], None, None]:

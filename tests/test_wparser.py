@@ -256,7 +256,7 @@ class TestWikiTemplate(WikiTestCase):
         self.assertFalse(t["2"])
 
     def test_remap(self):
-        t = WikiTemplate("Town", {"1": WikiTemplate("NPC", {"1": "Hailey"}), "2": WikiTemplate("NPC", {"1": "Emily"}), "3": WikiTemplate("NPC", {"1": "Penny"})})
+        t = WikiTemplate("Town", {"1": WikiTemplate("NPC", {"1": "Haley"}), "2": WikiTemplate("NPC", {"1": "Emily"}), "3": WikiTemplate("NPC", {"1": "Penny"})})
 
         target = t["3"]
         self.assertIn("3", t)

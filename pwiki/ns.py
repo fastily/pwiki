@@ -83,23 +83,39 @@ class NSManager:
         """
         return "" if (ns := self.stringify(ns)) == MAIN_NAME else ns + ":"
 
-    def create_filter(self, *args: Union[NS, str]) -> str:
-        """Convienence method, creates a pipe-fenced namespace filter for sending with queries.
+    def create_filter(self, nsl: Union[list[Union[NS, str]], NS, str]) -> str:
+        """Convenience method, creates a pipe-fenced namespace filter for sending with queries.
+
+        Args:
+            nsl (Union[list[Union[NS, str]], NS, str]): The namespace or namespaces to create a filter out of
+
+        Raises:
+            ValueError: If there is an invalid namespace in `nsl`
 
         Returns:
             str: The pipe-fenced namespace filter for sending with queries
         """
-        l = []
+        if not isinstance(nsl, list):
+            nsl = [nsl]
 
-        for ns in args:
-            if isinstance(ns, NS):
-                l.append(ns.value)
-            elif isinstance(ns, str):
-                l.append(self.m[ns])
-            else:
-                log.debug("'%s' is not a recognized namespace, ignoring...")
+        if None in (l := [self.intify(ns) for ns in nsl]):
+            raise ValueError(f"invalid namespace, one of these does not represent an actual namespace: {nsl}")
 
-        return "|".join(str(i) for i in l)
+        return "|".join([str(i) for i in l])
+
+    def intify(self, ns: Union[int, NS, str]) -> int:
+        """Convienence method, converts the specified namespace to its `int` id if possible.  This is a lexical operation and does not check if the id actually exists on the server.
+
+        Args:
+            ns (Union[int, NS, str]): The namespace to get the `int` of.
+
+        Returns:
+            int: The int id of `ns`.  None if you passed a `str` and it does not exist in the lookup table.
+        """
+        if isinstance(ns, NS):
+            return ns.value
+
+        return ns if isinstance(ns, int) else self.m.get(ns)
 
     def nss(self, title: str) -> str:
         """Strips the namespace prefix from a title.

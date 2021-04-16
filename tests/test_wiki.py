@@ -1,4 +1,6 @@
 from datetime import datetime
+from pathlib import Path
+from tempfile import TemporaryDirectory
 from unittest import mock, TestCase
 
 from pwiki.ns import NS
@@ -38,15 +40,36 @@ class TestWikiAuth(TestCase):
     """Tests Wiki's authentication-related functionality."""
 
     @mock.patch("pwiki.waction.WAction._post_action")
-    def test_login(self, mock: mock.Mock):
-        mock.return_value = file_to_json("login")
+    def test_login(self, m: mock.Mock):
+        m.return_value = file_to_json("login")
 
         wiki = new_wiki(cookie_jar=None)
         self.assertTrue(wiki.login("FSock", "not long enough"))
-        mock.assert_called_once()
+        m.assert_called_once()
 
         self.assertTrue(wiki.is_logged_in)
         self.assertEqual("FSock", wiki.username)
+
+    @mock.patch("pwiki.wiki.Wiki._refresh_rights")
+    @mock.patch("pwiki.oquery.OQuery.fetch_token")
+    def test_save_load_cookies(self, fetch_token: mock.Mock, refresh_rights: mock.Mock):
+        with TemporaryDirectory() as d:
+            tmp_dir = Path(d)
+            u = "Nyan Cat"
+            fetch_token.return_value = "abc123+\\"
+
+            # test cookie save
+            wiki = new_wiki(cookie_jar=tmp_dir)
+
+            wiki.client.cookies.set("yolo", "foobar", domain="wikipedia.org")
+            wiki.username = u
+            wiki.save_cookies()
+
+            self.assertTrue((tmp_dir / f"{wiki.domain}_{u}.pickle").is_file())
+
+            # test load
+            wiki = new_wiki(username=u, password="hi", cookie_jar=tmp_dir)
+            self.assertEqual("foobar", wiki.client.cookies.get("yolo"))
 
 
 class TestWikiQuery(WikiTestCase):

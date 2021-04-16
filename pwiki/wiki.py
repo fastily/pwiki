@@ -48,7 +48,7 @@ class Wiki:
 
         self._refresh_rights()
 
-        if not self._load_cookies(username) and username and password:
+        if not self._load_cookies(username):
             self.login(username, password)
 
         self.ns_manager: NSManager = OQuery.fetch_namespaces(self)
@@ -253,7 +253,7 @@ class Wiki:
         return WAction.edit(self, title, text, summary, prepend, append, minor)
 
     def login(self, username: str, password: str) -> bool:
-        """Attempts to login this Wiki object.  If successful, all future calls will be automatically include authentication.
+        """Attempts to login this Wiki object.  If successful, all future calls will be automatically include authentication.  Immediately returns `False` if `username` or `password` is empty/`None`.
 
         Args:
             username (str): The username to login with
@@ -262,6 +262,9 @@ class Wiki:
         Returns:
             bool: `True` if logging in was successful.
         """
+        if not (username and password):
+            return False
+
         log.info("%s: Attempting login for %s", self, username)
 
         if result := WAction.login(self, username, password):
@@ -341,12 +344,12 @@ class Wiki:
         log.info("%s: fetching categories on pages: %s", self, title)
         return self._xq_simple(MQuery.categories_on_page, title)
 
-    def category_members(self, title: str, *ns: Union[NS, str]) -> list[str]:
+    def category_members(self, title: str, ns: Union[list[Union[NS, str]], NS, str] = []) -> list[str]:
         """Fetches the elements in a category.
 
         Args:
             title (str): The title of the category to fetch elements from.  Must include `Category:` prefix.
-            ns (Union[NS, str], optional): Only return results that are in these namespaces.  Optional, set empty list to disable. Defaults to [].
+            ns (Union[list[Union[NS, str]], NS, str], optional): Only return results that are in these namespaces.  Optional, set empty list to disable. Defaults to [].
 
         Returns:
             list[str]: a `list` containing `title`'s category members.
@@ -487,18 +490,18 @@ class Wiki:
         """
         return l[0].user if (l := next(GQuery.revisions(self, title), None)) else None
 
-    def links_on_page(self, title: str, *ns: Union[NS, str]) -> list[str]:
+    def links_on_page(self, title: str, ns: Union[list[Union[NS, str]], NS, str] = []) -> list[str]:
         """Fetch wiki links on a page.
 
         Args:
             title (str): The title to query
-            ns (Union[NS, str]): Only return results in these namespaces.  Optional, leave empty to disable.
+            ns (Union[list[Union[NS, str]], NS, str], optional): Restrict returned output to titles in these namespaces. Optional, set to empty list to disable. Defaults to [].
 
         Returns:
             list[str]: The `list` of wiki links contained in the text of `title`
         """
         log.info("%s: fetching wikilinks on '%s'", self, title)
-        return self._xq_simple(MQuery.links_on_page, title, *ns)
+        return self._xq_simple(MQuery.links_on_page, title, ns)
 
     def list_duplicate_files(self) -> list[str]:
         """List files on a wiki which have duplicates by querying the Special page `Special:ListDuplicatedFiles`.  This reads the entire list, and may return up to 5000 elements.
@@ -688,18 +691,18 @@ class Wiki:
         log.info("%s: determining what pages link to %s", self, title)
         return self._xq_simple(MQuery.what_links_here, title, redirects_only)
 
-    def what_transcludes_here(self, title: str, *ns: Union[NS, str]) -> list[str]:
+    def what_transcludes_here(self, title: str, ns: Union[list[Union[NS, str]], NS, str] = []) -> list[str]:
         """Fetch pages that translcude a page.  If querying for templates, you must include the `Template:` prefix.
 
         Args:
             title (str): The title to query
-            ns (Union[NS, str]): Only return results in these namespaces.  Optional, leave empty to disable.
+            ns (Union[list[Union[NS, str]], NS, str], optional): Restrict returned output to titles in these namespaces. Optional, set to empty list to disable. Defaults to [].
 
         Returns:
             list[str]: The list of pages that transclude `title`.
         """
         log.info("%s: fetching transclusions of '%s'", self, title)
-        return self._xq_simple(MQuery.what_transcludes_here, title, *ns)
+        return self._xq_simple(MQuery.what_transcludes_here, title, ns)
 
     def whoami(self) -> str:
         """Get this Wiki's username from the server.  If not logged in, then this will return your external IP address.
