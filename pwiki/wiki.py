@@ -355,7 +355,7 @@ class Wiki:
             list[str]: a `list` containing `title`'s category members.
         """
         log.info("%s: fetching category members of '%s'", self, title)
-        return flatten_generator(GQuery.category_members(self, title, list(ns), MAX))
+        return flatten_generator(GQuery.category_members(self, title, ns if isinstance(ns, list) else [ns], MAX))
 
     def category_size(self, title: str) -> int:
         """Queries the wiki and gets the number of pages categorized in `title`.
