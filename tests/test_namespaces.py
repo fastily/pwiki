@@ -33,6 +33,37 @@ class TestNamespaces(WikiTestCase):
         self.assertFalse(self.wiki.filter_by_ns(["Chicken", "Talk:Cow", "Pig"], NS.PROJECT))
         self.assertFalse(self.wiki.filter_by_ns(["Category:Sun", "Talk:Moon", "Template:Stars"]))
 
+    def test_in_ns(self):
+        self.assertTrue(self.wiki.in_ns("Help:Cats", NS.HELP))
+        self.assertTrue(self.wiki.in_ns("User talk:Cats", "User talk"))
+        self.assertTrue(self.wiki.in_ns("Image:Cats.jpg", NS.FILE))
+        self.assertTrue(self.wiki.in_ns("Image:Cats.jpg", 6))
+        self.assertTrue(self.wiki.in_ns("Wikipedia:Dogs", "Project"))
+        self.assertTrue(self.wiki.in_ns("Category:Fastily", ("Category", NS.FILE)))
+        self.assertTrue(self.wiki.in_ns("Category:Fastily", (NS.CATEGORY, NS.FILE)))
+        self.assertTrue(self.wiki.in_ns("Special:ApiSandbox", -1))
+
+        self.assertFalse(self.wiki.in_ns("File:Example.jpg", "Main"))
+        self.assertFalse(self.wiki.in_ns("File:Example.jpg", "Project"))
+        self.assertFalse(self.wiki.in_ns("Foobar", NS.TALK))
+        self.assertFalse(self.wiki.in_ns("Template:Foobar", (4, NS.PROJECT_TALK)))
+
+    def test_not_in_ns(self):
+        self.assertTrue(self.wiki.not_in_ns("Category:Hello", "Main"))
+        self.assertTrue(self.wiki.not_in_ns("Template:Foobar", (NS.MEDIAWIKI, NS.PROJECT_TALK)))
+
+        self.assertFalse(self.wiki.not_in_ns("Fastily", NS.MAIN))
+
+    def test_is_talk_page(self):
+        self.assertTrue(self.wiki.is_talk_page("User talk:Fastily"))
+        self.assertTrue(self.wiki.is_talk_page("Talk:Fastily"))
+        self.assertTrue(self.wiki.is_talk_page("WT:Fastily"))
+
+        self.assertFalse(self.wiki.is_talk_page("Main page"))
+        self.assertFalse(self.wiki.is_talk_page("File:Fastily.jpg"))
+        self.assertFalse(self.wiki.is_talk_page("WP:Fastily"))
+        self.assertFalse(self.wiki.is_talk_page("Special:Contributions"))
+
     def test_talk_page_of(self):
         self.assertEqual("User talk:Me", self.wiki.talk_page_of("User:Me"))
         self.assertEqual("Talk:Hello", self.wiki.talk_page_of("Hello"))

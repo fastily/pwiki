@@ -251,18 +251,23 @@ class MQuery:
         return MQuery._prop_cont(wiki, titles, PropCont.TEMPLATES)
 
     @staticmethod
-    def what_links_here(wiki: Wiki, titles: list[str], redirects_only: bool = False) -> dict:
+    def what_links_here(wiki: Wiki, titles: list[str], redirects_only: bool = False, ns: Union[list[Union[NS, str]], NS, str] = []) -> dict:
         """Fetch pages that wiki link (locally) to a page.
 
         Args:
             wiki (Wiki): The Wiki object to use
             titles (list[str]): The titles to query
             redirects_only (bool, optional): Set `True` to get the titles that redirect to this page. Defaults to False.
+            ns (Union[list[Union[NS, str]], NS, str], optional): Restrict returned output to titles in these namespaces. Optional, set to empty list to disable. Defaults to [].
 
         Returns:
             dict: A `dict` such that each key is the title and each value is the list of pages that link to the specified page.
         """
-        return MQuery._prop_cont(wiki, titles, PropCont.LINKS_HERE, {"lhshow": ("" if redirects_only else "!") + "redirect"})
+        pl = {"lhshow": ("" if redirects_only else "!") + "redirect"}
+        if ns:
+            pl["lhnamespace"] = wiki.ns_manager.create_filter(ns)
+
+        return MQuery._prop_cont(wiki, titles, PropCont.LINKS_HERE, pl)
 
     @staticmethod
     def what_transcludes_here(wiki: Wiki, titles: list[str], ns: Union[list[Union[NS, str]], NS, str] = []) -> dict:

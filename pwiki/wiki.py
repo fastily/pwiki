@@ -168,6 +168,42 @@ class Wiki:
         nsl = {self.ns_manager.stringify(ns) for ns in nsl}
         return [s for s in titles if self.which_ns(s) in nsl]
 
+    def in_ns(self, title: str, ns: Union[int, NS, str, tuple[Union[int, NS, str]]]) -> bool:
+        """Checks if a title belongs to a namespace or namespaces.  This is a lexical operation only, so `title` must be well-formed.
+
+        Args:
+            title (str): The title to check.
+            ns (Union[int, NS, str, tuple[Union[int, NS, str]]]): The namespace or namespaces (pass as a `tuple`) to check
+
+        Returns:
+            bool: True if `title` is a member of the namespace(s), `ns`.
+        """
+        target = self.ns_manager.intify(self.which_ns(title))
+        return (target in {self.ns_manager.intify(x) for x in ns}) if isinstance(ns, tuple) else (target == self.ns_manager.intify(ns))
+
+    def is_talk_page(self, title: str) -> bool:
+        """Determines if `title` is part of a talk page namespace.  This is a lexical operation and does not perform an api query.
+
+        Args:
+            title (str): The title to check
+
+        Returns:
+            bool: `True` if `title` is a talk page.
+        """
+        return (id := self.ns_manager.intify(self.which_ns(title))) >= 0 and id % 2
+
+    def not_in_ns(self, title: str, ns: Union[int, NS, str, tuple[Union[int, NS, str]]]) -> bool:
+        """Checks if a title does not belong to a namespace or namespaces.  This is a lexical operation only, so `title` must be well-formed.
+
+        Args:
+            title (str): The title to check.
+            ns (Union[int, NS, str, tuple[Union[int, NS, str]]]): The namespace or namespaces (pass as a `tuple`) to check
+
+        Returns:
+            bool: True if `title` is NOT a member of the namespace(s), `ns`.
+        """
+        return not self.in_ns(title, ns)
+
     def nss(self, title: str) -> str:
         """Strips the namespace prefix from a title.
 
@@ -678,18 +714,19 @@ class Wiki:
         log.info("%s: Fetching uploads for '%s'", self, user)
         return flatten_generator(GQuery.user_uploads(self, user, MAX))
 
-    def what_links_here(self, title: str, redirects_only: bool = False) -> list[str]:
+    def what_links_here(self, title: str, redirects_only: bool = False, ns: Union[list[Union[NS, str]], NS, str] = []) -> list[str]:
         """Fetch pages that wiki link (locally) to a page.
 
         Args:
             title (str): The title to query
             redirects_only (bool, optional): Set `True` to get the titles that redirect to this page. Defaults to False.
+            ns (Union[list[Union[NS, str]], NS, str], optional): Restrict returned output to titles in these namespaces. Optional, set to empty list to disable. Defaults to [].
 
         Returns:
             list[str]: The list of pages that link to `title`.
         """
         log.info("%s: determining what pages link to %s", self, title)
-        return self._xq_simple(MQuery.what_links_here, title, redirects_only)
+        return self._xq_simple(MQuery.what_links_here, title, redirects_only, ns)
 
     def what_transcludes_here(self, title: str, ns: Union[list[Union[NS, str]], NS, str] = []) -> list[str]:
         """Fetch pages that translcude a page.  If querying for templates, you must include the `Template:` prefix.

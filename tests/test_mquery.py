@@ -107,6 +107,10 @@ class TestPropCont(WikiTestCase):
         self.assertListEqual(["User:Fastily/Sandbox/Link/4"], m["User:Fastily/Sandbox/Link/1"])
         self.assertFalse(m["User:Fastily/DoesNotExist789"])
 
+        m = MQuery.what_links_here(self.wiki, ["User:Fastily/Sandbox/LinksHereTest", "User:Fastily/DoesNotExist1337"], ns=[NS.FILE, NS.USER])
+        self.assertCountEqual(["File:Fastily Test Pie.svg", "User:Fastily/Sandbox/LinksHereTest2"], m["User:Fastily/Sandbox/LinksHereTest"])
+        self.assertFalse(m["User:Fastily/DoesNotExist1337"])
+
     def test_what_transcludes_here(self):
         m = MQuery.what_transcludes_here(self.wiki, ["Template:FastilyTest", "User:Fastily/DoesNotExist789"])
         self.assertCountEqual(["User:Fastily/Sandbox/T", "FastilyTest"], m["Template:FastilyTest"])

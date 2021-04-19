@@ -53,6 +53,12 @@ class NSManager:
             self.m[name] = id
             l.append(name)
 
+            # handle canonical namespaces (e.g. Project is also Wikipedia)
+            if (canonical := v.get("canonical")) and canonical != v["name"]:
+                self.m[canonical] = id
+                l.append(canonical)
+
+        # handle aliases
         self.m |= (aliases := {e["alias"]: e["id"] for e in r["namespacealiases"]})
         l += aliases.keys()
 
@@ -128,13 +134,13 @@ class NSManager:
         """
         return self.ns_regex.sub("", title, 1)
 
-    def stringify(self, ns: Union[NS, str]) -> str:
+    def stringify(self, ns: Union[int, NS, str]) -> str:
         """Convienence method, returns the name of a namespace as a `str`.  Does not perform any namespace validation whatsoever.
 
         Args:
-            ns (Union[NS, str]): The namespace to get the name of.  If this is a `str`, then it will be returned.
+            ns (Union[int, NS, str]): The namespace to get the name of.  If this is a `str`, then it will be returned.
 
         Returns:
             str: The name of `ns` as a `str`.
         """
-        return self.m.get(ns) if isinstance(ns, NS) else ns
+        return self.m.get(ns) if isinstance(ns, int) else ns
