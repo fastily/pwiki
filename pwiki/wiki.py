@@ -368,6 +368,17 @@ class Wiki:
         """
         return func(self, [title], *extra_args).get(title)
 
+    def all_users(self, groups: Union[list[str], str] = []) -> list[str]:
+        """Lists all users on a wiki.  Can filter users by right(s) they have been assigned.
+
+        Args:
+            groups (Union[list[str], str], optional): The group(s) to filter by (e.g. `sysop`, `bot`).  Optional, leave empty to disable. Defaults to [].
+
+        Returns:
+            list[str]: a `list` containing usernames (without the `User:` prefix) that match the specified crteria.
+        """
+        return flatten_generator(GQuery.all_users(self, groups, MAX))
+
     def categories_on_page(self, title: str) -> list[str]:
         """Fetch the categories used on a page.
 
@@ -725,7 +736,7 @@ class Wiki:
         Returns:
             list[str]: The list of pages that link to `title`.
         """
-        log.info("%s: determining what pages link to %s", self, title)
+        log.info("%s: determining what pages link to '%s'", self, title)
         return self._xq_simple(MQuery.what_links_here, title, redirects_only, ns)
 
     def what_transcludes_here(self, title: str, ns: Union[list[Union[NS, str]], NS, str] = []) -> list[str]:

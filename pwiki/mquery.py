@@ -264,8 +264,8 @@ class MQuery:
             dict: A `dict` such that each key is the title and each value is the list of pages that link to the specified page.
         """
         pl = {"lhshow": ("" if redirects_only else "!") + "redirect"}
-        if ns:
-            pl["lhnamespace"] = wiki.ns_manager.create_filter(ns)
+        if nsf := wiki.ns_manager.create_filter(ns):
+            pl["lhnamespace"] = nsf
 
         return MQuery._prop_cont(wiki, titles, PropCont.LINKS_HERE, pl)
 

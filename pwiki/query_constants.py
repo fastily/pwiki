@@ -7,6 +7,7 @@ from .utils import mine_for
 
 MAX = "max"
 
+
 class QConstant:
     """Template information for API queries.  Can generate query parameters to send and contains the result retreival function."""
 
@@ -70,6 +71,7 @@ class PropContSingle:
 
 class ListCont:
     """Collection of QConstant objects which fulfill the list cont strategy."""
+    ALL_USERS = QConstant("allusers", limit_key="aulimit", retrieve_results=lambda l: [e["name"] for e in l])
     CATEGORY_MEMBERS = QConstant("categorymembers", limit_key="cmlimit")
     CONTRIBS = QConstant("usercontribs", limit_key="uclimit", retrieve_results=lambda l: [Contrib(e) for e in l])
     DUPLICATE_FILES = QConstant("querypage", {"qppage": "ListDuplicatedFiles"}, "qplimit", lambda q: [e["title"] for e in q["results"]])

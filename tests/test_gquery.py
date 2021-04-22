@@ -11,6 +11,11 @@ from .base import WikiTestCase
 class TestListCont(WikiTestCase):
     """Tests GQuery's list cont methods"""
 
+    def test_all_users(self):
+        self.assertTrue(next(GQuery.all_users(self.wiki)))
+        self.assertTrue(next(GQuery.all_users(self.wiki, "sysop")))
+        self.assertTrue(next(GQuery.all_users(self.wiki, ["bot", "bureaucrat"], 5)))
+
     def test_category_members(self):
         # test 1
         self.assertCountEqual(["User:Fastily/Sandbox/Page/2", "File:FastilyTest.png"], next(GQuery.category_members(self.wiki, "Category:Fastily Test2", limit=MAX)))

@@ -75,6 +75,10 @@ class TestWikiAuth(TestCase):
 class TestWikiQuery(WikiTestCase):
     """Tests wiki's query methods.  These are basically smoke tests because the backing modules are more thoroughly tested."""
 
+    def test_all_users(self):
+        self.assertTrue(result := self.wiki.all_users("rollbacker"))
+        self.assertIsInstance(result, list)
+
     def test_categories_on_page(self):
         self.assertListEqual(["Category:Fastily Test"], self.wiki.categories_on_page("User:Fastily/Sandbox/Page/3"))
 

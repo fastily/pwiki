@@ -92,6 +92,23 @@ class GQuery:
     ##################################################################################################
 
     @staticmethod
+    def all_users(wiki: Wiki, groups: Union[list[str], str] = [], limit: Union[int, str] = 1) -> Generator[list[str], None, None]:
+        """Lists all users on a wiki.  Can filter users by right(s) they have been assigned.
+
+        Args:
+            wiki (Wiki): The Wiki object to use
+            groups (Union[list[str], str], optional): The group(s) to filter by (e.g. `sysop`, `bot`).  Optional, leave empty to disable. Defaults to [].
+            limit (Union[int, str], optional): The maximum number of elements to return per iteration. Defaults to 1.
+
+        Returns:
+            Generator[list[str], None, None]: A `Generator` which yields a `list` containing users (without the `User:` prefix) that match the specified crteria.
+        """
+        if isinstance(groups, str):
+            groups = [groups]
+
+        return GQuery._list_cont(wiki, limit, ListCont.ALL_USERS, {"augroup": "|".join(groups)} if groups else {})
+
+    @staticmethod
     def category_members(wiki: Wiki, title: str, ns: list[Union[NS, str]] = [], limit: Union[int, str] = 1) -> Generator[list[str], None, None]:
         """Fetches the elements in a category.
 

@@ -48,7 +48,7 @@ def mine_for(target: dict, *keys: str) -> Any:
         for k in keys:
             target = target.get(k, {})
 
-        return target or None
+        return target if target != {} else None
     except Exception:
         log.debug("Crash in mine_for(), something must have gone *terribly* wrong", exc_info=True)
 
@@ -72,4 +72,4 @@ def read_error(action: str, response: dict) -> tuple[str, str]:
     log.warning("Unable to parse error which occurred while perfoming a '%s' action", action)
     log.debug(response)
 
-    return None, None
+    return (None,)*2
