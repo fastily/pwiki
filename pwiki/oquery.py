@@ -100,10 +100,7 @@ class OQuery:
         for chunk in chunker(users, wiki.prop_title_max):
             if response := query_and_validate(wiki, {"list": "users", "usprop": "groups", "ususers": "|".join(chunk)}, wiki.is_bot, "determine user rights"):
                 for p in mine_for(response, "query", "users"):
-                    try:
-                        out[p["name"]] = None if p.keys() & {"invalid", "missing"} else p["groups"]  # TODO: p.get("groups", None)?
-                    except Exception:
-                        log.debug("%s: Unable able to parse list value from: %s", wiki, p, exc_info=True)
+                    out[p["name"]] = p.get("groups")
 
         return out
 
