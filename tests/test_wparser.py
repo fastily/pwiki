@@ -357,6 +357,11 @@ class TestWikiTemplate(WikiTestCase):
         self.assertEqual("User:Fastily/Sandbox/Redirect3", t2.title)
         self.assertEqual("User:Fastily/DoesNotExist123", t3.title)
 
+        # namespace mangling in template namespace
+        t = WikiTemplate("fastilyTest2")
+        self.assertEqual([t], WikiTemplate.normalize(self.wiki, t, bypass_redirects=True))
+        self.assertEqual("FastilyTest", t.title)
+
 
 class TestWikiExt(WikiTestCase):
     """Tests instance methods of `WikiExt`"""

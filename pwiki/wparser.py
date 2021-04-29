@@ -334,34 +334,27 @@ class WikiTemplate:
         return f"{{{{{self.title}{out}}}}}"
 
     @staticmethod
-    def _normalize(wiki: Wiki, method: Callable[[Wiki, list[str]], dict], *tl: WikiTemplate) -> None:
-        """Helper method, normalizes titles of templates using `method`.
-
-        Args:
-            wiki (Wiki): The `Wiki` object to use
-            method (Callable[[Wiki, list[str]], dict]): Either `OQuery.normalize_titles` or `OQuery.resolve_redirects`, depending on the goal you are trying to achieve.
-            tl (WikiTemplate): The `WikiTemplate` objects to normalize.
-        """
-        template_ns = wiki.ns_manager.stringify(NS.TEMPLATE)
-        m = {t.title: t for t in tl}
-
-        for k, v in method(wiki, list(m.keys())).items():
-            m[k].title = wiki.nss(v) if wiki.which_ns(v) == template_ns else v
-
-    @staticmethod
-    def normalize(wiki: Wiki, *tl: WikiTemplate, bypass_redirects: bool = False) -> None:
+    def normalize(wiki: Wiki, *tl: WikiTemplate, bypass_redirects: bool = False) -> list[WikiTemplate]:
         """Normalizes titles of templates.  This usually fixes capitalization and removes random underscores.
 
         Args:
             wiki (Wiki): The `Wiki` object to use.  The `WikiTemplate` titles will be normalized against this `Wiki`.
             tl (WikiTemplate): The `WikiTemplate` objects to normalize.
             bypass_redirects (bool, optional): Set `True` to also bypass redirects. Defaults to False.
-        """
 
-        WikiTemplate._normalize(wiki, OQuery.normalize_titles, *tl)
+        Returns:
+            list[WikiTemplate]: The WikiTemplates passed in as `tl`, for chaining convenience.
+        """
+        m = {t.title: t for t in tl}
+        for k, v in OQuery.normalize_titles(wiki, list(m.keys())).items():
+            m[k].title = wiki.nss(v) if wiki.in_ns(v, NS.TEMPLATE) else v
 
         if bypass_redirects:
-            WikiTemplate._normalize(wiki, OQuery.resolve_redirects, *tl)
+            m = {(wiki.convert_ns(t.title, NS.TEMPLATE) if wiki.in_ns(t.title, NS.MAIN) else t.title): t for t in tl}
+            for k, v in OQuery.resolve_redirects(wiki, list(m.keys())).items():
+                m[k].title = wiki.nss(v) if wiki.in_ns(v, NS.TEMPLATE) else v
+
+        return list(tl)
 
 
 class WikiExt:
