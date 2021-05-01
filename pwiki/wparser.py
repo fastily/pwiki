@@ -6,7 +6,7 @@ import logging
 
 from collections import deque
 from contextlib import suppress
-from typing import Any, Callable, KeysView, TYPE_CHECKING, Union, ValuesView
+from typing import Any, Iterator, KeysView, TYPE_CHECKING, Union, ValuesView
 from xml.etree import ElementTree
 
 from .dwrap import Revision
@@ -218,6 +218,14 @@ class WikiTemplate:
             bool: True if the objects are simillar.
         """
         return isinstance(o, WikiTemplate) and self.title == o.title and self._params == o._params
+
+    def __iter__(self) -> Iterator:
+        """Returns an iterator that iterates over the keys of this WikiTemplate
+
+        Returns:
+            Iterator: An iterator wiht the keys of this WikiTemplate.
+        """
+        return iter(self.keys())
 
     def has_key(self, key: str, empty_ok=True) -> bool:
         """Check if the key `item` is the name of a parameter in this WikiTemplate.

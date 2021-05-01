@@ -218,6 +218,10 @@ class TestWikiTemplate(WikiTestCase):
         self.assertEqual(t2, WikiTemplate("Tower", {"owner": "Wizard", "Ex": WikiTemplate("NPC", {"1": "Witch"})}))
         self.assertNotEqual(t1, t2)
 
+    def test_iter(self):
+        t = WikiTemplate("Spring Crops", {"1": "Parsnip", "2": "Strawberry", "3": "Cauliflower", "4": "Blue Jazz"})
+        self.assertCountEqual(t.keys(), [k for k in t])
+
     def test_has_key(self):
         t = WikiTemplate("Town", {"1": "Pelican Town", "2": ""})
 
@@ -359,7 +363,7 @@ class TestWikiTemplate(WikiTestCase):
 
         # namespace mangling in template namespace
         t = WikiTemplate("fastilyTest2")
-        self.assertEqual([t], WikiTemplate.normalize(self.wiki, t, bypass_redirects=True))
+        self.assertListEqual([t], WikiTemplate.normalize(self.wiki, t, bypass_redirects=True))
         self.assertEqual("FastilyTest", t.title)
 
 
