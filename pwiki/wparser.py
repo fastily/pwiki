@@ -223,7 +223,7 @@ class WikiTemplate:
         """Returns an iterator that iterates over the keys of this WikiTemplate
 
         Returns:
-            Iterator: An iterator wiht the keys of this WikiTemplate.
+            Iterator: An iterator with the keys of this WikiTemplate.
         """
         return iter(self.keys())
 
@@ -494,7 +494,7 @@ class WParser:
             return
 
         raw_xml = mine_for(response, "parsetree")
-        log.debug(raw_xml)
+        # log.debug(raw_xml)
         return WParser._parse_wiki_text(ElementTree.fromstring(raw_xml))
 
     @staticmethod
