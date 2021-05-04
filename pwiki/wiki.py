@@ -134,6 +134,10 @@ class Wiki:
         if not (p := self._cookie_path()):
             raise ValueError("No cookie path is specified, unable to save cookies")
 
+        if not self.is_logged_in:
+            log.warning("%s: not logged in, no cookies to save", self)
+            return
+
         log.info("%s: Saving cookies to '%s'", self, p)
 
         p.parent.mkdir(parents=True, exist_ok=True)
