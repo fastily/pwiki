@@ -63,6 +63,7 @@ class TestWikiAuth(TestCase):
 
             wiki.client.cookies.set("yolo", "foobar", domain="wikipedia.org")
             wiki.username = u
+            wiki.is_logged_in = True
             wiki.save_cookies()
 
             self.assertTrue((tmp_dir / f"{wiki.domain}_{u}.pickle").is_file())
