@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="pwiki",
-    version="1.0.0",
+    version="1.1.0",
     author="Fastily",
     author_email="fastily@users.noreply.github.com",
     description="A Python library for effortlessly interacting with Wikipedia/MediaWiki",
