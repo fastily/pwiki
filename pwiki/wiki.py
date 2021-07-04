@@ -40,6 +40,7 @@ class Wiki:
         self.endpoint: str = f"https://{domain}/w/api.php"
         self.domain: str = domain
         self.client: Session = Session()
+        self.client.headers.update({"User-Agent": "pwiki"})
 
         self.username: str = None
         self.cookie_jar: Path = cookie_jar
