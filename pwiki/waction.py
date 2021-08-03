@@ -153,6 +153,7 @@ class WAction:
 
         return True
 
+    @staticmethod
     def purge(wiki: Wiki, titles: Iterable[str]) -> bool:
         """Attempts to purge the server-side caches of `titles`.  Exits and outputs messages to standard out on the first failure.
 
