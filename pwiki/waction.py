@@ -167,7 +167,7 @@ class WAction:
         return all(WAction._post_action(wiki, "purge", {"titles": "|".join(chunk)}) for chunk in chunker(titles, wiki.prop_title_max))
 
     @staticmethod
-    def unstash(wiki: Wiki, filekey: str, title: str, desc: str = "", summary: str = "", max_retries=5, retry_interval=5) -> bool:
+    def unstash(wiki: Wiki, filekey: str, title: str, desc: str = "", summary: str = "", max_retries: int = 5, retry_interval: int = 5) -> bool:
         """Attempt to unstash a file uploaded to the file stash.
 
         Args:
