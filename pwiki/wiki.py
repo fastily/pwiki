@@ -697,6 +697,15 @@ class Wiki:
         log.info("%s: Searching the wiki for '%s'", self, phrase)
         return flatten_generator(GQuery.search(self, phrase, ns, MAX))
 
+    def stashed_files(self) -> list[tuple[str, int, str]]:
+        """Fetch the user's stashed files.  PRECONDITION: You must be logged in for this to work
+
+        Returns:
+            list[tuple[str, int]]: a `list` of 3-`tuple` where each tuple is of the form (file key, file size, status).  Known values for status: `"finished"`, `"chunks"`
+        """
+        log.info("%s: fetching user's stashed files...", self)
+        return flatten_generator(GQuery.stashed_files(self, MAX))
+
     def templates_on_page(self, title: str) -> list[str]:
         """Fetch templates transcluded on a page.
 

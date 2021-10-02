@@ -245,6 +245,19 @@ class GQuery:
         return GQuery._list_cont(wiki, limit, ListCont.SEARCH, {"srsearch": phrase} | ({"srnamespace": wiki.ns_manager.create_filter(ns)} if ns else {}))
 
     @staticmethod
+    def stashed_files(wiki: Wiki, limit: Union[int, str] = 1) -> Generator[list[tuple[str, int, str]], None, None]:
+        """Fetch the user's stashed files.  PRECONDITION: You must be logged in for this to work
+
+        Args:
+            wiki (Wiki): The Wiki object to use
+            limit (Union[int, str], optional): The maxmimum number of elements to fetch each iteration.  Defaults to 1.
+
+        Returns:
+            Generator[list[tuple[str, int]], None, None]: A `Generator` which yields a `list` of 3-`tuple` where each tuple is of the form (file key, file size, status).   Known values for status: `"finished"`, `"chunks"`
+        """
+        return GQuery._list_cont(wiki, limit, ListCont.STASHED_FILES)
+
+    @staticmethod
     def user_uploads(wiki: Wiki, user: str, limit: Union[int, str] = 1) -> Generator[list[str], None, None]:
         """Gets the uploads of a user.
 

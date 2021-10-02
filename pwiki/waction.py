@@ -8,6 +8,7 @@ from pathlib import Path
 from time import sleep
 from typing import TYPE_CHECKING
 
+from .ns import NS
 from .oquery import OQuery
 from .query_utils import chunker
 from .utils import has_error, make_params, mine_for, read_error
@@ -167,7 +168,7 @@ class WAction:
         return all(WAction._post_action(wiki, "purge", {"titles": "|".join(chunk)}) for chunk in chunker(titles, wiki.prop_title_max))
 
     @staticmethod
-    def unstash(wiki: Wiki, filekey: str, title: str, desc: str = "", summary: str = "", max_retries: int = 5, retry_interval: int = 5) -> bool:
+    def unstash(wiki: Wiki, filekey: str, title: str, desc: str = "", summary: str = "", max_retries: int = 5, retry_interval: int = 30) -> bool:
         """Attempt to unstash a file uploaded to the file stash.
 
         Args:
@@ -177,7 +178,7 @@ class WAction:
             desc (str, optional): The text to go on the file description page. Defaults to "".
             summary (str, optional): The upload log summary to use. Defaults to "".
             max_retries (int, optional): The maximum number of retry in the event of failure (assuming the server expereinced an error). Defaults to 5.
-            retry_interval (int, optional): The number of seconds to wait in between retries.  Set 0 to disable. Defaults to 5.
+            retry_interval (int, optional): The number of seconds to wait in between retries.  Set 0 to disable. Defaults to 30.
 
         Returns:
             bool: True if unstashing was successful
@@ -186,7 +187,7 @@ class WAction:
 
         tries = 0
         status = False
-        while tries < max_retries and not (status := bool(WAction._action_and_validate(wiki, "upload", {"filename": title, "text": desc, "comment": summary, "filekey": filekey, "ignorewarnings": 1}, timeout=360))):
+        while tries < max_retries and not (status := bool(WAction._action_and_validate(wiki, "upload", {"filename": title, "text": desc, "comment": summary, "filekey": filekey, "ignorewarnings": 1}, timeout=360)) or wiki.exists(wiki.convert_ns(title, NS.FILE))):
             log.warning("%s: Unstash failed, this is a attempt %d of %d. Sleeping %ds...", wiki, tries + 1, max_retries, retry_interval)
             sleep(retry_interval)
             tries += 1
@@ -224,12 +225,24 @@ class WAction:
                     chunk_count += 1
                     pl["offset"] = _CHUNKSIZE * chunk_count
                     pl["filekey"] = filekey
-                    continue
+                else:
+                    err_count += 1
+                    log.warning("%s: Encountered error while uploading, this was %d/%d", wiki, err_count, max_retries)
+                    if err_count > max_retries:
+                        log.error("%s: Exceeded error threshold, abort.", wiki)
+                        return
 
-                err_count += 1
-                log.warning("%s: Encountered error while uploading, this was %d/%d", wiki, err_count, max_retries)
-                if err_count > max_retries:
-                    log.error("%s: Exceeded error threshold, abort.", wiki)
+        if chunk_count == total_chunks - 1:  # a poorly configured MediaWiki installation may fail to acknowledge the final chunk, but we can attempt recovery on our end
+            for i in range(max_retries):
+                log.info("%s: Attempting to unmangle filekey, '%s'.  Attempt %d/%d, but first sleeping 30s...", wiki, pl["filekey"], i+1, max_retries)
+                sleep(30)
+
+                if t := next((e for e in wiki.stashed_files() if e[0] == pl["filekey"] or e[1] == fsize), None):
+                    if t[2] == "finished":
+                        log.info("%s: Found a matching filekey: '%s'", wiki, t[0])
+                        return t[0]
+                else:
+                    log.error("No matching filekey found, unable to recover from MediaWiki error!")
                     return
 
         return pl.get("filekey")
