@@ -499,10 +499,10 @@ class Wiki:
         """Fetch the global file usage of a media file.  Only works with wikis that utilize a shared media respository wiki.
 
         Args:
-            title (str): The file to get global usage usage of. Must start with `File:` prefix
+            title (str): The file to get global usage usage of. Must start with `File:` prefix.
 
         Returns:
-            list[tuple]: A `list` of `tuple`s (page title, wiki hostname) containing the global usages of the file.
+            list[tuple]: A `list` of `tuple` (page title, wiki hostname) containing the global usages of the file.
         """
         log.info("%s: fetching global usage of %s", self, title)
         return self._xq_simple(MQuery.global_usage, title)
@@ -713,7 +713,7 @@ class Wiki:
             title (str): The title to query
 
         Returns:
-            list[str]: A list of tempalates transcluded on `title
+            list[str]: A list of tempalates transcluded on `title`.
         """
         log.info("%s: determining what templates are transcluded on %s", self, title)
         return self._xq_simple(MQuery.templates_on_page, title)

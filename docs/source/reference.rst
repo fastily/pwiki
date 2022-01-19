@@ -1,10 +1,7 @@
-pwiki package
+API reference
 =============
 
-Submodules
-----------
-
-pwiki.dwrap module
+pwiki.dwrap
 ------------------
 
 .. automodule:: pwiki.dwrap
@@ -12,7 +9,8 @@ pwiki.dwrap module
    :undoc-members:
    :show-inheritance:
 
-pwiki.gquery module
+
+pwiki.gquery
 -------------------
 
 .. automodule:: pwiki.gquery
@@ -20,7 +18,8 @@ pwiki.gquery module
    :undoc-members:
    :show-inheritance:
 
-pwiki.mquery module
+
+pwiki.mquery
 -------------------
 
 .. automodule:: pwiki.mquery
@@ -28,7 +27,8 @@ pwiki.mquery module
    :undoc-members:
    :show-inheritance:
 
-pwiki.ns module
+
+pwiki.ns
 ---------------
 
 .. automodule:: pwiki.ns
@@ -37,16 +37,16 @@ pwiki.ns module
    :show-inheritance:
 
 
-pwiki.utils module
-------------------
+pwiki.oquery
+---------------
 
-.. automodule:: pwiki.utils
+.. automodule:: pwiki.oquery
    :members:
    :undoc-members:
    :show-inheritance:
 
 
-pwiki.wgen module
+pwiki.wgen
 -----------------
 
 .. automodule:: pwiki.wgen
@@ -54,7 +54,8 @@ pwiki.wgen module
    :undoc-members:
    :show-inheritance:
 
-pwiki.wiki module
+
+pwiki.wiki
 -----------------
 
 .. automodule:: pwiki.wiki
@@ -62,18 +63,11 @@ pwiki.wiki module
    :undoc-members:
    :show-inheritance:
 
-pwiki.wparser module
+
+pwiki.wparser
 --------------------
 
 .. automodule:: pwiki.wparser
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: pwiki
    :members:
    :undoc-members:
    :show-inheritance:
