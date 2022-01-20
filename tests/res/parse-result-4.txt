@@ -1,8 +1,0 @@
-This is a <nowiki>nowiki</nowiki> test
-
-This is a {{Tlp|1=Test|2=<nowiki>some text here</nowiki>}} test
-
-
-<syntaxhighlight lang="python" line='line'>
-print("hello world")
-</syntaxhighlight>
