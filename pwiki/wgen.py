@@ -1,4 +1,4 @@
-"""Simple secret manager which provides an interactive way to input, save, and load credentials for use with pwiki."""
+"""Simple secret manager which provides an interactive way to input, save, and load credentials for use with pwiki.  If this module is invoked directly, it can be used to interactively read/write credentials."""
 import argparse
 import base64
 import getpass
@@ -27,7 +27,7 @@ def load_px(px_file: Path = _DEFAULT_PX) -> dict:
     return dict([line.split("\t") for line in base64.b64decode(px_file.read_text().encode()).decode().strip().splitlines()])
 
 
-def setup_px(out_file: Path = _DEFAULT_PX, allow_continue: bool = True, edit_mode: bool = False):
+def setup_px(out_file: Path = _DEFAULT_PX, allow_continue: bool = True, edit_mode: bool = False) -> None:
     """Interactively creates a credential save file.
 
     Args:
@@ -73,7 +73,7 @@ def _user_says_no(question: str) -> bool:
     return input(question + " (y/N): ").strip().lower() not in ("y", "yes")
 
 
-def main():
+def _main() -> None:
     """Main driver, to be used when this module is invoked via CLI."""
     cli_parser = argparse.ArgumentParser(description="pwiki Wgen credential manager")
     cli_parser.add_argument('--px-path', type=Path, default=_DEFAULT_PX, dest="px_path", help="The local path to write the password file to")
@@ -94,4 +94,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    _main()

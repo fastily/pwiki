@@ -6,12 +6,24 @@
 Welcome to pwiki's documentation!
 =================================
 
-WIP - under construction right now :)
+**pwiki** is a Python library which makes interacting with the MediaWiki API simple and easy.  It can be used with sites such as Wikipedia, or virtually any other website that runs on MediaWiki.
+
+
+Installation
+------------
+
+Install with pip:
+
+.. code-block:: bash
+
+   pip install pwiki
+
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
    
+   examples
    reference
 
 
