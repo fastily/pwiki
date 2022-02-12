@@ -133,7 +133,8 @@ class Wiki:
             ValueError: If a directory for cookies was not specified (i.e. set to `None`) when initializing this Wiki.
         """
         if not (p := self._cookie_path()):
-            raise ValueError("No cookie path is specified, unable to save cookies")
+            log.warning("No cookie path is specified, unable to save cookies")
+            return
 
         if not self.is_logged_in:
             log.warning("%s: not logged in, no cookies to save", self)
@@ -642,7 +643,7 @@ class Wiki:
         Returns:
             list[str]: A `list` containing files that match the specified prefix index.
         """
-        log.info("%s: Getting prefix index for ns '%s' and prefix '%s'", ns, prefix)
+        log.info("%s: Getting prefix index for ns '%s' and prefix '%s'", self, ns, prefix)
         return flatten_generator(GQuery.prefix_index(self, ns, prefix, MAX))
 
     def random(self, ns: list[Union[NS, str]] = []) -> str:
