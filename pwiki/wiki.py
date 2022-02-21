@@ -7,6 +7,7 @@ import re
 from collections.abc import Callable, Iterable
 from datetime import datetime
 from pathlib import Path
+from platform import platform, python_version
 from typing import Any, Union
 
 from requests import Session
@@ -40,7 +41,7 @@ class Wiki:
         self.endpoint: str = f"https://{domain}/w/api.php"
         self.domain: str = domain
         self.client: Session = Session()
-        self.client.headers.update({"User-Agent": "pwiki"})
+        self.client.headers.update({"User-Agent": f"pwiki/{platform()}/{python_version()}"})
 
         self.username: str = None
         self.cookie_jar: Path = cookie_jar
