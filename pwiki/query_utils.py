@@ -5,12 +5,14 @@ import logging
 
 from collections.abc import Generator, Iterable
 from itertools import chain
-from typing import TYPE_CHECKING, Union
+from typing import Any, TYPE_CHECKING, TypeVar, Union
 
 from .utils import has_error, make_params, mine_for, read_error
 
 if TYPE_CHECKING:
     from .wiki import Wiki
+
+T = TypeVar('T')
 
 log = logging.getLogger(__name__)
 
@@ -35,11 +37,11 @@ def basic_query(wiki: Wiki, pl: dict, big_query: bool = False) -> dict:
     return {}
 
 
-def chunker(l: Iterable[str], size: int) -> tuple:
+def chunker(l: Iterable[T], size: int) -> tuple[T, ...]:
     """Divides the input Iterable, `l`, into equal sub-lists of size, `size`.  Any remainder will be in the last element.
 
     Args:
-        l (Iterable[str]): The input Iterable
+        l (Iterable[T]): The input Iterable
         size (int): The maximum size of the sub-lists
 
     Returns:

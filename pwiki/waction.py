@@ -4,10 +4,12 @@ from __future__ import annotations
 import logging
 
 from collections.abc import Iterable
+from functools import partial
 from pathlib import Path
 from time import sleep
 from typing import TYPE_CHECKING
 
+from .dwrap import Revision
 from .ns import NS
 from .oquery import OQuery
 from .query_utils import chunker
@@ -166,6 +168,23 @@ class WAction:
             bool: `True` if all pages in `titles` were successfully purged. 
         """
         return all(WAction._post_action(wiki, "purge", {"titles": "|".join(chunk)}) for chunk in chunker(titles, wiki.prop_title_max))
+
+    @staticmethod
+    def undelete(wiki: Wiki, title: str, reason: str, revs: list[Revision] = None) -> bool:
+        """Undeletes a page. PRECONDITION: `wiki` must be logged in and have the ability to restore pages for this to work.
+
+        Args:
+            wiki (Wiki): The Wiki to use.
+            title (str): The title to restore
+            reason (str): The reason for restoring this page.
+            revs (list[Revision], optional): A list of revisions to restore.  If not set, then all deleted revisions will be restored.  Defaults to None.
+
+        Returns:
+            bool: `True` if this action succeeded.
+        """
+        do_restore = partial(WAction._action_and_validate, wiki, "undelete", timeout=60, success_vals=None)
+        pl = {"title": title, "reason": reason}
+        return all((do_restore(form=pl | {"timestamps": "|".join(rev.timestamp.strftime("%Y%m%d%H%M%S") for rev in chunk)}) for chunk in chunker(revs, wiki.prop_title_max))) if revs else bool(do_restore(form=pl))
 
     @staticmethod
     def unstash(wiki: Wiki, filekey: str, title: str, desc: str = "", summary: str = "", max_retries: int = 5, retry_interval: int = 30) -> bool:

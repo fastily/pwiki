@@ -66,6 +66,7 @@ class PropCont:
 
 class PropContSingle:
     """Collection of QConstant objects which fulfill the prop cont single strategy."""
+    DELETED_REVISIONS = QConstant("deletedrevisions", {"drvslots": "main"}, "drvlimit", lambda l: [Revision(e) for e in l])
     REVISIONS = QConstant("revisions", {"rvslots": "main"}, "rvlimit", lambda l: [Revision(e) for e in l])
 
 

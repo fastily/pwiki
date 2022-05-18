@@ -290,6 +290,29 @@ class GQuery:
         return GQuery._prop_cont(wiki, title, limit, PropCont.CATEGORIES)
 
     @staticmethod
+    def deleted_revisions(wiki: Wiki, title: str, limit: Union[int, str] = 1, older_first: bool = False, include_text: bool = False) -> Generator[list[Revision], None, None]:
+        """Fetches all the deleted revisions of `title`.  PRECONDITION: You must be logged in and have admin rights in order for this to work.
+
+        Args:
+            wiki (Wiki): The Wiki object to use.
+            title (str): The title to get deleted revisions for.
+            limit (Union[int, str], optional): The maxmimum number of revisions to fetch each iteration. Defaults to 1.
+            older_first (bool, optional): Set to `True` to fetch older revisions first. Defaults to False.
+            include_text (bool, optional): If `True`, then also fetch the wikitext of each revision.  Will populate the `Revision.text` field. Defaults to False.
+
+        Returns:
+            Generator[list[Revision], None, None]: A `Generator` which yields a `list` containing the (deleted) `Revision` objects of `title`.
+        """
+        pl = {"drvprop": "comment|ids|timestamp|user"}
+
+        if older_first:
+            pl["drvdir"] = "newer"
+        if include_text:
+            pl["drvprop"] += "|content"
+
+        return GQuery._prop_cont(wiki, title, limit, PropContSingle.DELETED_REVISIONS, pl)
+
+    @staticmethod
     def revisions(wiki: Wiki, title: str, limit: Union[int, str] = 1, older_first: bool = False, start: datetime = None, end: datetime = None, include_text: bool = False) -> Generator[list[Revision], None, None]:
         """Gets the revisions of a page.  Fetches newer revisions first by default.  PRECONDITION: if `start` and `end` are both set, then `start` must occur before `end`.
 
@@ -303,7 +326,7 @@ class GQuery:
             include_text (bool, optional): If `True`, then also fetch the wikitext of each revision.  Will populate the `Revision.text` field.  Defaults to False.
 
         Returns:
-            Generator[list[Revision], None, None]: A `Generator` which yields a `list` containing the Revision objects of `title`.
+            Generator[list[Revision], None, None]: A `Generator` which yields a `list` containing the `Revision` objects of `title`.
         """
         if start and end and start >= end:
             raise ValueError(f"start '{start}' cannot be equal to or after end '{end}' !")

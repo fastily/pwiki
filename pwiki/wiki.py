@@ -76,7 +76,7 @@ class Wiki:
         else:
             self.rights: list = self.list_user_rights()
             self.is_bot: bool = "bot" in self.rights
-            self.prop_title_max: int = 500 if self.is_bot else 50
+            self.prop_title_max: int = 500 if self.is_bot or "sysop" in self.rights else 50
 
     ##################################################################################################
     ######################################## C O O K I E S ###########################################
@@ -343,6 +343,21 @@ class Wiki:
         """
         return (s := re.sub(pattern, replacement, original := self.page_text(title))) == original or self.edit(title, s, summary)
 
+    def undelete(self, title: str, reason: str, revs: list[Revision] = None) -> bool:
+        """Undeletes a page. PRECONDITION: `wiki` must be logged in and have the ability to restore pages for this to work.
+
+        Args:
+            title (str): The title to restore
+            reason (str): The reason for restoring this page.
+            revs (list[Revision], optional): A list of revisions to restore.  If not set, then all deleted revisions will be restored.  Defaults to None.
+
+        Returns:
+            bool: `True` if this action succeeded.
+        """
+        log.info("%s: Restoring '%s'...", self, title)
+        return WAction.undelete(self, title, reason, revs)
+
+
     def upload(self, path: Path, title: str, desc: str = "", summary: str = "", max_retries=5) -> bool:
         """Uploads a file to the target Wiki.
 
@@ -436,6 +451,20 @@ class Wiki:
         """
         log.info("%s: fetching contributions of '%s'", self, user)
         return flatten_generator(GQuery.contribs(self, user, older_first, ns, MAX))
+
+    def deleted_revisions(self, title: str, older_first: bool = False, include_text: bool = False) -> list[Revision]:
+        """Fetches all the deleted revisions of `title`.  Plan accordingly when querying pages that have many deleted revisions!  PRECONDITION: You must be logged in and have admin rights in order for this to work.
+
+        Args:
+            title (str): The title to get deleted revisions for.
+            older_first (bool, optional): Set `True` to get older revisions first. Defaults to False.
+            include_text (bool, optional): If `True`, then also fetch the wikitext of each revision.  Will populate the `Revision.text` field.  Warning: enabling this is expensive for large pages with many deleted revisions.  Defaults to False.
+
+        Returns:
+            list[Revision]: A `list` containing the (deleted) `Revision` objects of `title`
+        """
+        log.info("%s: Fetching deleted revisions of '%s'", self, title)
+        return flatten_generator(GQuery.deleted_revisions(self, title, MAX, older_first, include_text))
 
     def duplicate_files(self, title: str, local_only: bool = True) -> list[str]:
         """Find dupliates of `title` if possible.
