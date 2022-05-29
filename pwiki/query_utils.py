@@ -5,7 +5,7 @@ import logging
 
 from collections.abc import Generator, Iterable
 from itertools import chain
-from typing import Any, TYPE_CHECKING, TypeVar, Union
+from typing import TYPE_CHECKING, TypeVar, Union
 
 from .utils import has_error, make_params, mine_for, read_error
 
