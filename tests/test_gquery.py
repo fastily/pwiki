@@ -1,11 +1,12 @@
 from datetime import datetime, timezone
+from unittest.mock import Mock, patch
 
 from pwiki.gquery import GQuery
 from pwiki.ns import NS
 from pwiki.query_constants import MAX
 from pwiki.query_utils import flatten_generator
 
-from .base import WikiTestCase
+from .base import file_to_json, WikiTestCase
 
 
 class TestListCont(WikiTestCase):
@@ -115,6 +116,16 @@ class TestPropCont(WikiTestCase):
 
     def test_categories_on_page(self):
         self.assertCountEqual(["Category:Fastily Test", "Category:Fastily Test2"], next(GQuery.categories_on_page(self.wiki, "User:Fastily/Sandbox/Page/2", MAX)))
+
+    @patch("pwiki.query_utils.basic_query", return_value=file_to_json("deleted-revisions"))
+    def test_deleted_revisions(self, mock: Mock):
+        result = next(GQuery.deleted_revisions(self.wiki, "User:Fastily/SomePageThatWasDeleted"))
+
+        mock.assert_called_once()
+        self.assertEqual(3, len(result))
+        self.assertEqual("Fastily", result[0].user)
+        self.assertEqual("test 1", result[1].summary)
+        self.assertEqual(datetime(2022, 6, 21, 9, 38, 57, tzinfo=timezone.utc), result[2].timestamp)
 
     def test_revisions(self):
         # test 1 - base

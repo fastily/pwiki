@@ -27,6 +27,11 @@ class TestWikiAction(WikiTestCase):
         with self.assertRaises(ValueError):
             self.wiki.edit("Foo")
 
+    def test_undelete(self, mock: mock.Mock):
+        mock.return_value = file_to_json("undelete")
+        self.assertTrue(self.wiki.undelete("User:Fastily", "testing undeletion"))
+        mock.assert_called_once()
+
 
 class TestReadOnlyWikiAction(WikiTestCase):
     """Tests Wiki actions which perform invisible/read-only updates the target wiki."""

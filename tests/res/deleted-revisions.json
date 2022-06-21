@@ -1,0 +1,38 @@
+{
+    "batchcomplete": true,
+    "query": {
+        "pages": [
+            {
+                "ns": 2,
+                "title": "User:Fastily/SomePageThatWasDeleted",
+                "missing": true,
+                "deletedrevisions": [
+                    {
+                        "revid": 1094208014,
+                        "parentid": 1094207980,
+                        "minor": false,
+                        "user": "Fastily",
+                        "timestamp": "2022-06-21T09:47:20Z",
+                        "comment": "test again"
+                    },
+                    {
+                        "revid": 1094207980,
+                        "parentid": 1094207022,
+                        "minor": false,
+                        "user": "Fastily",
+                        "timestamp": "2022-06-21T09:47:07Z",
+                        "comment": "test 1"
+                    },
+                    {
+                        "revid": 1094207022,
+                        "parentid": 0,
+                        "minor": false,
+                        "user": "Fastily",
+                        "timestamp": "2022-06-21T09:38:57Z",
+                        "comment": "test"
+                    }
+                ]
+            }
+        ]
+    }
+}
