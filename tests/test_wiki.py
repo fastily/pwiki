@@ -108,7 +108,7 @@ class TestWikiQuery(WikiTestCase):
     def test_exists(self):
         self.assertTrue(self.wiki.exists("Main Page"))
 
-    @skip("Regression on testwiki - 1.41.0-wmf.10")  # TODO - revisit
+    @skip("Regression on testwiki - https://phabricator.wikimedia.org/T337994")  # TODO - revisit
     def test_external_links(self):
         self.assertCountEqual(["https://www.google.com", "https://www.facebook.com", "https://github.com"], self.wiki.external_links("User:Fastily/Sandbox/ExternalLink"))
 
