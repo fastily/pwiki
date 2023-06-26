@@ -1,5 +1,4 @@
 from datetime import datetime
-from unittest import skip
 
 from pwiki.mquery import MQuery
 from pwiki.ns import NS
@@ -41,10 +40,9 @@ class TestPropCont(WikiTestCase):
         expected = {"File:FastilyTest.svg": []}
         self.assertDictEqual(expected, MQuery.duplicate_files(self.wiki, list(expected.keys()), False, True))
 
-    @skip("Regression on testwiki - https://phabricator.wikimedia.org/T337994")  # TODO - revisit
     def test_external_links(self):
         m = MQuery.external_links(self.wiki, ["User:Fastily/Sandbox/ExternalLink", "User:Fastily/Sandbox", "User:Fastily/DoesNotExist789"])
-        self.assertCountEqual(["https://www.google.com", "https://www.facebook.com", "https://github.com"], m["User:Fastily/Sandbox/ExternalLink"])
+        self.assertCountEqual(["https://www.google.com/", "https://www.facebook.com/", "https://github.com/"], m["User:Fastily/Sandbox/ExternalLink"])
         self.assertFalse(m["User:Fastily/Sandbox"])
         self.assertFalse(m["User:Fastily/DoesNotExist789"])
 

@@ -1,7 +1,7 @@
 from datetime import datetime
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from unittest import mock, skip, TestCase
+from unittest import mock, TestCase
 
 from pwiki.ns import NS
 
@@ -108,9 +108,8 @@ class TestWikiQuery(WikiTestCase):
     def test_exists(self):
         self.assertTrue(self.wiki.exists("Main Page"))
 
-    @skip("Regression on testwiki - https://phabricator.wikimedia.org/T337994")  # TODO - revisit
     def test_external_links(self):
-        self.assertCountEqual(["https://www.google.com", "https://www.facebook.com", "https://github.com"], self.wiki.external_links("User:Fastily/Sandbox/ExternalLink"))
+        self.assertCountEqual(["https://www.google.com/", "https://www.facebook.com/", "https://github.com/"], self.wiki.external_links("User:Fastily/Sandbox/ExternalLink"))
 
     def test_file_usage(self):
         self.assertCountEqual(["User:Fastily/Sandbox/ImageLinks", "User:Fastily/Sandbox/Page"], self.wiki.file_usage("File:FastilyTest.svg"))
