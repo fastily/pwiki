@@ -8,6 +8,7 @@ from collections.abc import Callable, Iterable
 from datetime import datetime
 from pathlib import Path
 from platform import platform, python_version
+from os import environ
 from typing import Any, Union
 
 from requests import Session
@@ -34,7 +35,7 @@ class Wiki:
 
         Args:
             domain (str): The shorthand domain of the Wiki to target (e.g. "en.wikipedia.org")
-            username (str, optional): The username to login as. Does nothing if `password` is not set.  Defaults to None.
+            username (str, optional): The username to login as.  If `password` is not set, then attempt to use an env var named `<USERNAME>_PW`, where `<USERNAME>` is `username` capitalized and all spaces are replaced with `_`.  Defaults to None.
             password (str, optional): The password to use when logging in. Does nothing if `username` is not set.  Defaults to None.
             cookie_jar (Path, optional): The directory to save/read cookies to/from.  Disable by setting this to `None`.  Note that in order to save cookies you still have to call `self.save_cookies()`. Defaults to Path(".").
         """
@@ -295,17 +296,19 @@ class Wiki:
         log.info("%s: Editing '%s'...", self, title)
         return WAction.edit(self, title, text, summary, prepend, append, minor)
 
-    def login(self, username: str, password: str) -> bool:
-        """Attempts to login this Wiki object.  If successful, all future calls will be automatically include authentication.  Immediately returns `False` if `username` or `password` is empty/`None`.
+    def login(self, username: str, password: str = None) -> bool:
+        """Attempts to login this Wiki object.  If successful, all future calls will be automatically include authentication. If `password` is not set, then the 
+        method will try looking using an environment variable of the form `<username>_PW`, where `<username>` is `username` capitalized, with all spaces replaced with `_`.
+        If `username` and/or `password` are evaluated to be empty/`None`, then `False` will be returned immediately.
 
         Args:
             username (str): The username to login with
-            password (str): The password to login with
+            password (str, optional): The password to login with. Defaults to None.
 
         Returns:
-            bool: `True` if logging in was successful.
+            bool: `True` if login was successful.
         """
-        if not (username and password):
+        if not (username and (password or (password := environ.get(f"{username.upper().replace(' ', '_')}_PW")))):
             return False
 
         log.info("%s: Attempting login for %s", self, username)
@@ -356,7 +359,6 @@ class Wiki:
         """
         log.info("%s: Restoring '%s'...", self, title)
         return WAction.undelete(self, title, reason, revs)
-
 
     def upload(self, path: Path, title: str, desc: str = "", summary: str = "", max_retries=5) -> bool:
         """Uploads a file to the target Wiki.
