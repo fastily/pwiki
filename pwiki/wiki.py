@@ -51,8 +51,8 @@ class Wiki:
 
         self._refresh_rights()
 
-        if not self._load_cookies(username):
-            self.login(username, password)
+        if username and not (self._load_cookies(username) or self.login(username, password)):
+            raise RuntimeError(f"Failed to login for '{username}'!")
 
         self.ns_manager: NSManager = OQuery.fetch_namespaces(self)
 
