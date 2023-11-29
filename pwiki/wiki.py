@@ -92,18 +92,21 @@ class Wiki:
         Returns:
             Path: The file `Path` to save the cookies of this instance to.  If no cookie_jar or username was set in the initializer, then return `None`.
         """
-        return (self.cookie_jar / f"{self.domain}_{username}.pickle") if self.cookie_jar and (username := username or self.username) else None
+        if not (username := username or self.username):
+            raise RuntimeError("No username specified or user is not logged in, not possible to determine a path to cookies")
 
-    def _load_cookies(self, username: str = None) -> bool:
+        return self.cookie_jar / f"{self.domain}_{username}.pickle"
+
+    def _load_cookies(self, username: str) -> bool:
         """Load saved cookies from a file into this pwiki instance.
 
         Args:
-            username (str, optional): The override username to use.  If unset, then `self.username` will be used as the default.  Defaults to None.
+            username (str): The username to load cookies for.
 
         Returns:
-            bool: True if successful (confirmed with server that cookies are valid).
+            bool: `True` if successful (confirmed with server that cookies are valid).
         """
-        if not (cookie_path := self._cookie_path(username)) or not cookie_path.is_file():
+        if not (self.cookie_jar and (cookie_path := self._cookie_path(username)).is_file()):
             return False
 
         with cookie_path.open('rb') as f:
@@ -125,28 +128,22 @@ class Wiki:
 
     def clear_cookies(self) -> None:
         """Deletes any saved cookies from disk."""
+        if not self.cookie_jar:
+            return
+
         (p := self._cookie_path()).unlink(True)
         log.info("%s: Removed cookies saved at '%s'", self, p)
 
     def save_cookies(self) -> None:
-        """Write the cookies of the Wiki object to disk, so they can be used in the future.
-
-        Raises:
-            ValueError: If a directory for cookies was not specified (i.e. set to `None`) when initializing this Wiki.
-        """
-        if not (p := self._cookie_path()):
-            log.warning("No cookie path is specified, unable to save cookies")
+        """Write the cookies of the Wiki object to disk, so they can be used in the future.  Does nothing if `self.cookie_jar` is set to `None`. Raises `RuntimeError` if the `Wiki` is not logged in."""
+        if not self.cookie_jar:
             return
 
-        if not self.is_logged_in:
-            log.warning("%s: not logged in, no cookies to save", self)
-            return
-
-        log.info("%s: Saving cookies to '%s'", self, p)
-
-        p.parent.mkdir(parents=True, exist_ok=True)
+        (p := self._cookie_path()).parent.mkdir(parents=True, exist_ok=True)
         with p.open('wb') as f:
             pickle.dump(self.client.cookies, f)
+
+        log.info("%s: Saved cookies to '%s'", self, p)
 
     ##################################################################################################
     ##################################### N A M E S P A C E S ########################################

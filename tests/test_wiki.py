@@ -77,6 +77,10 @@ class TestWikiAuth(TestCase):
             wiki = new_wiki(username=u, password="hi", cookie_jar=tmp_dir)
             self.assertEqual("foobar", wiki.client.cookies.get("yolo"))
 
+    def test_no_auth_save_error(self):
+        with self.assertRaises(RuntimeError):
+            new_wiki().save_cookies()
+
 
 class TestWikiQuery(WikiTestCase):
     """Tests wiki's query methods.  These are basically smoke tests because the backing modules are more thoroughly tested."""
