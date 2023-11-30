@@ -46,15 +46,6 @@ pwiki.oquery
    :show-inheritance:
 
 
-pwiki.wgen
------------------
-
-.. automodule:: pwiki.wgen
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-
 pwiki.wiki
 -----------------
 

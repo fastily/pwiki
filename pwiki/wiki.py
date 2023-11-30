@@ -752,7 +752,7 @@ class Wiki:
         """Queries the Wiki for all acceptable file types which may be uploaded to this Wiki.  PRECONDITION: the target Wiki permits file uploads.
 
         Returns:
-            set: A set containing all acceptable file types as their extensions ("." prefix is included) 
+            set: A `set` containing all acceptable file types as their extensions (`.` prefix is not included)
         """
         log.info("%s: Fetching a list of acceptable file upload extensions.", self)
         return OQuery.uploadable_filetypes(self)
