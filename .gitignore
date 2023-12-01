@@ -16,6 +16,9 @@ build
 dist
 *.egg-info
 
+# Docs
+site/
+
 # virtualenv
 venv_pwiki
 

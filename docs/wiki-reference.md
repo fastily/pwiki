@@ -1,0 +1,2 @@
+# wiki
+::: pwiki.wiki

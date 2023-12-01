@@ -1,0 +1,2 @@
+# gquery
+::: pwiki.gquery
