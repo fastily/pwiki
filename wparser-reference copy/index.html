@@ -1,0 +1,3527 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://fastily.github.io/pwiki/wparser-reference%20copy/">
+      
+      
+        <link rel="prev" href="../wiki-reference/">
+      
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.14">
+    
+    
+      
+        <title>wparser - pwiki docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.fad675c6.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.356b1318.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#wparser" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="pwiki docs" class="md-header__button md-logo" aria-label="pwiki docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            pwiki docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              wparser
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="pwiki docs" class="md-nav__button md-logo" aria-label="pwiki docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    pwiki docs
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Welcome to pwiki's docs
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dwrap-reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    dwrap
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Examples
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../gquery-reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    gquery
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mquery-reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    mquery
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ns-reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ns
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../oquery-reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    oquery
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../wiki-reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    wiki
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    wparser
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    wparser
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#pwiki.wparser" class="md-nav__link">
+    <span class="md-ellipsis">
+      wparser
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pwiki.wparser.WParser" class="md-nav__link">
+    <span class="md-ellipsis">
+      WParser
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="WParser">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WParser.parse" class="md-nav__link">
+    <span class="md-ellipsis">
+      parse()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WParser.revision_metadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      revision_metadata()
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiExt" class="md-nav__link">
+    <span class="md-ellipsis">
+      WikiExt
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="WikiExt">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiExt.__init__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __init__()
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiTemplate" class="md-nav__link">
+    <span class="md-ellipsis">
+      WikiTemplate
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="WikiTemplate">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiTemplate.__bool__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __bool__()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiTemplate.__contains__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __contains__()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiTemplate.__eq__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __eq__()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiTemplate.__getitem__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __getitem__()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiTemplate.__init__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __init__()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiTemplate.__iter__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __iter__()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiTemplate.__setitem__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __setitem__()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiTemplate.__str__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __str__()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiTemplate.append_to_params" class="md-nav__link">
+    <span class="md-ellipsis">
+      append_to_params()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiTemplate.as_text" class="md-nav__link">
+    <span class="md-ellipsis">
+      as_text()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiTemplate.drop" class="md-nav__link">
+    <span class="md-ellipsis">
+      drop()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiTemplate.get_param" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_param()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiTemplate.has_key" class="md-nav__link">
+    <span class="md-ellipsis">
+      has_key()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiTemplate.keys" class="md-nav__link">
+    <span class="md-ellipsis">
+      keys()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiTemplate.normalize" class="md-nav__link">
+    <span class="md-ellipsis">
+      normalize()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiTemplate.pop" class="md-nav__link">
+    <span class="md-ellipsis">
+      pop()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiTemplate.remap" class="md-nav__link">
+    <span class="md-ellipsis">
+      remap()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiTemplate.set_param" class="md-nav__link">
+    <span class="md-ellipsis">
+      set_param()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiTemplate.touch" class="md-nav__link">
+    <span class="md-ellipsis">
+      touch()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiTemplate.values" class="md-nav__link">
+    <span class="md-ellipsis">
+      values()
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiText" class="md-nav__link">
+    <span class="md-ellipsis">
+      WikiText
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="WikiText">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiText.templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      templates
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiText.__bool__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __bool__()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiText.__eq__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __eq__()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiText.__iadd__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __iadd__()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiText.__init__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __init__()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiText.__str__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __str__()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiText.all_templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      all_templates()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiText.as_text" class="md-nav__link">
+    <span class="md-ellipsis">
+      as_text()
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#pwiki.wparser" class="md-nav__link">
+    <span class="md-ellipsis">
+      wparser
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pwiki.wparser.WParser" class="md-nav__link">
+    <span class="md-ellipsis">
+      WParser
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="WParser">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WParser.parse" class="md-nav__link">
+    <span class="md-ellipsis">
+      parse()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WParser.revision_metadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      revision_metadata()
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiExt" class="md-nav__link">
+    <span class="md-ellipsis">
+      WikiExt
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="WikiExt">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiExt.__init__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __init__()
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiTemplate" class="md-nav__link">
+    <span class="md-ellipsis">
+      WikiTemplate
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="WikiTemplate">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiTemplate.__bool__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __bool__()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiTemplate.__contains__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __contains__()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiTemplate.__eq__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __eq__()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiTemplate.__getitem__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __getitem__()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiTemplate.__init__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __init__()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiTemplate.__iter__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __iter__()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiTemplate.__setitem__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __setitem__()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiTemplate.__str__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __str__()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiTemplate.append_to_params" class="md-nav__link">
+    <span class="md-ellipsis">
+      append_to_params()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiTemplate.as_text" class="md-nav__link">
+    <span class="md-ellipsis">
+      as_text()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiTemplate.drop" class="md-nav__link">
+    <span class="md-ellipsis">
+      drop()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiTemplate.get_param" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_param()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiTemplate.has_key" class="md-nav__link">
+    <span class="md-ellipsis">
+      has_key()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiTemplate.keys" class="md-nav__link">
+    <span class="md-ellipsis">
+      keys()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiTemplate.normalize" class="md-nav__link">
+    <span class="md-ellipsis">
+      normalize()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiTemplate.pop" class="md-nav__link">
+    <span class="md-ellipsis">
+      pop()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiTemplate.remap" class="md-nav__link">
+    <span class="md-ellipsis">
+      remap()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiTemplate.set_param" class="md-nav__link">
+    <span class="md-ellipsis">
+      set_param()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiTemplate.touch" class="md-nav__link">
+    <span class="md-ellipsis">
+      touch()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiTemplate.values" class="md-nav__link">
+    <span class="md-ellipsis">
+      values()
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiText" class="md-nav__link">
+    <span class="md-ellipsis">
+      WikiText
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="WikiText">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiText.templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      templates
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiText.__bool__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __bool__()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiText.__eq__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __eq__()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiText.__iadd__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __iadd__()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiText.__init__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __init__()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiText.__str__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __str__()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiText.all_templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      all_templates()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.wparser.WikiText.as_text" class="md-nav__link">
+    <span class="md-ellipsis">
+      as_text()
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<h1 id="wparser">wparser</h1>
+
+
+<div class="doc doc-object doc-module">
+
+
+
+<a id="pwiki.wparser"></a>
+  <div class="doc doc-contents first">
+  
+      <p>Methods and classes for parsing wikitext into a object-oriented format which is easier to work with. BEWARE: This is an experimental module and may not work for 100% of cases; you have been warned...</p>
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-class">
+
+
+
+
+<h2 id="pwiki.wparser.WParser" class="doc doc-heading">
+          <code>WParser</code>
+
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+
+  
+      <p>Entry point for the WParser module</p>
+
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pwiki.wparser.WParser.parse" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">parse</span><span class="p">(</span><span class="n">wiki</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Parses the title or text into <code>WikiText</code>/<code>WTemplate</code> objects.  If <code>title</code> and <code>text</code> are both specified, then <code>text</code> will be parsed as if it was on <code>title</code>.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>wiki</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="pwiki.wiki.Wiki" href="../wiki-reference/#pwiki.wiki.Wiki">Wiki</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The Wiki object to use.</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>title</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The title to use.  If <code>text</code> is not specified, then the text of <code>title</code> will be automatically fetched and parsed. Defaults to None.</p>
+            </div>
+          </td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>text</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The text to parse. If <code>title</code> is specified, then the text will be parsed as if it is was published on <code>title</code>. Defaults to None.</p>
+            </div>
+          </td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Raises:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>ValueError</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>If <code>title</code> and <code>text</code> are both <code>None</code>.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>WikiText</code></td>          <td>
+                <code><a class="autorefs autorefs-internal" title="pwiki.wparser.WikiText" href="#pwiki.wparser.WikiText">WikiText</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The result of the parsing operation.  <code>None</code> if something went wrong.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pwiki.wparser.WParser.revision_metadata" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">revision_metadata</span><span class="p">(</span><span class="n">wiki</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">categories</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">external_links</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">images</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">links</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">templates</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Fetches metadata from the <code>Revision</code>, <code>r</code>.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>wiki</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="pwiki.wiki.Wiki" href="../wiki-reference/#pwiki.wiki.Wiki">Wiki</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The Wiki object to use</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>r</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="pwiki.dwrap.Revision" href="../dwrap-reference/#pwiki.dwrap.Revision">Revision</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The <code>Revision</code> to get metadata of</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>categories</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Set <code>True</code> to get the categories contained in this <code>Revision</code>. Defaults to False.</p>
+            </div>
+          </td>
+          <td>
+                <code>False</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>external_links</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Set <code>True</code> to get the external links contained in this <code>Revision</code>. Defaults to False.</p>
+            </div>
+          </td>
+          <td>
+                <code>False</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>images</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Set <code>True</code> to get the files contained in this <code>Revision</code>. Defaults to False.</p>
+            </div>
+          </td>
+          <td>
+                <code>False</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>links</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Set <code>True</code> to get the links contained in this <code>Revision</code>. Defaults to False.</p>
+            </div>
+          </td>
+          <td>
+                <code>False</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>templates</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Set <code>True</code> to get the templates contained in this <code>Revision</code>. Defaults to False.</p>
+            </div>
+          </td>
+          <td>
+                <code>False</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>dict</code></td>          <td>
+                <code>dict</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>A <code>dict</code> where each key is the type of metadata (these match the <code>bool</code> parameters of this method), and each value is a <code>list</code> with the associated type of metadata.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+
+<h2 id="pwiki.wparser.WikiExt" class="doc doc-heading">
+          <code>WikiExt</code>
+
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+
+  
+      <p>Represents an extension tag.  Extensions technically aren't supported, so this is a meta class which will be interpreted as WikiText during lexing.</p>
+
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pwiki.wparser.WikiExt.__init__" class="doc doc-heading">
+          <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">attr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">inner</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">close</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Creates a new <code>WikiExt</code> object</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>name</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The name of the extension tag. Defaults to None.</p>
+            </div>
+          </td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>attr</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The attribute str of the extension tag. Defaults to None.</p>
+            </div>
+          </td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>inner</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="pwiki.wparser.WikiText" href="#pwiki.wparser.WikiText">WikiText</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The inner text of the tag. Defaults to None.</p>
+            </div>
+          </td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>close</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The closing tag (including carets). Defaults to None.</p>
+            </div>
+          </td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+
+<h2 id="pwiki.wparser.WikiTemplate" class="doc doc-heading">
+          <code>WikiTemplate</code>
+
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+
+  
+      <p>Represents a MediaWiki template.  These usually contain a title and parameters.</p>
+
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pwiki.wparser.WikiTemplate.__bool__" class="doc doc-heading">
+          <code class="highlight language-python"><span class="fm">__bool__</span><span class="p">()</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Get a bool representation of this WikiTemplate object.</p>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>bool</code></td>          <td>
+                <code>bool</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p><code>True</code> if this WikiTemplate is not empty.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pwiki.wparser.WikiTemplate.__contains__" class="doc doc-heading">
+          <code class="highlight language-python"><span class="fm">__contains__</span><span class="p">(</span><span class="n">item</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Check if the key <code>item</code> is the name of a parameter</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>item</code></td>
+          <td>
+                <code><span title="typing.Any">Any</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The key to check.  If this is not a <code>str</code>, then <code>False</code> will be returned.</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>bool</code></td>          <td>
+                <code>bool</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p><code>True</code> if the key <code>item</code> is the name of a parameter with a non-empty value in this WikiTemplate.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pwiki.wparser.WikiTemplate.__eq__" class="doc doc-heading">
+          <code class="highlight language-python"><span class="fm">__eq__</span><span class="p">(</span><span class="n">o</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Compares two <code>WikiTemplate</code>s for equality.  Checks for matching titles (does not automatically normalize, if you want this, then call normalize() before checking equality!) and matching parameters.  CAVEAT: does not compare order of parameters (not that it matters anyways)</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>o</code></td>
+          <td>
+                <code><span title="typing.Any">Any</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The other object to compare</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>bool</code></td>          <td>
+                <code>bool</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>True if the objects are simillar.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pwiki.wparser.WikiTemplate.__getitem__" class="doc doc-heading">
+          <code class="highlight language-python"><span class="fm">__getitem__</span><span class="p">(</span><span class="n">key</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Returns the parameter value associated with <code>key</code> in this <code>WikiTemplate</code>'s params</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>key</code></td>
+          <td>
+                <code><span title="typing.Any">Any</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The key associated with the value to look up.</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Raises:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>KeyError</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>If <code>key</code> is not the name of a parameter in this WikiTemplate.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>WikiText</code></td>          <td>
+                <code><a class="autorefs autorefs-internal" title="pwiki.wparser.WikiText" href="#pwiki.wparser.WikiText">WikiText</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The <code>WikiText</code> associated with the spceified <code>key</code></p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pwiki.wparser.WikiTemplate.__init__" class="doc doc-heading">
+          <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Initializer, creates a new <code>WikiTemplate</code> object</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>title</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The <code>name</code> of this WikiTemplate. Defaults to None.</p>
+            </div>
+          </td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>params</code></td>
+          <td>
+                <code>dict[str, <span title="typing.Union">Union</span>[str, <a class="autorefs autorefs-internal" title="pwiki.wparser.WikiText" href="#pwiki.wparser.WikiText">WikiText</a>]]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Default parameters to initialize this WikiTemplate with.  Defaults to None.</p>
+            </div>
+          </td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>parent</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="pwiki.wparser.WikiText" href="#pwiki.wparser.WikiText">WikiText</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The WikiText associated with this WikiTemplate.  Defaults to None.</p>
+            </div>
+          </td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pwiki.wparser.WikiTemplate.__iter__" class="doc doc-heading">
+          <code class="highlight language-python"><span class="fm">__iter__</span><span class="p">()</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Returns an iterator that iterates over the keys of this WikiTemplate</p>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>Iterator</code></td>          <td>
+                <code><span title="typing.Iterator">Iterator</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>An iterator with the keys of this WikiTemplate.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pwiki.wparser.WikiTemplate.__setitem__" class="doc doc-heading">
+          <code class="highlight language-python"><span class="fm">__setitem__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Associates <code>key</code> and <code>value</code> as entries in this <code>WikiTemplate</code>'s parameter list.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>key</code></td>
+          <td>
+                <code><span title="typing.Any">Any</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The key to use.  This must be a <code>str</code>.</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>value</code></td>
+          <td>
+                <code><span title="typing.Any">Any</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The value to use.  This must be a <code>str</code>, <code>WikiTemplate</code>, or <code>WikiText</code>.</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Raises:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>TypeError</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>If <code>key</code> or <code>value</code> are not acceptable types.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pwiki.wparser.WikiTemplate.__str__" class="doc doc-heading">
+          <code class="highlight language-python"><span class="fm">__str__</span><span class="p">()</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Generates a <code>str</code> representaiton of this WikiTemplate.</p>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>str</code></td>          <td>
+                <code>str</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The <code>str</code> representation of this <code>WikiTemplate</code>.  The result will not be indented, see <code>self.as_text()</code> for details.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pwiki.wparser.WikiTemplate.append_to_params" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">append_to_params</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Appends <code>e</code> to the value associated with <code>k</code>. If <code>k</code> does not exist in this WikiTemplate, then a new entry will be created.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>k</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The key to lookup</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>e</code></td>
+          <td>
+                <code><span title="typing.Union">Union</span>[str, <a class="autorefs autorefs-internal" title="pwiki.wparser.WikiTemplate" href="#pwiki.wparser.WikiTemplate">WikiTemplate</a>, <a class="autorefs autorefs-internal" title="pwiki.wparser.WikiText" href="#pwiki.wparser.WikiText">WikiText</a>]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The element to append to the value associated with <code>k</code>.</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pwiki.wparser.WikiTemplate.as_text" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">as_text</span><span class="p">(</span><span class="n">indent</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Renders this <code>WikiTemplate</code> as wikitext, in <code>str</code> form.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>indent</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Set <code>True</code> to include newlines so as to 'pretty-print' this <code>WikiTemplate</code>. Defaults to False.</p>
+            </div>
+          </td>
+          <td>
+                <code>False</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>str</code></td>          <td>
+                <code>str</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The <code>WikiTemplate</code> rendered as wikitext.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pwiki.wparser.WikiTemplate.drop" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">drop</span><span class="p">()</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>If possible, remove this <code>WikiTemplate</code> from its parent <code>WikiText</code>.</p>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pwiki.wparser.WikiTemplate.get_param" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">get_param</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Returns the parameter value associated with <code>k</code> in this <code>WikiTemplate</code>'s params</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>k</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The key associated with the value to look up.</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>default</code></td>
+          <td>
+                <code><span title="typing.Union">Union</span>[str, <a class="autorefs autorefs-internal" title="pwiki.wparser.WikiText" href="#pwiki.wparser.WikiText">WikiText</a>]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The value to return if <code>k</code> is not a parameter in this <code>WikiTemplate</code>. Defaults to None.</p>
+            </div>
+          </td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>WikiText</code></td>          <td>
+                <code><span title="typing.Union">Union</span>[str, <a class="autorefs autorefs-internal" title="pwiki.wparser.WikiText" href="#pwiki.wparser.WikiText">WikiText</a>]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The <code>WikiText</code> associated with the specified <code>k</code>, otherwise <code>default</code></p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pwiki.wparser.WikiTemplate.has_key" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">has_key</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">empty_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Check if the key <code>item</code> is the name of a parameter in this WikiTemplate.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>key</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The key to check. </p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>empty_ok</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Set <code>False</code> to enable an additional check for whether the value assoaciated with <code>key</code> is non-empty. Defaults to True.</p>
+            </div>
+          </td>
+          <td>
+                <code>True</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>bool</code></td>          <td>
+                <code>bool</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p><code>True</code> if <code>key</code> exists in this <code>WikiTemplate</code>.  If <code>empty_ok</code> is <code>False</code>, then <code>True</code> will be returned if the value assoaciated with <code>key</code> is also non-empty.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pwiki.wparser.WikiTemplate.keys" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">keys</span><span class="p">()</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Gets the parameter keys in this WikiTemplate</p>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>KeysView</code></td>          <td>
+                <code><span title="typing.KeysView">KeysView</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The keys in this WikiTemplate</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pwiki.wparser.WikiTemplate.normalize" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">normalize</span><span class="p">(</span><span class="n">wiki</span><span class="p">,</span> <span class="o">*</span><span class="n">tl</span><span class="p">,</span> <span class="n">bypass_redirects</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Normalizes titles of templates.  This usually fixes capitalization and removes random underscores.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>wiki</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="pwiki.wiki.Wiki" href="../wiki-reference/#pwiki.wiki.Wiki">Wiki</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The <code>Wiki</code> object to use.  The <code>WikiTemplate</code> titles will be normalized against this <code>Wiki</code>.</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>tl</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="pwiki.wparser.WikiTemplate" href="#pwiki.wparser.WikiTemplate">WikiTemplate</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The <code>WikiTemplate</code> objects to normalize.</p>
+            </div>
+          </td>
+          <td>
+                <code>()</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>bypass_redirects</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Set <code>True</code> to also bypass redirects. Defaults to False.</p>
+            </div>
+          </td>
+          <td>
+                <code>False</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>list[<a class="autorefs autorefs-internal" title="pwiki.wparser.WikiTemplate" href="#pwiki.wparser.WikiTemplate">WikiTemplate</a>]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>list[WikiTemplate]: The WikiTemplates passed in as <code>tl</code>, for chaining convenience.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pwiki.wparser.WikiTemplate.pop" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">pop</span><span class="p">(</span><span class="n">k</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Removes the key, <code>k</code>, and its associated value from this <code>WikiTemplate</code>'s parameters, and then return the value.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>k</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The key to lookup.  If <code>None</code>, then an arbitrary key-value pair will be popped.  Defaults to None.</p>
+            </div>
+          </td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>WikiText</code></td>          <td>
+                <code><a class="autorefs autorefs-internal" title="pwiki.wparser.WikiText" href="#pwiki.wparser.WikiText">WikiText</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The value formerly associated with <code>k</code>.  <code>None</code> if <code>k</code> is not in this <code>WikiTemplate</code>.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pwiki.wparser.WikiTemplate.remap" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">remap</span><span class="p">(</span><span class="n">old_key</span><span class="p">,</span> <span class="n">new_key</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Remap a key in this <code>WikiTemplate</code>'s parameters.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>old_key</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The key to remap.  If this key does not exist in this WikiTemplate, then this method exits without making any changes.</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>new_key</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The key to remap the value associated with <code>old_key</code> to.</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pwiki.wparser.WikiTemplate.set_param" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">set_param</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Associates key <code>k</code> with value <code>v</code> in this <code>WikiTemplate</code>'s parameter list.  Alias of <code>self[k] = v</code>.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>k</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The key to use</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>v</code></td>
+          <td>
+                <code><span title="typing.Union">Union</span>[str, <a class="autorefs autorefs-internal" title="pwiki.wparser.WikiText" href="#pwiki.wparser.WikiText">WikiText</a>, <a class="autorefs autorefs-internal" title="pwiki.wparser.WikiTemplate" href="#pwiki.wparser.WikiTemplate">WikiTemplate</a>]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The value to associate with <code>k</code></p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pwiki.wparser.WikiTemplate.touch" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">touch</span><span class="p">(</span><span class="n">k</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>If <code>k</code> does not exist in this WikiTemplate, create a mapping for <code>k</code> to an empty <code>WikiText</code></p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>k</code></td>
+          <td>
+                <code>[type]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>[description]</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pwiki.wparser.WikiTemplate.values" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">values</span><span class="p">()</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Gets the parameter values in this WikiTemplate</p>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>ValuesView</code></td>          <td>
+                <code><span title="typing.ValuesView">ValuesView</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The values contained in this WikiTemplate</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+
+<h2 id="pwiki.wparser.WikiText" class="doc doc-heading">
+          <code>WikiText</code>
+
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+
+  
+      <p>Mutable representation of parsed WikiText.  This is basically a container which contains <code>str</code> and <code>WikiTemplate</code> objects</p>
+
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+
+<h3 id="pwiki.wparser.WikiText.templates" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">templates</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">WikiTemplate</span><span class="p">]</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Convenience property, gets the templates contained in this WikiText.  CAVEAT: this does not recursively search sub-templates, see <code>all_templates()</code> for more details.</p>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>list[<a class="autorefs autorefs-internal" title="pwiki.wparser.WikiTemplate" href="#pwiki.wparser.WikiTemplate">WikiTemplate</a>]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>list[WikiTemplate]: A list of <code>WikiTemplate</code> objects contained in this <code>WikiText</code> (top level only)</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+  </div>
+
+</div>
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pwiki.wparser.WikiText.__bool__" class="doc doc-heading">
+          <code class="highlight language-python"><span class="fm">__bool__</span><span class="p">()</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Get a bool representation of this WikiText object.</p>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>bool</code></td>          <td>
+                <code>bool</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p><code>True</code> if this WikiText is not empty.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pwiki.wparser.WikiText.__eq__" class="doc doc-heading">
+          <code class="highlight language-python"><span class="fm">__eq__</span><span class="p">(</span><span class="n">o</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Compares two <code>WikiText</code> objects for equality.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>o</code></td>
+          <td>
+                <code><span title="typing.Any">Any</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The object to compare with self.</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>bool</code></td>          <td>
+                <code>bool</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>True if the objects are the same type and contain the same elements in the same order.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pwiki.wparser.WikiText.__iadd__" class="doc doc-heading">
+          <code class="highlight language-python"><span class="fm">__iadd__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Appends the specified element to the end of this WikiText object.  CAVEAT: if <code>other</code> is a <code>WikiText</code> object, then other's contents will be merged into this <code>WikiText</code>. </p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>other</code></td>
+          <td>
+                <code><span title="typing.Any">Any</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>A <code>str</code> or <code>WikiTemplate</code> object</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Raises:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>TypeError</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>If <code>other</code> is not a <code>str</code> or <code>WikiTemplate</code></p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>WikiText</code></td>          <td>
+                <code><a class="autorefs autorefs-internal" title="pwiki.wparser.WikiText" href="#pwiki.wparser.WikiText">WikiText</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>A reference to original, now modified WikiText object</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pwiki.wparser.WikiText.__init__" class="doc doc-heading">
+          <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">elements</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Initializer, creates a new <code>WikiText</code> object.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>elements</code></td>
+          <td>
+                <code><span title="typing.Union">Union</span>[str, <a class="autorefs autorefs-internal" title="pwiki.wparser.WikiTemplate" href="#pwiki.wparser.WikiTemplate">WikiTemplate</a>]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Default values to initialize this WikiText with.  These will be appended together in the order passed.</p>
+            </div>
+          </td>
+          <td>
+                <code>()</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pwiki.wparser.WikiText.__str__" class="doc doc-heading">
+          <code class="highlight language-python"><span class="fm">__str__</span><span class="p">()</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Gets a <code>str</code> representation of this <code>WikiText</code> object.</p>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>str</code></td>          <td>
+                <code>str</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>A <code>str</code> representation of this <code>WikiText</code> object.  Leading and trailing whitespace will be stripped.  If you don't want this, see <code>as_text()</code>.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pwiki.wparser.WikiText.all_templates" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">all_templates</span><span class="p">()</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Recursively finds all templates contained in this <code>WikiText</code> and their subtemplates.</p>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>list[<a class="autorefs autorefs-internal" title="pwiki.wparser.WikiTemplate" href="#pwiki.wparser.WikiTemplate">WikiTemplate</a>]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>list[WikiTemplate]: all <code>WikiTemplate</code> objects contained in this <code>WikiText</code> and their subtemplates.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pwiki.wparser.WikiText.as_text" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">as_text</span><span class="p">(</span><span class="n">trim</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Generate a <code>str</code> representation of this <code>WikiText</code>.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>trim</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Set <code>True</code> to remove leading &amp; trailing whitespace. Defaults to False.</p>
+            </div>
+          </td>
+          <td>
+                <code>False</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>str</code></td>          <td>
+                <code>str</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>A <code>str</code> representation of this <code>WikiText</code>.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.cd18aaf1.min.js"></script>
+      
+    
+  </body>
+</html>

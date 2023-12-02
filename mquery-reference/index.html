@@ -1,0 +1,2209 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://fastily.github.io/pwiki/mquery-reference/">
+      
+      
+        <link rel="prev" href="../gquery-reference/">
+      
+      
+        <link rel="next" href="../ns-reference/">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.14">
+    
+    
+      
+        <title>mquery - pwiki docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.fad675c6.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.356b1318.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#mquery" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="pwiki docs" class="md-header__button md-logo" aria-label="pwiki docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            pwiki docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              mquery
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="pwiki docs" class="md-nav__button md-logo" aria-label="pwiki docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    pwiki docs
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Welcome to pwiki's docs
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dwrap-reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    dwrap
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Examples
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../gquery-reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    gquery
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    mquery
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    mquery
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#pwiki.mquery" class="md-nav__link">
+    <span class="md-ellipsis">
+      mquery
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pwiki.mquery.MQuery" class="md-nav__link">
+    <span class="md-ellipsis">
+      MQuery
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="MQuery">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.mquery.MQuery.categories_on_page" class="md-nav__link">
+    <span class="md-ellipsis">
+      categories_on_page()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.mquery.MQuery.category_size" class="md-nav__link">
+    <span class="md-ellipsis">
+      category_size()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.mquery.MQuery.duplicate_files" class="md-nav__link">
+    <span class="md-ellipsis">
+      duplicate_files()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.mquery.MQuery.exists" class="md-nav__link">
+    <span class="md-ellipsis">
+      exists()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.mquery.MQuery.external_links" class="md-nav__link">
+    <span class="md-ellipsis">
+      external_links()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.mquery.MQuery.file_usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      file_usage()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.mquery.MQuery.global_usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      global_usage()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.mquery.MQuery.image_info" class="md-nav__link">
+    <span class="md-ellipsis">
+      image_info()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.mquery.MQuery.images_on_page" class="md-nav__link">
+    <span class="md-ellipsis">
+      images_on_page()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.mquery.MQuery.links_on_page" class="md-nav__link">
+    <span class="md-ellipsis">
+      links_on_page()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.mquery.MQuery.page_text" class="md-nav__link">
+    <span class="md-ellipsis">
+      page_text()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.mquery.MQuery.templates_on_page" class="md-nav__link">
+    <span class="md-ellipsis">
+      templates_on_page()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.mquery.MQuery.what_links_here" class="md-nav__link">
+    <span class="md-ellipsis">
+      what_links_here()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.mquery.MQuery.what_transcludes_here" class="md-nav__link">
+    <span class="md-ellipsis">
+      what_transcludes_here()
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ns-reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ns
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../oquery-reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    oquery
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../wiki-reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    wiki
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../wparser-reference%20copy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    wparser
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#pwiki.mquery" class="md-nav__link">
+    <span class="md-ellipsis">
+      mquery
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pwiki.mquery.MQuery" class="md-nav__link">
+    <span class="md-ellipsis">
+      MQuery
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="MQuery">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.mquery.MQuery.categories_on_page" class="md-nav__link">
+    <span class="md-ellipsis">
+      categories_on_page()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.mquery.MQuery.category_size" class="md-nav__link">
+    <span class="md-ellipsis">
+      category_size()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.mquery.MQuery.duplicate_files" class="md-nav__link">
+    <span class="md-ellipsis">
+      duplicate_files()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.mquery.MQuery.exists" class="md-nav__link">
+    <span class="md-ellipsis">
+      exists()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.mquery.MQuery.external_links" class="md-nav__link">
+    <span class="md-ellipsis">
+      external_links()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.mquery.MQuery.file_usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      file_usage()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.mquery.MQuery.global_usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      global_usage()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.mquery.MQuery.image_info" class="md-nav__link">
+    <span class="md-ellipsis">
+      image_info()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.mquery.MQuery.images_on_page" class="md-nav__link">
+    <span class="md-ellipsis">
+      images_on_page()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.mquery.MQuery.links_on_page" class="md-nav__link">
+    <span class="md-ellipsis">
+      links_on_page()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.mquery.MQuery.page_text" class="md-nav__link">
+    <span class="md-ellipsis">
+      page_text()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.mquery.MQuery.templates_on_page" class="md-nav__link">
+    <span class="md-ellipsis">
+      templates_on_page()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.mquery.MQuery.what_links_here" class="md-nav__link">
+    <span class="md-ellipsis">
+      what_links_here()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pwiki.mquery.MQuery.what_transcludes_here" class="md-nav__link">
+    <span class="md-ellipsis">
+      what_transcludes_here()
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<h1 id="mquery">mquery</h1>
+
+
+<div class="doc doc-object doc-module">
+
+
+
+<a id="pwiki.mquery"></a>
+  <div class="doc doc-contents first">
+  
+      <p>Mass/Bulk query methods and classes designed to fetch as many results as possible in the fewest round trips</p>
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-class">
+
+
+
+
+<h2 id="pwiki.mquery.MQuery" class="doc doc-heading">
+          <code>MQuery</code>
+
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+
+  
+      <p>Collection of queries optimized for performing mass/bulk data retrieval from the API</p>
+
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pwiki.mquery.MQuery.categories_on_page" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">categories_on_page</span><span class="p">(</span><span class="n">wiki</span><span class="p">,</span> <span class="n">titles</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Fetch the categories used on a page.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>wiki</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="pwiki.wiki.Wiki" href="../wiki-reference/#pwiki.wiki.Wiki">Wiki</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The Wiki object to use</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>titles</code></td>
+          <td>
+                <code>list[str]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The titles to query.</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>dict</code></td>          <td>
+                <code>dict</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>A <code>dict</code> such that each key is the title and each value is the list of categories the page is categorized in.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pwiki.mquery.MQuery.category_size" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">category_size</span><span class="p">(</span><span class="n">wiki</span><span class="p">,</span> <span class="n">titles</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Queries the Wiki and gets the number of elements categorized in each of the specified categories.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>wiki</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="pwiki.wiki.Wiki" href="../wiki-reference/#pwiki.wiki.Wiki">Wiki</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The Wiki object to use.</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>titles</code></td>
+          <td>
+                <code>list[str]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The categories to get the size of.  Each list element must include the <code>Category:</code> prefix</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>dict</code></td>          <td>
+                <code>dict</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>A dict where each key is the category name and each value is an <code>int</code> representing the number of elements categorized in this category.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pwiki.mquery.MQuery.duplicate_files" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">duplicate_files</span><span class="p">(</span><span class="n">wiki</span><span class="p">,</span> <span class="n">titles</span><span class="p">,</span> <span class="n">local_only</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">shared_only</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Find duplicates of the specified files if possible.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>wiki</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="pwiki.wiki.Wiki" href="../wiki-reference/#pwiki.wiki.Wiki">Wiki</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The Wiki object to use</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>titles</code></td>
+          <td>
+                <code>list[str]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The list of files to get duplicates of (must start with <code>File:</code> prefix).</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>local_only</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Set <code>False</code> to also search the associated shared media repository wiki. Defaults to True.</p>
+            </div>
+          </td>
+          <td>
+                <code>True</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>shared_only</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Set <code>True</code> to only return duplicates from the shared media repository.  Do not set to <code>True</code> if <code>local_only</code> is <code>True</code> or you will get strange behavior.  Defaults to False.</p>
+            </div>
+          </td>
+          <td>
+                <code>False</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>dict</code></td>          <td>
+                <code>dict</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>A <code>dict</code> such that each key is the title and each value is the list of files that duplicate the specified file.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pwiki.mquery.MQuery.exists" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">exists</span><span class="p">(</span><span class="n">wiki</span><span class="p">,</span> <span class="n">titles</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Queries the Wiki to determine if the specified list of titles exists.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>wiki</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="pwiki.wiki.Wiki" href="../wiki-reference/#pwiki.wiki.Wiki">Wiki</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The Wiki object to use.</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>titles</code></td>
+          <td>
+                <code>list[str]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The titles to query.</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>dict</code></td>          <td>
+                <code>dict</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>A <code>dict</code> where each key is a title and each value is a bool indiciating if the title exists (<code>True</code>) or not (<code>False</code>).</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pwiki.mquery.MQuery.external_links" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">external_links</span><span class="p">(</span><span class="n">wiki</span><span class="p">,</span> <span class="n">titles</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Fetches external links on a page.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>wiki</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="pwiki.wiki.Wiki" href="../wiki-reference/#pwiki.wiki.Wiki">Wiki</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The Wiki object to use</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>titles</code></td>
+          <td>
+                <code>list[str]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The titles to query</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>dict</code></td>          <td>
+                <code>dict</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>A <code>dict</code> such that each key is the title and each value is the <code>list</code> of external links contained in the text of the page.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pwiki.mquery.MQuery.file_usage" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">file_usage</span><span class="p">(</span><span class="n">wiki</span><span class="p">,</span> <span class="n">titles</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Fetch the titles of all pages displaying the specified list of media files.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>wiki</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="pwiki.wiki.Wiki" href="../wiki-reference/#pwiki.wiki.Wiki">Wiki</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The Wiki object to use</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>titles</code></td>
+          <td>
+                <code>list[str]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The files to get file usage of.  Each list element must include the <code>File:</code> prefix</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>dict</code></td>          <td>
+                <code>dict</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>A dict such that each key is the title and each value is the list of pages displaying the file.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pwiki.mquery.MQuery.global_usage" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">global_usage</span><span class="p">(</span><span class="n">wiki</span><span class="p">,</span> <span class="n">titles</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Fetch the global file usage of a media file.  Only works with wikis that utilize a shared media respository wiki.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>wiki</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="pwiki.wiki.Wiki" href="../wiki-reference/#pwiki.wiki.Wiki">Wiki</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The Wiki object to use</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>titles</code></td>
+          <td>
+                <code>list[str]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The files to get global usage usage of.  Each list element must include the <code>File:</code> prefix</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>dict</code></td>          <td>
+                <code>dict</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>A dict such that each key is the title and each value is the list of tuples (page title, wiki hostname) containing the global usages of the file.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pwiki.mquery.MQuery.image_info" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">image_info</span><span class="p">(</span><span class="n">wiki</span><span class="p">,</span> <span class="n">titles</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Fetch image (file) info for media files.  This is basically image metadata for each uploaded media file under the specified title. See <code>dwrap.ImageInfo</code> for details.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>wiki</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="pwiki.wiki.Wiki" href="../wiki-reference/#pwiki.wiki.Wiki">Wiki</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The Wiki object to use</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>titles</code></td>
+          <td>
+                <code>list[str]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The files to get image info of.  Each list element must include the <code>File:</code> prefix</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>dict</code></td>          <td>
+                <code>dict</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>A dict such that each key is the title and each value is the list of ImageInfo objects associated with the title.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pwiki.mquery.MQuery.images_on_page" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">images_on_page</span><span class="p">(</span><span class="n">wiki</span><span class="p">,</span> <span class="n">titles</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Fetch images/media files used on a page.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>wiki</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="pwiki.wiki.Wiki" href="../wiki-reference/#pwiki.wiki.Wiki">Wiki</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The Wiki object to use</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>titles</code></td>
+          <td>
+                <code>list[str]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The titles to query</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>dict</code></td>          <td>
+                <code>dict</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>A dict such that each key is the title and each value is the list of images/files that are used on the page.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pwiki.mquery.MQuery.links_on_page" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">links_on_page</span><span class="p">(</span><span class="n">wiki</span><span class="p">,</span> <span class="n">titles</span><span class="p">,</span> <span class="n">ns</span><span class="o">=</span><span class="p">[])</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Fetch wiki links on a page.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>wiki</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="pwiki.wiki.Wiki" href="../wiki-reference/#pwiki.wiki.Wiki">Wiki</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The Wiki object to use</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>titles</code></td>
+          <td>
+                <code>list[str]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The titles to query</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>ns</code></td>
+          <td>
+                <code><span title="typing.Union">Union</span>[list[<span title="typing.Union">Union</span>[<a class="autorefs autorefs-internal" title="pwiki.ns.NS" href="../ns-reference/#pwiki.ns.NS">NS</a>, str]], <a class="autorefs autorefs-internal" title="pwiki.ns.NS" href="../ns-reference/#pwiki.ns.NS">NS</a>, str]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Restrict returned output to titles in these namespaces. Optional, set to empty list to disable. Defaults to [].</p>
+            </div>
+          </td>
+          <td>
+                <code>[]</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>dict</code></td>          <td>
+                <code>dict</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>A <code>dict</code> such that each key is the title and each value is the list of wiki links contained in the text of the page.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pwiki.mquery.MQuery.page_text" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">page_text</span><span class="p">(</span><span class="n">wiki</span><span class="p">,</span> <span class="n">titles</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Queries the Wiki for the text of a title.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>wiki</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="pwiki.wiki.Wiki" href="../wiki-reference/#pwiki.wiki.Wiki">Wiki</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The Wiki object to use.</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>titles</code></td>
+          <td>
+                <code>list[str]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The titles to query.</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>dict</code></td>          <td>
+                <code>dict</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>A <code>dict</code> where each key is the title and each value is a <code>str</code> with the wikitext of the title.  If a title does not exist, the str will be replaced with <code>None</code>.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pwiki.mquery.MQuery.templates_on_page" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">templates_on_page</span><span class="p">(</span><span class="n">wiki</span><span class="p">,</span> <span class="n">titles</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Fetch templates transcluded on a page.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>wiki</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="pwiki.wiki.Wiki" href="../wiki-reference/#pwiki.wiki.Wiki">Wiki</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The Wiki object to use</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>titles</code></td>
+          <td>
+                <code>list[str]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The titles to query</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>dict</code></td>          <td>
+                <code>dict</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>A <code>dict</code> such that each key is the title and each value is the list of tempalates transcluded on the page.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pwiki.mquery.MQuery.what_links_here" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">what_links_here</span><span class="p">(</span><span class="n">wiki</span><span class="p">,</span> <span class="n">titles</span><span class="p">,</span> <span class="n">redirects_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ns</span><span class="o">=</span><span class="p">[])</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Fetch pages that wiki link (locally) to a page.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>wiki</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="pwiki.wiki.Wiki" href="../wiki-reference/#pwiki.wiki.Wiki">Wiki</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The Wiki object to use</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>titles</code></td>
+          <td>
+                <code>list[str]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The titles to query</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>redirects_only</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Set <code>True</code> to get the titles that redirect to this page. Defaults to False.</p>
+            </div>
+          </td>
+          <td>
+                <code>False</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>ns</code></td>
+          <td>
+                <code><span title="typing.Union">Union</span>[list[<span title="typing.Union">Union</span>[<a class="autorefs autorefs-internal" title="pwiki.ns.NS" href="../ns-reference/#pwiki.ns.NS">NS</a>, str]], <a class="autorefs autorefs-internal" title="pwiki.ns.NS" href="../ns-reference/#pwiki.ns.NS">NS</a>, str]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Restrict returned output to titles in these namespaces. Optional, set to empty list to disable. Defaults to [].</p>
+            </div>
+          </td>
+          <td>
+                <code>[]</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>dict</code></td>          <td>
+                <code>dict</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>A <code>dict</code> such that each key is the title and each value is the list of pages that link to the specified page.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h3 id="pwiki.mquery.MQuery.what_transcludes_here" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">what_transcludes_here</span><span class="p">(</span><span class="n">wiki</span><span class="p">,</span> <span class="n">titles</span><span class="p">,</span> <span class="n">ns</span><span class="o">=</span><span class="p">[])</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Fetch pages that translcude a page.  If querying for templates, you must include the <code>Template:</code> prefix.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>wiki</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="pwiki.wiki.Wiki" href="../wiki-reference/#pwiki.wiki.Wiki">Wiki</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The Wiki object to use</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>titles</code></td>
+          <td>
+                <code>list[str]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The titles to query</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>ns</code></td>
+          <td>
+                <code><span title="typing.Union">Union</span>[list[<span title="typing.Union">Union</span>[<a class="autorefs autorefs-internal" title="pwiki.ns.NS" href="../ns-reference/#pwiki.ns.NS">NS</a>, str]], <a class="autorefs autorefs-internal" title="pwiki.ns.NS" href="../ns-reference/#pwiki.ns.NS">NS</a>, str]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Restrict returned output to titles in these namespaces. Optional, set to empty list to disable. Defaults to [].</p>
+            </div>
+          </td>
+          <td>
+                <code>[]</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>dict</code></td>          <td>
+                <code>dict</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>A <code>dict</code> such that each key is the title and each value is the list of pages that transclude the specified page.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.cd18aaf1.min.js"></script>
+      
+    
+  </body>
+</html>
