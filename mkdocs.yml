@@ -1,5 +1,5 @@
 site_name: pwiki docs
-site_url: https://example.com/
+site_url: https://fastily.github.io/pwiki/
 
 theme:
   name: material
