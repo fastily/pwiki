@@ -20,6 +20,7 @@ from .ns import MAIN_NAME, NS, NSManager
 from .oquery import OQuery
 from .query_constants import MAX
 from .query_utils import flatten_generator
+from .utils import PROP_TITLE_MAX ,PROP_TITLE_MAX_BOT
 from .waction import WAction
 from .wparser import WikiText, WParser
 
@@ -73,11 +74,11 @@ class Wiki:
         if not self.username:
             self.rights: list = []
             self.is_bot: bool = False
-            self.prop_title_max: int = 50
+            self.prop_title_max: int = PROP_TITLE_MAX
         else:
             self.rights: list = self.list_user_rights()
             self.is_bot: bool = "bot" in self.rights
-            self.prop_title_max: int = 500 if self.is_bot or "sysop" in self.rights else 50
+            self.prop_title_max: int = PROP_TITLE_MAX_BOT if self.is_bot or "sysop" in self.rights else PROP_TITLE_MAX
 
     ##################################################################################################
     ######################################## C O O K I E S ###########################################

@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Union
 from .ns import NS
 from .query_constants import PropCont, PropNoCont, QConstant
 from .query_utils import chunker, denormalize_result, get_continue_params, query_and_validate
-from .utils import mine_for
+from .utils import mine_for, PROP_TITLE_MAX
 
 if TYPE_CHECKING:
     from .wiki import Wiki
@@ -71,7 +71,7 @@ class MQuery:
         out = dict.fromkeys(titles)
 
         for chunk in chunker(titles, wiki.prop_title_max):
-            if response := query_and_validate(wiki, {**template.pl, "prop": template.name, "titles": "|".join(chunk)}, desc=f"peform a prop_no_cont query with '{template.name}'"):
+            if response := query_and_validate(wiki, {**template.pl, "prop": template.name, "titles": "|".join(chunk)}, len(chunk) > PROP_TITLE_MAX, f"peform a prop_no_cont query with '{template.name}'"):
                 for p in mine_for(response, "query", "pages"):
                     try:
                         out[p["title"]] = template.retrieve_results(p)

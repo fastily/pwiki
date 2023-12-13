@@ -5,6 +5,8 @@ from contextlib import suppress
 from typing import Any
 
 API_DEFAULTS = {"format": "json", "formatversion": "2"}
+PROP_TITLE_MAX = 50
+PROP_TITLE_MAX_BOT = 500
 
 log = logging.getLogger(__name__)
 
