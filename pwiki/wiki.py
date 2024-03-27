@@ -10,6 +10,7 @@ from pathlib import Path
 from platform import platform, python_version
 from os import environ
 from typing import Any, Union
+from urllib.parse import urlparse
 
 from requests import Session
 
@@ -20,7 +21,7 @@ from .ns import MAIN_NAME, NS, NSManager
 from .oquery import OQuery
 from .query_constants import MAX
 from .query_utils import flatten_generator
-from .utils import PROP_TITLE_MAX ,PROP_TITLE_MAX_BOT
+from .utils import PROP_TITLE_MAX, PROP_TITLE_MAX_BOT
 from .waction import WAction
 from .wparser import WikiText, WParser
 
@@ -31,17 +32,21 @@ log = logging.getLogger(__name__)
 class Wiki:
     """General wiki-interfacing functionality and config data"""
 
-    def __init__(self, domain: str = "en.wikipedia.org", username: str = None, password: str = None, cookie_jar: Path = Path(".")):
+    def __init__(self, domain: str = "en.wikipedia.org", username: str = None, password: str = None, cookie_jar: Path = Path("."), api_endpoint: str = None):
         """Initializer, creates a new Wiki object.
 
         Args:
-            domain (str): The shorthand domain of the Wiki to target (e.g. "en.wikipedia.org")
-            username (str, optional): The username to login as.  If `password` is not set, then attempt to use an env var named `<USERNAME>_PW`, where `<USERNAME>` is `username` capitalized and all spaces are replaced with `_`.  Defaults to None.
-            password (str, optional): The password to use when logging in. Does nothing if `username` is not set.  Defaults to None.
+            domain (str, optional): The shorthand domain of the Wiki to target. Defaults to "en.wikipedia.org".
+            username (str, optional):  The username to login as.  If `password` is not set, then attempt to use an env var named `<USERNAME>_PW`, where `<USERNAME>` is `username` capitalized and all spaces are replaced with `_`. Defaults to None.
+            password (str, optional): The password to use when logging in. Does nothing if `username` is not set. Defaults to None.
             cookie_jar (Path, optional): The directory to save/read cookies to/from.  Disable by setting this to `None`.  Note that in order to save cookies you still have to call `self.save_cookies()`. Defaults to Path(".").
+            api_endpoint (str, optional): The base API endpoint on your wiki.  This usually looks something like `https://<YOUR_DOMAIN>/w/api.php`.  Useful if your wiki uses a non-standard endpoint.  If set, `domain` will be ignored. Defaults to None.
+
+        Raises:
+            RuntimeError: If `username` and/or `password` was set and login failed.
         """
-        self.endpoint: str = f"https://{domain}/w/api.php"
-        self.domain: str = domain
+        self.endpoint: str = api_endpoint or f"https://{domain}/w/api.php"
+        self.domain: str = urlparse(api_endpoint).hostname if api_endpoint else domain
         self.client: Session = Session()
         self.client.headers.update({"User-Agent": f"pwiki/{platform()}/{python_version()}"})
 
