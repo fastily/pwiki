@@ -2,47 +2,47 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://fastily.github.io/pwiki/</loc>
-         <lastmod>2023-12-02</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://fastily.github.io/pwiki/dwrap-reference/</loc>
-         <lastmod>2023-12-02</lastmod>
+         <lastmod>2024-04-23</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://fastily.github.io/pwiki/examples/</loc>
-         <lastmod>2023-12-02</lastmod>
+         <lastmod>2024-04-23</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://fastily.github.io/pwiki/gquery-reference/</loc>
-         <lastmod>2023-12-02</lastmod>
+         <loc>https://fastily.github.io/pwiki/API/dwrap-reference/</loc>
+         <lastmod>2024-04-23</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://fastily.github.io/pwiki/mquery-reference/</loc>
-         <lastmod>2023-12-02</lastmod>
+         <loc>https://fastily.github.io/pwiki/API/gquery-reference/</loc>
+         <lastmod>2024-04-23</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://fastily.github.io/pwiki/ns-reference/</loc>
-         <lastmod>2023-12-02</lastmod>
+         <loc>https://fastily.github.io/pwiki/API/mquery-reference/</loc>
+         <lastmod>2024-04-23</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://fastily.github.io/pwiki/oquery-reference/</loc>
-         <lastmod>2023-12-02</lastmod>
+         <loc>https://fastily.github.io/pwiki/API/ns-reference/</loc>
+         <lastmod>2024-04-23</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://fastily.github.io/pwiki/wiki-reference/</loc>
-         <lastmod>2023-12-02</lastmod>
+         <loc>https://fastily.github.io/pwiki/API/oquery-reference/</loc>
+         <lastmod>2024-04-23</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://fastily.github.io/pwiki/wparser-reference%20copy/</loc>
-         <lastmod>2023-12-02</lastmod>
+         <loc>https://fastily.github.io/pwiki/API/wiki-reference/</loc>
+         <lastmod>2024-04-23</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://fastily.github.io/pwiki/API/wparser-reference/</loc>
+         <lastmod>2024-04-23</lastmod>
          <changefreq>daily</changefreq>
     </url>
 </urlset>
