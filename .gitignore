@@ -15,12 +15,10 @@ __pycache__
 build
 dist
 *.egg-info
+.venv
 
 # Docs
 site/
-
-# virtualenv
-venv_pwiki
 
 scratch*
 *.pickle

@@ -8,16 +8,21 @@ pwiki is a Python library for effortlessly interacting with Wikipedia/MediaWiki
 
 ## Install
 ```bash
+# pip
 pip install pwiki
+
+# uv
+uv add pwiki
 ```
 
 ## Build docs
 ```bash
-# make sure doc requirements are installed
-pip install -r requirements-docs.txt
+uv run mkdocs build
+```
 
-# build docs
-mkdocs build
+## Run Tests
+```bash
+uv run python -m unittest
 ```
 
 ## Resources
